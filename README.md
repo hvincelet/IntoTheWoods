@@ -4,8 +4,9 @@ To get code in your machine, please use following commands:
 
 When you want to update use them:
  * git add *
- * git commit -m 'message'
- * git push -u origin master
+ * git commit -m "message"
+ * git pull origin master
+ * git push origin master
 
 > ### Notes
 > NodeJS is required for running this server.
