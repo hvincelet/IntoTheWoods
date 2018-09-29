@@ -1,0 +1,52 @@
+<!-- Side Navbar -->
+<nav class="side-navbar">
+    <div class="side-navbar-wrapper">
+        <!-- Sidebar Header -->
+        <div class="sidenav-header d-flex align-items-center justify-content-center">
+            <!-- User Info -->
+            <div class="sidenav-header-inner text-center">
+                <%- userPicture %>
+                <h2 class="h5"><%= userName_fn %> <%= userName_ln %></h2>
+            </div>
+            <!-- Small Brand information, appears on minimized sidebar-->
+            <div class="sidenav-header-logo"><span class="brand-small text-center"><strong class="text-primary"><%= userName_fn_ %><%= userName_ln_ %></strong></span></div>
+        </div>
+    </div>
+    <!-- Sidebar Navigation Menus-->
+    <div class="main-menu">
+        <h5 class="sidenav-heading">Menu</h5>
+        <ul id="side-main-menu" class="side-menu list-unstyled">
+            <li><a href="/"> <i class="icon-home"></i>Accueil</a></li>
+            <li><a href="#organizeraid" aria-expanded="false" data-toggle="collapse"> <i class="icon-form"></i>Organiser un Raid</a>
+                <ul id="organizeraid" class="collapse list-unstyled ">
+                    <li><a href="#">Début</a></li>
+                    <li><a href="#">Fiche descriptive</a></li>
+                    <li><a href="#">Édition du parcours</a></li>
+                    <li><a href="#">Besoins en bénévoles</a></li>
+                    <li><a href="#">Validation</a></li>
+                </ul>
+            </li>
+            <li><a href="#manageraid" aria-expanded="false" data-toggle="collapse"> <i class="icon-list"></i>Gérer mes Raids</a>
+                <ul id="manageraid" class="collapse list-unstyled ">
+                    <li><a href="#">page</a></li>
+                    <li><a href="#">page</a></li>
+                    <li><a href="#">page</a></li>
+                </ul>
+            </li>
+            <li><a href="#superviseevent" aria-expanded="false" data-toggle="collapse"> <i class="icon-screen"></i>Superviser un évenement en cours</a>
+                <ul id="superviseevent" class="collapse list-unstyled ">
+                    <li><a href="#">page</a></li>
+                    <li><a href="#">page</a></li>
+                    <li><a href="#">page</a></li>
+                </ul>
+            </li>
+            <li><a href="#team" aria-expanded="false" data-toggle="collapse"> <i class="icon-user"></i>Équipe et organisateurs</a>
+                <ul id="team" class="collapse list-unstyled ">
+                    <li><a href="#">page</a></li>
+                    <li><a href="#">page</a></li>
+                    <li><a href="#">page</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav>
