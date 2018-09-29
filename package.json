@@ -1,0 +1,24 @@
+{
+  "name": "projetgl",
+  "version": "1.0.0",
+  "description": "To get code in your machine, please use following commands:  * git clone https://github.com/hvincelet/IntoTheWoods.git",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hvincelet/IntoTheWoods.git"
+  },
+  "author": "RunTonic",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/hvincelet/IntoTheWoods/issues"
+  },
+  "homepage": "https://github.com/hvincelet/IntoTheWoods#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "lodash": "^4.17.11"
+  }
+}
