@@ -5,7 +5,7 @@
         <div class="sidenav-header d-flex align-items-center justify-content-center">
             <!-- User Info -->
             <div class="sidenav-header-inner text-center">
-                <%- userPicture %>
+                <img src="data:image/png;base64,<%= userPicture %>" alt="person" class="img-fluid rounded-circle" />
                 <h2 class="h5"><%= userName_fn %> <%= userName_ln %></h2>
             </div>
             <!-- Small Brand information, appears on minimized sidebar-->

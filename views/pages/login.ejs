@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<% include partials/head %>
+<body>
+<div class="page login-page"  style="background-image: url('/views/img/woods.jpg') !important;background-repeat: no-repeat;background-size: cover;">
+    <div class="container">
+        <div class="form-outer text-center d-flex align-items-center">
+            <div class="form-inner">
+                <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
+                <p>Bienvenue sur Into the Woods, l'application qui vous permet de créer et gérer facilement vos Raids ! Pour commencer à utiliser ce service, merci de vous connecter ou bien de vous créer un compte.</p>
+                <form method="get" class="text-left form-validate">
+                    <div class="form-group-material">
+                        <input id="login-username" type="text" name="loginUsername" required data-msg="Merci d'entrer votre identifiant" class="input-material">
+                        <label for="login-username" class="label-material">Identifiant</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="login-password" type="password" name="loginPassword" required data-msg="Merci d'entrer votre mot de passe" class="input-material">
+                        <label for="login-password" class="label-material">Mot de passe</label>
+                    </div>
+                    <div class="form-group text-center">
+                        <a id="login" href="/" class="btn btn-primary">Connexion</a>
+                    </div>
+                </form>
+                <a href="#" class="forgot-pass">Mot de passe oublié ?</a><small>Vous n'avez pas de compte ? </small><a href="/register" class="signup">Créez-en un !</a>
+            </div>
+            <div class="copyrights text-center">
+                <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+                <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+            </div>
+        </div>
+    </div>
+</div>
+<% include partials/footer %>
+</body>
+</html>
