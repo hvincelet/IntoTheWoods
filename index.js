@@ -6,8 +6,7 @@ const app = express_lib();
 const pages_path = __dirname + "/views/pages/";
 
 
-app.get("/", function(req, resp)
-{
+app.get("/", function(req, resp) {
 	let picture = jdenticon.toPng("GwendalRaballand", 80).toString('base64');
 
 	resp.render(pages_path + "template.ejs", {
@@ -15,8 +14,7 @@ app.get("/", function(req, resp)
 	    "page" : "accueil",
         "userName_fn" : "Gwendal",
         "userName_ln" : "Raballand",
-        "userName_fn_" : "G",
-        "userName_ln_" : "R",
+        "userName_initials" : "GR",
         "userPicture" : picture
 	});
 });
