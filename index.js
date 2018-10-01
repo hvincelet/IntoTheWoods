@@ -5,42 +5,52 @@ const jdenticon = require('jdenticon');
 const app = express_lib();
 const pages_path = __dirname + "/views/pages/";
 
+const picture = jdenticon.toPng("GwendalRaballand", 80).toString('base64');
 
 app.get("/", function(req, resp) {
-	let picture = jdenticon.toPng("GwendalRaballand", 80).toString('base64');
-
 	resp.render(pages_path + "template.ejs", {
-	    "pageTitle" : "Accueil",
-	    "page" : "accueil",
-        "userName_fn" : "Gwendal",
-        "userName_ln" : "Raballand",
-        "userName_initials" : "GR",
-        "userPicture" : picture
+	    pageTitle : "Accueil",
+	    page : "accueil",
+        userName_fn : "Gwendal",
+        userName_ln : "Raballand",
+        userName_initials : "GR",
+        userPicture : picture
 	});
 });
 
 app.get("/login", function (req, resp) {
     if(req.query.logout === undefined){
         resp.render(pages_path + "login.ejs", {
-            "pageTitle" : "Connexion"
+            pageTitle : "Connexion"
         });
     }else{
         resp.render(pages_path + "logout.ejs", {
-            "pageTitle" : "Déconnexion"
+            pageTitle : "Déconnexion"
         });
     }
 });
 
 app.get("/register", function (req, resp) {
     resp.render(pages_path + "register.ejs", {
-        "pageTitle" : "Inscription"
+        pageTitle : "Inscription"
     });
 });
 
 app.get("/termsandpolicy", function (req, resp) {
     resp.render(pages_path + "termsandpolicy.ejs", {
-        "pageTitle" : "Termes et conditions d'utilisation"
+        pageTitle : "Termes et conditions d'utilisation"
     });
+});
+
+app.get("/createraid/:step", function (req, resp) {
+    resp.render(pages_path + "template.ejs",{
+        pageTitle : "Organiser un Raid",
+        page : "create_raid/" + req.params.step,
+        userName_fn : "Gwendal",
+        userName_ln : "Raballand",
+        userName_initials : "GR",
+        userPicture : picture
+    })
 });
 
 // Make favicon available
@@ -51,7 +61,7 @@ app.set('view engine', 'ejs');
 // Do not write routes before these lines (handle 404 error)
 app.use(function(req, resp, next) {
     resp.render(pages_path + "404.ejs", {
-        "pageTitle" : "Erreur 404"
+        pageTitle : "Erreur 404"
     });
 });
 
