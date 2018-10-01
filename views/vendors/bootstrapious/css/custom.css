@@ -39,3 +39,9 @@ footer.main-footer{
     color: #fff;
     text-decoration: none;
 }
+
+.wood-background{
+    background-image: url('/views/img/woods.jpg') !important;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
