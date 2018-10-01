@@ -2,17 +2,21 @@
 <html lang="fr">
 <% include partials/head %>
 <body>
-<div class="page login-page"  style="background-image: url('/views/img/woods.jpg') !important;background-repeat: no-repeat;background-size: cover;">
+<div class="page login-page wood-background">
     <div class="container">
         <div class="form-outer text-center d-flex align-items-center">
             <div class="form-inner">
                 <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
                 <p>Bienvenue sur Into the Woods, l'application qui vous permet de créer et gérer facilement vos Raids ! Vous êtes sur le point de créer un compte sur la plateforme.<br/>
                     Une fois que vous aurez rempli le formulaire, lu et accepté les termes et conditions d'utilisation du service, vous recevrez un mail vous demandant de confirmer votre inscription.</p>
-                <form class="text-left form-validate">
+                <form class="text-left form-validate" method="post" action="/register">
                     <div class="form-group-material">
-                        <input id="register-username" type="text" name="registerUsername" required data-msg="Merci d'entrer votre identifiant" class="input-material">
-                        <label for="register-username" class="label-material">Identifiant</label>
+                        <input id="register-userfn" type="text" name="registerUserFn" required data-msg="Merci d'entrer votre prénom" class="input-material">
+                        <label for="register-userfn" class="label-material">Prénom</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="register-userln" type="text" name="registerUserLn" required data-msg="Merci d'entrer votre nom" class="input-material">
+                        <label for="register-userln" class="label-material">Nom</label>
                     </div>
                     <div class="form-group-material">
                         <input id="register-email" type="email" name="registerEmail" required data-msg="Merci d'entrer votre adresse e-mail" class="input-material">
