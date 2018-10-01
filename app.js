@@ -1,21 +1,31 @@
 const express = require('express');
 const favicon = require('serve-favicon');
+const bodyParser = require('body-parser');
 
-require('./models/init');
+//require('./models/init');
 
 const app = express();
 
 app.use(favicon(__dirname + '/views/img/favicon.png'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
-var organizer = require('./controllers/organizer');
+const organizer = require('./controllers/organizer');
+const misc = require('./controllers/misc');
 
 app.route('/')
-    .get(organizer.displayHome)
-    .post(organizer.checkAuthentification);
+    .get(organizer.displayHome);
 
 app.route('/login')
-    .get(organizer.displayLogScreen);
+    .get(organizer.displayLogScreen)
+    .post(organizer.checkAuthentification);
 
+app.route('/register')
+    .get(organizer.displayRegister)
+    .post(organizer.register);
+
+app.route('/termsandpolicy')
+    .get(misc.cgu);
 
 
 // view engine setup

@@ -1,9 +1,8 @@
-var Sequelize = require('sequelize');
-var env       = 'development';
-var config    = require(__dirname + '/../config/config.js')[env];
-var db        = {};
+const Sequelize = require('sequelize');
+const env       = 'development';
+const config    = require(__dirname + '/../config/config.js')[env];
 
-var sequelize = new Sequelize(config.database, config.username, config.password, config);
+let sequelize = new Sequelize(config.database, config.username, config.password, config);
 
 sequelize
     .authenticate()

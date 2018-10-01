@@ -4,7 +4,7 @@ module.exports = {
     password: 'glpass2018',
     database: 'intoTheWoodsDB',
     host: 'localhost',
-    dialect: 'mysql',
+    dialect: 'mysql'
   },
   production: {
     // configuration specific to the production environment
