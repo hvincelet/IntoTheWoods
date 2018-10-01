@@ -1,16 +1,33 @@
 const express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
+const favicon = require('serve-favicon');
 
-var routes = require('./routes/index');
-var organizers  = require('./routes/organizers');
+require('./models/init');
 
 const app = express();
 
-app.get("/", function(req, resp)
-{
-	let project_name = "IntoTheWoods";
-	resp.render('index.ejs', {"name" : project_name});
+app.use(favicon(__dirname + '/views/img/favicon.png'));
+
+var organizer = require('./controllers/organizer');
+
+app.route('/')
+    .get(organizer.displayHome)
+    .post(organizer.checkAuthentification);
+
+app.route('/login')
+    .get(organizer.displayLogScreen);
+
+
+
+// view engine setup
+app.use("/views", express.static(__dirname + '/views'));
+app.set('view engine', 'ejs');
+
+// catch 404 and forward to error handler
+app.use(function(req, resp, next) {
+    resp.render("pages/404.ejs", {
+        "pageTitle" : "Erreur 404"
+    });
 });
 
+console.log('Listen on http://localhost:8080');
 app.listen(8080);
