@@ -1,19 +1,13 @@
-
-var fs        = require('fs');
-var path = require('path')
+const fs = require('fs');
+const path = require('path');
 const Sequelize = require('sequelize');
-const env       = 'development';
-const config    = require(__dirname + '/../config/config.js')[env];
+const env = 'development';
+const config = require(__dirname + '/../config/config.js')[env];
 
-var sequelize = new Sequelize(config.database, config.username, config.password, config);
-var basename = path.basename(__filename);
-var db = {};
+let sequelize = new Sequelize(config.database, config.username, config.password, config);
+let basename = path.basename(__filename);
+let db = {};
 
-const Oraganizer = sequelize.import("organizer");
-
-
-
-/*
 fs
     .readdirSync(__dirname)
     .filter(file => {
@@ -34,4 +28,3 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 module.exports = db;
-*/

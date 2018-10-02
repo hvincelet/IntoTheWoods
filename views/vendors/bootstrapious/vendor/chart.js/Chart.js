@@ -3634,7 +3634,7 @@ defaults._set('scatter', {
 
 module.exports = function(Chart) {
 
-	// Scatter charts use line controllers
+	// Scatter charts use line routes
 	Chart.controllers.scatter = Chart.controllers.line;
 
 };
@@ -3962,7 +3962,7 @@ module.exports = function(Chart) {
 				me.resize(true);
 			}
 
-			// Make sure scales have IDs and are built before we build any controllers.
+			// Make sure scales have IDs and are built before we build any routes.
 			me.ensureScalesHaveIDs();
 			me.buildOrUpdateScales();
 			me.initToolTip();
@@ -4203,17 +4203,17 @@ module.exports = function(Chart) {
 			// In case the entire data object changed
 			me.tooltip._data = me.data;
 
-			// Make sure dataset controllers are updated and new controllers are reset
+			// Make sure dataset routes are updated and new routes are reset
 			var newControllers = me.buildOrUpdateControllers();
 
-			// Make sure all dataset controllers have correct meta data counts
+			// Make sure all dataset routes have correct meta data counts
 			helpers.each(me.data.datasets, function(dataset, datasetIndex) {
 				me.getDatasetMeta(datasetIndex).controller.buildOrUpdateElements();
 			}, me);
 
 			me.updateLayout();
 
-			// Can only reset the new controllers after the scales have been updated
+			// Can only reset the new routes after the scales have been updated
 			if (me.options.animation && me.options.animation.duration) {
 				helpers.each(newControllers, function(controller) {
 					controller.reset();
@@ -4567,7 +4567,7 @@ module.exports = function(Chart) {
 
 			me.stop();
 
-			// dataset controllers need to cleanup associated data
+			// dataset routes need to cleanup associated data
 			for (i = 0, ilen = me.data.datasets.length; i < ilen; ++i) {
 				me.destroyDatasetMeta(i);
 			}
@@ -4840,7 +4840,7 @@ module.exports = function(Chart) {
 		delete array._chartjs;
 	}
 
-	// Base class for all dataset controllers (line, bar, etc)
+	// Base class for all dataset routes (line, bar, etc)
 	Chart.DatasetController = function(chart, datasetIndex) {
 		this.initialize(chart, datasetIndex);
 	};
@@ -11159,7 +11159,7 @@ function computeBoundary(source) {
 
 	// Backward compatibility: until v3, we still need to support boundary values set on
 	// the model (scaleTop, scaleBottom and scaleZero) because some external plugins and
-	// controllers might still use it (e.g. the Smith chart).
+	// routes might still use it (e.g. the Smith chart).
 
 	if (fill === 'start') {
 		target = model.scaleBottom === undefined ? scale.bottom : model.scaleBottom;

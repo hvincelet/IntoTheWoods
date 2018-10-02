@@ -2,23 +2,21 @@ const express = require('express');
 const favicon = require('serve-favicon');
 const bodyParser = require('body-parser');
 
-//require('./models/init');
-
 const app = express();
 
 app.use(favicon(__dirname + '/views/img/favicon.png'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-const organizer = require('./controllers/organizer');
-const misc = require('./controllers/misc');
+const organizer = require('./routes/organizer');
+const misc = require('./routes/misc');
 
 app.route('/')
     .get(organizer.displayHome);
 
 app.route('/login')
     .get(organizer.displayLogScreen)
-    .post(organizer.checkAuthentification);
+    .post(organizer.checkAuthentication);
 
 app.route('/register')
     .get(organizer.displayRegister)
@@ -26,7 +24,6 @@ app.route('/register')
 
 app.route('/termsandpolicy')
     .get(misc.cgu);
-
 
 // view engine setup
 app.use("/views", express.static(__dirname + '/views'));
