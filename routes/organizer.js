@@ -8,16 +8,20 @@ let last_name;
 let initials;
 
 exports.displayHome = function (req, res) {
-    let picture = jdenticon.toPng(first_name.concat(last_name), 80).toString('base64');
+    if (first_name !== undefined) { // must be replaced by a middleware
+        let picture = jdenticon.toPng(first_name.concat(last_name), 80).toString('base64');
 
-    res.render(pages_path + "template.ejs", {
-        pageTitle: "Accueil",
-        page: "accueil",
-        userName_fn: first_name,
-        userName_ln: last_name,
-        userName_initials: initials,
-        userPicture: picture
-    });
+        res.render(pages_path + "template.ejs", {
+            pageTitle: "Accueil",
+            page: "accueil",
+            userName_fn: first_name,
+            userName_ln: last_name,
+            userName_initials: initials,
+            userPicture: picture
+        });
+    } else {
+        res.redirect('/login');
+    }
 };
 
 exports.displayLogScreen = function (req, res) {
@@ -41,7 +45,11 @@ exports.checkAuthentication = function (req, res) {
             initials = first_name.charAt(0).concat(last_name.charAt(0)).toUpperCase();
             return res.redirect('/');
         } else {
-            return res.redirect('/login');
+            //return res.redirect('/login');
+            res.render(pages_path + "login.ejs", {
+                pageTitle: "Connexion",
+                errorMessage: "Identifiants incorrects"
+            });
         }
     });
 };
