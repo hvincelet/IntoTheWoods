@@ -10,8 +10,8 @@
     "type": "git",
     "url": "git+https://github.com/hvincelet/IntoTheWoods.git"
   },
-  "author": "Julien Deroux",
-  "license": "ISC",
+  "author": "RunTonic",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/hvincelet/IntoTheWoods/issues"
   },
