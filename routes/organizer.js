@@ -39,7 +39,7 @@ exports.checkAuthentication = function (req, res) {
             email: id, password: hash
         }
     }).then(function (organizer) {
-        if (organizer != null) {
+        if (organizer !== null) {
             first_name = organizer.dataValues.first_name;
             last_name = organizer.dataValues.last_name;
             initials = first_name.charAt(0).concat(last_name.charAt(0)).toUpperCase();
@@ -62,13 +62,28 @@ exports.displayRegister = function (req, res) {
 
 exports.register = function (req, res) {
     let hash = crypto.createHmac('sha256', req.body.registerPassword).digest('hex');
+    let email = req.body.registerEmail;
 
-    models.organizer.create({
-        email: req.body.registerEmail,
-        first_name: req.body.registerUserFn,
-        last_name: req.body.registerUserLn,
-        password: hash
-    }).then(function () {
-        res.redirect('/login');
+    models.organizer.findOne({
+        where: {
+            email: email
+        }
+    }).then(function (organizer) {
+        if (organizer !== null) { // organizer with entered email already exist
+            res.render(pages_path + "register.ejs", {
+                pageTitle: "Inscription",
+                errorMessage: "Cette adresse email est déjà utilisée"
+            });
+        } else { // registration of the new organizer
+            models.organizer.create({
+                email: email,
+                first_name: req.body.registerUserFn,
+                last_name: req.body.registerUserLn,
+                password: hash
+            }).then(function () {
+                res.redirect('/login');
+            });
+        }
     });
+
 };
