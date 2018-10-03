@@ -21,7 +21,8 @@ app.get("/", function(req, resp) {
 app.get("/login", function (req, resp) {
     if(req.query.logout === undefined){
         resp.render(pages_path + "login.ejs", {
-            pageTitle : "Connexion"
+            pageTitle : "Connexion",
+            errorMessage : "Vos identifiants sont incorrects..."
         });
     }else{
         resp.render(pages_path + "logout.ejs", {

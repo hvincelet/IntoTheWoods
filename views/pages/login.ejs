@@ -8,6 +8,14 @@
             <div class="form-inner">
                 <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
                 <p>Bienvenue sur Into the Woods, l'application qui vous permet de créer et gérer facilement vos Raids ! Pour commencer à utiliser ce service, merci de vous connecter ou bien de vous créer un compte.</p>
+                <% if(typeof errorMessage !== "undefined") { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+                        <%= errorMessage %>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <% } %>
                 <form method="post" class="text-left form-validate" action="/login">
                     <div class="form-group-material">
                         <input id="login-username" type="text" name="loginUsername" required data-msg="Merci d'entrer votre identifiant" class="input-material">
