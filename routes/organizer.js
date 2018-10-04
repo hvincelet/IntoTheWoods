@@ -3,24 +3,21 @@ const pages_path = "../views/pages/";
 const models = require('../models');
 const crypto = require('crypto');
 
-let first_name;
-let last_name;
-let initials;
-
 exports.displayHome = function (req, res) {
-        let picture = jdenticon.toPng(first_name.concat(last_name), 80).toString('base64');
+        let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
 
         res.render(pages_path + "template.ejs", {
             pageTitle: "Accueil",
             page: "accueil",
-            userName_fn: first_name,
-            userName_ln: last_name,
-            userName_initials: initials,
+            userName_fn: user.first_name,
+            userName_ln: user.last_name,
+            userName_initials: user.initials,
             userPicture: picture
         });
 };
 
 exports.displayLogScreen = function (req, res) {
+    console.log(user);
     res.render(pages_path + "login.ejs", {
         pageTitle: "Connexion"
     });
@@ -36,9 +33,9 @@ exports.checkAuthentication = function (req, res) {
         }
     }).then(function (organizer) {
         if (organizer !== null) {
-            first_name = organizer.dataValues.first_name;
-            last_name = organizer.dataValues.last_name;
-            initials = first_name.charAt(0).concat(last_name.charAt(0)).toUpperCase();
+            user.first_name = organizer.dataValues.user.first_name;
+            user.last_name = organizer.dataValues.user.last_name;
+            user.initials = user.first_name.charAt(0).concat(user.last_name.charAt(0)).toUpperCase();
             return res.redirect('/');
         } else {
             res.render(pages_path + "login.ejs", {
@@ -72,8 +69,8 @@ exports.register = function (req, res) {
         } else { // registration of the new organizer
             models.organizer.create({
                 email: email,
-                first_name: req.body.registerUserFn,
-                last_name: req.body.registerUserLn,
+                user.first_name: req.body.registerUserFn,
+                user.last_name: req.body.registerUserLn,
                 password: hash
             }).then(function () {
                 res.redirect('/login');
