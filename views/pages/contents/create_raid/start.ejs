@@ -3,7 +3,7 @@
         <ul class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Accueil</a></li>
             <li class="breadcrumb-item active">Organiser un Raid</li>
-            <li class="breadcrumb-item active">Fiche descriptive</li>
+            <li class="breadcrumb-item active">Initialisation</li>
         </ul>
     </div>
 </div>
@@ -14,37 +14,18 @@
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-header d-flex align-items-center">
-                        <h4>Fiche descriptive</h4>
+                        <h4>Initialisation</h4>
                     </div>
                     <div class="card-body">
                         <form class="form-horizontal" method="post" action="/createraid/sports">
                             <div class="form-group row">
-                                <label class="col-sm-1">Nom du Raid :</label>
-                                <div class="col-sm-11">
-                                    <input id="raidName" name="raidName" type="text" placeholder="Nom du Raid" class="form-control form-control-success"><small class="form-text">Exemple : Raid &lt;Mon association sportive&gt;</small>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-sm-1">Édition :</label>
-                                <div class="col-sm-11">
-                                    <input id="raidEdition" name="raidEdition" type="number" placeholder="Édition n°" class="form-control form-control-success" min="1"><small class="form-text">Exemple : Édition 1, Édition 2018</small>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-sm-1">Date de l'événement :</label>
-                                <div class="col-sm-11">
-                                    <input id="raidStartDate" name="raidStartDate" type="date" placeholder="Date de début" class="form-control form-control-success" min="<%= new Date().toISOString().split('T')[0] %>">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-sm-1">Lieu :</label>
-                                <div class="col-sm-11">
-                                    <input id="raidPlace" name="raidPlace" type="text" placeholder="rue, ville" class="form-control form-control-success" min="1"><small class="form-text">Exemple : Avenue des Champs-Élysées, Paris</small>
+                                <div class="col-sm-1 offset-sm-11">
+
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <div class="col-sm-11 offset-sm-1">
-                                    <input type="submit" value="Sélectionner les sports" class="btn btn-primary">
+                                    <input type="submit" value="Vérifier et enregistrer" class="btn btn-primary">
                                 </div>
                             </div>
                         </form>

@@ -1,0 +1,67 @@
+<div class="breadcrumb-holder">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+            <li class="breadcrumb-item active">Organiser un Raid</li>
+            <li class="breadcrumb-item active">Fiche descriptive</li>
+        </ul>
+    </div>
+</div>
+<section class="forms">
+    <div class="container-fluid">
+        <header></header>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <h4>Fiche descriptive</h4>
+                    </div>
+                    <div class="card-body">
+                        <form class="form-horizontal" method="post" action="/createraid/sports">
+                            <div class="form-group row">
+                                <label class="col-sm-3">Nom du Raid :</label>
+                                <div class="col-sm-9">
+                                    <input id="raidName" name="raidName" type="text" placeholder="Nom du Raid" class="form-control form-control-success"><small class="form-text">Exemple : Raid &lt;Mon association sportive&gt;</small>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3">Édition :</label>
+                                <div class="col-sm-9">
+                                    <input id="raidEdition" name="raidEdition" type="number" placeholder="Édition n°" class="form-control form-control-success" min="1"><small class="form-text">Exemple : Édition 1, Édition 2018</small>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3">Date de l'événement :</label>
+                                <div class="col-sm-9">
+                                    <input id="raidStartDate" name="raidStartDate" type="date" placeholder="Date de début" class="form-control form-control-success" min="<%= new Date().toISOString().split('T')[0] %>">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3">Lieu :</label>
+                                <div class="col-sm-9">
+                                    <input id="raidPlace" name="raidPlace" type="text" placeholder="rue, ville" class="form-control form-control-success" min="1"><small class="form-text">Exemple : Avenue des Champs-Élysées, Paris</small>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-3">Choisissez les sports :<br/><small>Utilisez la touche ctrl pour en sélectionner plusieur</small></label>
+                                <div class="col-sm-9">
+                                    <!--<select id="raidSports" name="raidSports" class="form-control form-control-success" multiple required size="<%= sports.length %>">-->
+                                    <select class="select2-selection--multiple" name="sports[]" multiple="multiple" style="width: 100% !important;">
+                                        <% sports.forEach(function(sport){ %>
+                                            <option value="<%= sport %>"><%= sport %></option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-9 offset-sm-3">
+                                    <input type="submit" value="Enregistrer mon Raid" class="btn btn-primary">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

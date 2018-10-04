@@ -25,6 +25,9 @@ app.route('/register')
 app.route('/termsandpolicy')
     .get(misc.cgu);
 
+app.route('/createraid/:page')
+    .get(organizer.createraid);
+
 // view engine setup
 app.use("/views", express.static(__dirname + '/views'));
 app.set('view engine', 'ejs');
