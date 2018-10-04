@@ -8,7 +8,6 @@ let last_name;
 let initials;
 
 exports.displayHome = function (req, res) {
-    if (first_name !== undefined) { // must be replaced by a middleware
         let picture = jdenticon.toPng(first_name.concat(last_name), 80).toString('base64');
 
         res.render(pages_path + "template.ejs", {
@@ -19,9 +18,6 @@ exports.displayHome = function (req, res) {
             userName_initials: initials,
             userPicture: picture
         });
-    } else {
-        res.redirect('/login');
-    }
 };
 
 exports.displayLogScreen = function (req, res) {
@@ -45,10 +41,9 @@ exports.checkAuthentication = function (req, res) {
             initials = first_name.charAt(0).concat(last_name.charAt(0)).toUpperCase();
             return res.redirect('/');
         } else {
-            //return res.redirect('/login');
             res.render(pages_path + "login.ejs", {
                 pageTitle: "Connexion",
-                errorMessage: "Identifiants incorrects"
+                errorMessage: "Identifiants incorrects..."
             });
         }
     });
@@ -72,7 +67,7 @@ exports.register = function (req, res) {
         if (organizer !== null) { // organizer with entered email already exist
             res.render(pages_path + "register.ejs", {
                 pageTitle: "Inscription",
-                errorMessage: "Cette adresse email est déjà utilisée"
+                errorMessage: "Cette adresse email est déjà utilisée..."
             });
         } else { // registration of the new organizer
             models.organizer.create({
