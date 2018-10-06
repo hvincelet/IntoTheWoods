@@ -14,6 +14,15 @@ module.exports = function(sequelize, DataTypes) {
     first_name: {
       type: DataTypes.STRING(30),
       allowNull: true
+    },
+    check_in: {
+      type: DataTypes.INTEGER(1),
+      allowNull: false,
+      defaultValue: '0'
+    },
+    backup: {
+      type: DataTypes.INTEGER(1),
+      allowNull: true
     }
   }, {
     tableName: 'helper'

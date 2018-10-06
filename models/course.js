@@ -10,8 +10,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     order_num: {
       type: DataTypes.INTEGER(5).UNSIGNED,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     label: {
       type: DataTypes.STRING(45),
@@ -23,13 +22,19 @@ module.exports = function(sequelize, DataTypes) {
       references: {
         model: 'sport',
         key: 'id'
-      },
-      unique: true
+      }
     },
     id_track: {
       type: DataTypes.INTEGER(10).UNSIGNED,
-      allowNull: true,
-      unique: true
+      allowNull: true
+    },
+    id_raid: {
+      type: DataTypes.INTEGER(10).UNSIGNED,
+      allowNull: false,
+      references: {
+        model: 'raid',
+        key: 'id'
+      }
     }
   }, {
     tableName: 'course'

@@ -8,50 +8,51 @@ app.use(favicon(__dirname + '/views/img/favicon.png'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
+// view engine setup
+app.use("/views", express.static(__dirname + '/views'));
+app.set('view engine', 'ejs');
+
 global.user = {
-    login:"",
-    first_name:"",
-    last_name:"",
-    initials:"",
-    authenticated:false
+    login: "",
+    first_name: "",
+    last_name: "",
+    initials: "",
+    authenticated: false
 };
 
+let checkAuth = function (req, res, next) {
+    if (!user.authenticated) {
+        res.redirect('/login');
+    }
+    next();
+};
 
 const organizer = require('./routes/organizer');
 const raid = require('./routes/raid');
 const misc = require('./routes/misc');
 
-let authenticationMiddleware = function (req, res) {
-    if(!user.authenticated){
-        user.authenticated = true;
-        res.redirect('/login');
-    }
-};
-
-
-
 /**********************************/
-/*                                */
 /*             Routes             */
-/*                                */
 /**********************************/
 
 //routes dedicated to register and connection
-app.get('/', authenticationMiddleware, organizer.displayHome);
+app.route('/')
+    .get(checkAuth, organizer.displayHome);
 app.route('/login')
     .get(organizer.displayLogScreen)
-    .post(organizer.checkAuthentication);
+    .post(organizer.idVerification);
 app.route('/register')
     .get(organizer.displayRegister)
     .post(organizer.register);
-app.get('/termsandpolicy', misc.cgu);
+
 
 //routes dedicated to the raids' pages
-app.get('/createraid/start', authenticationMiddleware, raid.displayStart);
-app.get('/createraid/description', authenticationMiddleware, raid.displayDescriptionForm);
-app.get('/createraid/sports', authenticationMiddleware, raid.displaySportsForm);
-app.get('/createraid/summary', authenticationMiddleware, raid.displaySummary);
-app.post('/createraid/summary', authenticationMiddleware, raid.save);
+app.route('/createraid/:page')
+    .get(checkAuth, raid.displayStart)
+    .post(raid.storeInformations);
+
+app.route('/termsandpolicy')
+    .get(misc.cgu);
 
 //bad url route
 app.use(function (req, resp, next) {
@@ -59,14 +60,6 @@ app.use(function (req, resp, next) {
         "pageTitle": "Erreur 404"
     });
 });
-
-
-
-
-
-// view engine setup
-app.use("/views", express.static(__dirname + '/views'));
-app.set('view engine', 'ejs');
 
 console.log('Listen on http://localhost:8080');
 app.listen(8080);

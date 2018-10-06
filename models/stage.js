@@ -8,7 +8,7 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true,
       references: {
         model: 'participant',
-        key: 'id'
+        key: 'id_participant'
       }
     },
     id_course: {
