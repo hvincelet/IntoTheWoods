@@ -80,3 +80,24 @@ exports.register = function (req, res) {
     });
 
 };
+
+exports.createraid = function (req, res) {
+    let picture = jdenticon.toPng(first_name.concat(last_name), 80).toString('base64');
+
+    const sports = [];
+    models.sport.findAll({order: ['name']}).then(function (sports_bdd) {
+        sports_bdd.forEach(function (sport) {
+            sports.push(sport.dataValues.name);
+        });
+
+        res.render(pages_path + "template.ejs", {
+            pageTitle: "Création d'un Raid",
+            page: "create_raid/"+req.params.page,
+            sports : sports,
+            userName_fn: first_name,
+            userName_ln: last_name,
+            userName_initials: initials,
+            userPicture: picture
+        });
+    });
+};

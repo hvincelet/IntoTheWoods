@@ -45,3 +45,17 @@ footer.main-footer{
     background-repeat: no-repeat;
     background-size: cover;
 }
+
+.form-group .select2-container {
+    position: relative;
+    z-index: 2;
+    float: left;
+    width: 100%;
+    margin-bottom: 0;
+    display: table;
+    table-layout: fixed;
+}
+
+.selection{
+    width: 100% !important;
+}
