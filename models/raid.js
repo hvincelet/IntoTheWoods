@@ -12,6 +12,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(45),
       allowNull: true
     },
+    edition: {
+      type: DataTypes.INTEGER(6),
+      allowNull: true
+    },
     date: {
       type: DataTypes.DATEONLY,
       allowNull: true
@@ -20,8 +24,12 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(45),
       allowNull: true
     },
-    edition: {
-      type: DataTypes.INTEGER(6),
+    lat: {
+      type: DataTypes.FLOAT,
+      allowNull: true
+    },
+    lng: {
+      type: DataTypes.FLOAT,
       allowNull: true
     }
   }, {

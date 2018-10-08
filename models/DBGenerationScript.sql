@@ -23,9 +23,11 @@ GRANT ALL PRIVILEGES ON intoTheWoodsDB.* TO 'gluser2018'@'localhost' IDENTIFIED 
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
+  `edition` SMALLINT NULL,
   `date` DATE NULL,
   `place` VARCHAR(45) NULL,
-  `edition` SMALLINT NULL,
+  `lat` FLOAT NULL,
+  `lng` FLOAT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 

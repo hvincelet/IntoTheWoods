@@ -49,10 +49,10 @@ app.route('/register')
 //routes dedicated to the raids' pages
 app.route('/createraid/description')
     .get(checkAuth, raid.displayDescriptionForm)
-    .post(checkAuth,raid.storeDescriptionInfos);
+    .post(checkAuth,raid.createRaid);
 
 app.route('/editraid/map')
-    .get(raid.displayMap);
+    .get(checkAuth, raid.displayMap);
 
 app.route('/termsandpolicy')
     .get(misc.cgu);
