@@ -59,3 +59,12 @@ footer.main-footer{
 .selection{
     width: 100% !important;
 }
+
+.card{
+    margin-top: 20px !important;
+}
+
+.map {
+    height: 400px;
+    width: 100%;
+}

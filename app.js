@@ -47,9 +47,12 @@ app.route('/register')
 
 
 //routes dedicated to the raids' pages
-app.route('/createraid/:page')
-    .get(checkAuth, raid.displayStart)
-    .post(raid.storeInformations);
+app.route('/createraid/description')
+    .get(checkAuth, raid.displayDescriptionForm)
+    .post(checkAuth,raid.storeDescriptionInfos);
+
+app.route('/editraid/map')
+    .get(raid.displayMap);
 
 app.route('/termsandpolicy')
     .get(misc.cgu);
