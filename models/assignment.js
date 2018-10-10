@@ -19,6 +19,11 @@ module.exports = function(sequelize, DataTypes) {
         model: 'helper_post',
         key: 'id'
       }
+    },
+    filled: {
+      type: DataTypes.INTEGER(1),
+      allowNull: false,
+      defaultValue: '0'
     }
   }, {
     tableName: 'assignment'

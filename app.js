@@ -31,6 +31,10 @@ const organizer = require('./routes/organizer');
 const raid = require('./routes/raid');
 const misc = require('./routes/misc');
 
+// BEGIN: Guillaume
+const helper = require('./routes/helper');
+// END: Guillaume
+
 /**********************************/
 /*             Routes             */
 /**********************************/
@@ -45,6 +49,14 @@ app.route('/register')
     .get(organizer.displayRegister)
     .post(organizer.register);
 
+// BEGIN: Guillaume
+// routes dedicated to helper
+app.route('/helper')
+    .get(helper.displayRegister) // register page for new helper
+    .post(helper.register); // register request from helper page
+app.route('/helper/:id')
+    .get(helper.displayHome); // home default page for helper
+// END: Guillaume
 
 //routes dedicated to the raids' pages
 app.route('/createraid/description')

@@ -7,6 +7,10 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
+    email: {
+      type: DataTypes.STRING(45),
+      allowNull: false,
+    },
     last_name: {
       type: DataTypes.STRING(30),
       allowNull: true

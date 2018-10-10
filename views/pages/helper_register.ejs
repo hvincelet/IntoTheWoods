@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<% include partials/head %>
+<body>
+<div class="page login-page wood-background">
+    <div class="container">
+        <div class="form-outer text-center d-flex align-items-center">
+            <div class="form-inner">
+                <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
+                <p>Bienvenue sur Into the Woods, l'application qui vous permet de participer facilement à différents raids ! Vous êtes sur le point de créer un compte sur la plateforme.<br/>
+                    Une fois que vous aurez rempli le formulaire, lu et accepté les termes et conditions d'utilisation du service, vous recevrez un mail récapitulatif de votre inscription.</p>
+                <% if(typeof errorMessage !== "undefined") { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+                        <%= errorMessage %>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <% } %>
+                <form class="text-left form-validate" method="post" action="/helper">
+                    <div class="form-group-material">
+                        <input id="register-userfn" type="text" name="registerUserFn" required data-msg="Merci d'entrer votre prénom" class="input-material">
+                        <label for="register-userfn" class="label-material">Prénom</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="register-userln" type="text" name="registerUserLn" required data-msg="Merci d'entrer votre nom" class="input-material">
+                        <label for="register-userln" class="label-material">Nom</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="register-email" type="email" name="registerEmail" required data-msg="Merci d'entrer votre adresse e-mail" class="input-material">
+                        <label for="register-email" class="label-material">Adresse e-mail</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-run" class="col-sm-2 control-label">Voeux</label>
+                        <div class="col-sm-10">
+                            <select id="register-run" name="registerRun" multiple class="form-control">
+                                <option value="10001">Activity 1</option>
+                                <option value="10002">Activity 2</option>
+                                <option value="10003">Activity 3</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group terms-conditions text-center">
+                        <input id="register-agree" name="registerAgree" type="checkbox" required value="1" data-msg="Votre accord est obligatoire" class="form-control-custom">
+                        <label for="register-agree">J'accepte <a href="/termsandpolicy" target="_blank">les termes et les conditions d'utilisation</a></label>
+                    </div>
+                    <div class="form-group text-center">
+                        <input id="register" type="submit" value="S'inscrire" class="btn btn-primary">
+                    </div>
+                </form>
+            </div>
+            <div class="copyrights text-center">
+                <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+                <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+            </div>
+        </div>
+    </div>
+</div>
+<% include partials/footer %>
+</body>
+</html>
