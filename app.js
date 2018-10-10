@@ -67,6 +67,10 @@ const raid = require('./routes/raid');
 const map = require('./routes/map');
 const misc = require('./routes/misc');
 
+// BEGIN: Guillaume
+const helper = require('./routes/helper');
+// END: Guillaume
+
 /**********************************/
 /*             Routes             */
 /**********************************/
@@ -88,6 +92,12 @@ app.route('/register')
 
 app.route('/validate')
     .get(organizer.validate);
+
+app.route('/helper')
+    .post(helper.register);
+
+app.route('/helper/:id')
+    .get(helper.displayHome);
 
 //routes dedicated to the raids' pages
 app.route('/dashboard')
