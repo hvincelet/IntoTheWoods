@@ -43,14 +43,23 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-3">Choisissez les sports :<br/><small>Utilisez la touche ctrl pour en sélectionner plusieur</small></label>
+                                <label class="col-sm-3">Choisissez les sports :</label>
                                 <div class="col-sm-9">
-                                    <!--<select id="raidSports" name="raidSports" class="form-control form-control-success" multiple required size="<%= sports.length %>">-->
+                                    <div id="sports">
+                                        <select id="sport_type0" name="sport_type0" class="select2-selection--single" style="width: 50% !important; height: auto; margin-right: 0; padding-right: 0;">
+                                            <% sports.forEach(function(sport){ %>
+                                                <option value="<%= sport %>"><%= sport %></option>
+                                            <% }); %>
+                                        </select>
+                                        <input type="text" id="sport_name0" name="sport_name0" class="form-control form-control-success" placeholder="Saisissez le nom de l'étape" style="width: 50% !important; margin-left: 0; padding-left: 0;">
+                                    </div>
+                                    <button type="button" onclick="add_row()" class="btn btn-info">Ajouter un sport</button>
+                                    <!--<select id="raidSports" name="raidSports" class="form-control form-control-success" multiple required size="<%= sports.length %>">
                                     <select class="select2-selection--multiple" name="sports[]" multiple="multiple" style="width: 100% !important;">
                                         <% sports.forEach(function(sport){ %>
                                             <option value="<%= sport %>"><%= sport %></option>
                                         <% }); %>
-                                    </select>
+                                    </select>-->
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -65,3 +74,40 @@
         </div>
     </div>
 </section>
+<script type="text/javascript">
+    let number_of_row = 1;
+    let sports_list = "<% sports.forEach(function(sport){ %> <option value=\"<%= sport %>\"><%= sport %></option><% }); %>"
+    function add_row()
+    {
+        let select_node = document.createElement("select");
+        select_node.setAttribute("id","sport_type"+number_of_row);
+        select_node.setAttribute("name","sport_type"+number_of_row);
+        select_node.setAttribute("form","form");
+        select_node.innerHTML=sports_list;
+
+        let input_node = document.createElement("input");
+        input_node.setAttribute("type","text");
+        input_node.setAttribute("id","sport_name"+number_of_row);
+        input_node.setAttribute("name","sport_name"+number_of_row);
+
+        let delete_node = document.createElement("button");
+        delete_node.setAttribute("type","button");
+        delete_node.setAttribute("id","sport_delete"+number_of_row);
+        delete_node.setAttribute("onclick","delete_row(this)");
+        delete_node.innerHTML="x";
+
+        document.getElementById("sports").appendChild(select_node);
+        document.getElementById("sports").appendChild(input_node);
+        document.getElementById("sports").appendChild(delete_node);
+        number_of_row = number_of_row + 1;
+    }
+
+    function delete_row(e)
+    {
+        let row_id = parseInt(e.id.substring(e.id.length - 1, e.id.length));
+        document.getElementById("sport_type"+row_id).remove();
+        document.getElementById("sport_name"+row_id).remove();
+        e.remove();
+
+    }
+</script>
