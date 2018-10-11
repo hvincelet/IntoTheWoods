@@ -39,7 +39,7 @@
                         <label for="register-agree">J'accepte <a href="/termsandpolicy" target="_blank">les termes et les conditions d'utilisation</a></label>
                     </div>
                     <div class="form-group text-center">
-                        <input id="register" type="submit" value="S'inscrire" class="btn btn-primary">
+                        <a id="register" class="btn btn-primary" href="javascript:register()">S'inscrire</a>
                     </div>
                 </form><small>Vous avez déjà un compte ? </small><a href="/login" class="signup">Connectez-vous</a>
             </div>
@@ -47,9 +47,64 @@
                 <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
                 <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
             </div>
+            <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalLabel">Title</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="submit-button" class="btn btn-primary">Button</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 <% include partials/footer %>
+<script type="text/javascript">
+    function register() {
+        let data = {
+            firstname : $('#register-userfn').val(),
+            lastname : $('#register-userln').val(),
+            email : $('#register-email').val(),
+            password : $('#register-password').val()
+        };
+        $.ajax({
+            type: 'POST',
+            url: '/register',
+            data: data,
+            success: function (msg) {
+                if (msg==="already-exist"){
+                    $('.modal-title').text('bonjour !');
+                    $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
+                    $('#submit-button').text('Retourner à la page de connexion');
+                    $('#submit-button').attr('onclick', 'document.location.href=#');
+                    $('#modal').modal('show');
+                }else if (msg==="ok"){
+                    $('.modal-title').text('Inscription enregistrée !');
+                    $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
+                    $('#submit-button').text('Retourner à la page de connexion');
+                    $('#submit-button').attr('onclick', 'document.location.href=/login');
+                    $('#modal').modal('show');
+                }
+            },
+            error: function (msg) {
+                $('.modal-title').text('Erreur lors de l\'inscription...');
+                $('.modal-body').text("Erreur "+msg.status+" : "+msg.statusText);
+                $('#submit-button').text('Recharger la page');
+                $('#submit-button').attr('onclick', 'location.reload()');
+                $('#modal').modal('show');
+            }
+        });
+    }
+</script>
 </body>
 </html>

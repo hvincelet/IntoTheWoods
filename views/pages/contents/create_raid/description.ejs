@@ -20,38 +20,49 @@
                             <div class="form-group row">
                                 <label class="col-sm-3">Nom du Raid :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidName" name="raidName" type="text" placeholder="Nom du Raid" class="form-control form-control-success"><small class="form-text">Exemple : Raid &lt;Mon association sportive&gt;</small>
+                                    <input id="raidName" name="raidName" type="text" placeholder="Nom du Raid"
+                                           class="form-control form-control-success">
+                                    <small class="form-text">Exemple : Raid &lt;Mon association sportive&gt;</small>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3">Édition :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidEdition" name="raidEdition" type="number" placeholder="Édition n°" class="form-control form-control-success" min="1"><small class="form-text">Exemple : Édition 1, Édition 2018</small>
+                                    <input id="raidEdition" name="raidEdition" type="number" placeholder="Édition n°"
+                                           class="form-control form-control-success" min="1">
+                                    <small class="form-text">Exemple : Édition 1, Édition 2018</small>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3">Date de l'événement :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidStartDate" name="raidStartDate" type="date" placeholder="Date de début" class="form-control form-control-success" min="<%= new Date().toISOString().split('T')[0] %>">
+                                    <input id="raidStartDate" name="raidStartDate" type="date"
+                                           placeholder="Date de début" class="form-control form-control-success"
+                                           min="<%= new Date().toISOString().split('T')[0] %>">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3">Lieu :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidPlace" name="raidPlace" type="text" placeholder="rue, ville" class="form-control form-control-success" min="1"><small class="form-text">Exemple : Avenue des Champs-Élysées, Paris</small>
+                                    <!--<input id="raidPlace" name="raidPlace" type="text" placeholder="rue, ville"-->
+                                    <!--class="form-control form-control-success" min="1">-->
+
+                                    <!--<select id="place" name="place_type0" class="select2-selection&#45;&#45;single"-->
+                                    <!--style="width: 50% !important; height: auto; margin-right: 0; padding-right: 0;">-->
+                                    <!--</select>-->
+
+
+                                    <input type="text" id="ajax" name="raidPlace" list="json-datalist" placeholder="Ville, Pays"
+                                           class="form-control form-control-success">
+                                    <datalist id="json-datalist"></datalist>
+                                    <small class="form-text">Exemple : Avenue des Champs-Élysées, Paris</small>
+
+                                    <!--<input id="place" name="raidPlace" type="text" value="">-->
+                                    <!--<input type="text" name="raidPlace" id="place" placeholder="ville, pays" class="form-control form-control-success">-->
+
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <label class="col-sm-3">Choisissez les sports :<br/><small>Utilisez la touche ctrl pour en sélectionner plusieur</small></label>
-                                <div class="col-sm-9">
-                                    <!--<select id="raidSports" name="raidSports" class="form-control form-control-success" multiple required size="<%= sports.length %>">-->
-                                    <select class="select2-selection--multiple" name="sports[]" multiple="multiple" style="width: 100% !important;">
-                                        <% sports.forEach(function(sport){ %>
-                                            <option value="<%= sport %>"><%= sport %></option>
-                                        <% }); %>
-                                    </select>
-                                </div>
-                            </div>
+
                             <div class="form-group row">
                                 <div class="col-sm-9 offset-sm-3">
                                     <input type="submit" value="Enregistrer mon Raid" class="btn btn-primary">
@@ -64,3 +75,93 @@
         </div>
     </div>
 </section>
+
+
+<script type="application/javascript">
+    // $("#place").keyup(function () {
+    //         // alert("Handler for .keyup() called.");
+    //         // place_query = document.getElementsByName("#place")[0].value;
+    //         place_query = document.getElementById("place").value;
+    //
+    //         if (place_query.length >= 3) {
+    //             let data = {
+    //                 query: place_query
+    //             };
+    //             $.ajax({
+    //                 type: 'POST',
+    //                 url: '/createraid/places',
+    //                 data: data,
+    //                 success: function (data) {
+    //                     console.log(data);
+    //                     let datas = JSON.parse(data);
+    //                     datas.forEach(function (element) {
+    //                         console.log(element['name']);
+    //                     })
+    //                     console.log("------------------");
+    //                     //console.log(JSON.parse(data)[0]['name']);
+    //                 }
+    //             });
+    //
+    //         }
+    //     }
+    // );
+
+    // $(document).ready(function () {
+    //     $('#place').typeahead({
+    //         name: "placeRaid",
+    //         remote: '/createraid/places?query=%QUERY',
+    //         limit: 3,
+    //         source: {
+    //             groupName: {
+    //                 // Ajax Request
+    //                 url: "/createraid/places"
+    //             }
+    //         },
+    //         callback: {
+    //             onResult: function (node, query, result, resultCount, resultCountPerGroup) {
+    //                 console.log(node, query, result, resultCount, resultCountPerGroup);
+    //             }
+    //         }
+    //
+    //
+    //
+    //
+    //     });
+    // });
+
+    $(document).ready(function() {
+        let dataList = document.getElementById('json-datalist');
+        let input = document.getElementById('ajax');
+
+        $('#ajax').keyup(function(){
+            place_query = input.value;
+            let data;
+
+            if(place_query.length >= 3){
+                data = {query: place_query};
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/createraid/places',
+                data: data,
+                success: function(data){
+                    let datas = JSON.parse(data);
+                    console.log(datas);
+
+                    datas.forEach(function(element){
+                        console.log(element);
+                        console.log(element.name);
+
+                        let option = document.createElement('option');
+                        option.value = element.name;
+                        datalist.appendChild(option);
+                    });
+                },
+                error: function (msg) {
+                    console.log(msg);
+                }
+            });
+        });
+    });
+</script>

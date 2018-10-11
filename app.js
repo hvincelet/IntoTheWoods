@@ -17,7 +17,7 @@ global.user = {
     first_name: "",
     last_name: "",
     initials: "",
-    authenticated: false
+    authenticated: true
 };
 
 let checkAuth = function (req, res, next) {
@@ -49,7 +49,10 @@ app.route('/register')
 //routes dedicated to the raids' pages
 app.route('/createraid/description')
     .get(checkAuth, raid.displayDescriptionForm)
-    .post(checkAuth,raid.createRaid);
+    .post(checkAuth, raid.createRaid);
+
+app.route('/createraid/places')
+    .post(checkAuth, raid.getGeocodedResults);
 
 app.route('/editraid/map')
     .get(checkAuth, raid.displayMap);

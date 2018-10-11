@@ -22,7 +22,6 @@
     "express": "^4.16.3",
     "jdenticon": "^2.1.0",
     "mysql2": "^1.6.1",
-    "nominatim": "^0.1.0",
     "nominatim-geocoder": "^0.1.4",
     "ol": "^5.2.0",
     "sequelize": "^4.39.0",

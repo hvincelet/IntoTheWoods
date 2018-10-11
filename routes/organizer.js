@@ -14,6 +14,7 @@ exports.displayHome = function (req, res) {
         userName_initials: user.initials,
         userPicture: picture
     });
+    res.end();
 };
 
 exports.displayLogScreen = function (req, res) {
@@ -26,7 +27,6 @@ exports.displayLogScreen = function (req, res) {
 exports.idVerification = function (req, res) {
     let id = req.body.loginUsername;
     let hash = crypto.createHmac('sha256', req.body.loginPassword).digest('hex');
-
     models.organizer.findOne({
         where: {
             email: id, password: hash
@@ -54,27 +54,36 @@ exports.displayRegister = function (req, res) {
 };
 
 exports.register = function (req, res) {
-    let hash = crypto.createHmac('sha256', req.body.registerPassword).digest('hex');
-    let email = req.body.registerEmail;
+
+    let hash = crypto.createHmac('sha256', req.body.password).digest('hex');
 
     models.organizer.findOne({
         where: {
-            email: email
+            email: req.body.email
         }
     }).then(function (organizer_found) {
         if (organizer_found !== null) { // organizer with entered email already exist
-            res.render(pages_path + "register.ejs", {
-                pageTitle: "Inscription",
-                errorMessage: "Cette adresse email est déjà utilisée..."
-            });
+            /*
+             res.render(pages_path + "register.ejs", {
+                 pageTitle: "Inscription",
+                 errorMessage: "Cette adresse email est déjà utilisée..."
+             });
+             */
+            res.send(JSON.stringify({msg: "alreay-exist"}));
+            // res.writeHead(200, {'Content-Type': 'application/json'});
+            // res.end(JSON.stringify({msg: "already-exist"}));
         } else { // registration of the new organizer
             models.organizer.create({
-                email: email,
-                first_name: req.body.registerUserFn,
-                last_name: req.body.registerUserLn,
+                email: req.body.email,
+                first_name: req.body.firstname,
+                last_name: req.body.lastname,
                 password: hash
             }).then(function () {
-                res.redirect('/login');
+                //res.redirect('/login');
+
+                res.send(JSON.stringify({msg: "ok"}));
+                // res.writeHead(200, {'Content-Type': 'application/json'});
+                // res.end(JSON.stringify({msg: "ok"}));
             });
         }
     });
