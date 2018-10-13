@@ -44,21 +44,22 @@
                             <div class="form-group row">
                                 <label class="col-sm-3">Lieu :</label>
                                 <div class="col-sm-9">
-                                    <!--<input id="raidPlace" name="raidPlace" type="text" placeholder="rue, ville"-->
-                                    <!--class="form-control form-control-success" min="1">-->
 
-                                    <!--<select id="place" name="place_type0" class="select2-selection&#45;&#45;single"-->
-                                    <!--style="width: 50% !important; height: auto; margin-right: 0; padding-right: 0;">-->
-                                    <!--</select>-->
-
-
-                                    <input type="text" id="ajax" name="raidPlace" list="json-datalist" placeholder="Ville, Pays"
-                                           class="form-control form-control-success">
-                                    <datalist id="json-datalist"></datalist>
-                                    <small class="form-text">Exemple : Avenue des Champs-Élysées, Paris</small>
-
-                                    <!--<input id="place" name="raidPlace" type="text" value="">-->
-                                    <!--<input type="text" name="raidPlace" id="place" placeholder="ville, pays" class="form-control form-control-success">-->
+                                    <div class="input-group sm-3">
+                                        <div class="input-group-prepend">
+                                            <button type="button" class="input-group-text" id="search-button"><i
+                                                        class="fas fa-search-location" id="search"></i></button>
+                                        </div>
+                                        <input type="text" id="ajax" name="raidPlace" list="json-datalist"
+                                               placeholder="Ex : Avenue des Champs Élysées, Paris"
+                                               class="form-control form-control-success" aria-describedby="search">
+                                    </div>
+                                    <datalist id="json-datalist">
+                                        <select id="select-datalist" multiple size=3></select>
+                                    </datalist>
+                                    <small class="form-text">Entrez l'adresse de l'évenement, puis cliquez sur la
+                                        loupe.
+                                    </small>
 
                                 </div>
                             </div>
@@ -76,92 +77,75 @@
     </div>
 </section>
 
-
 <script type="application/javascript">
-    // $("#place").keyup(function () {
-    //         // alert("Handler for .keyup() called.");
-    //         // place_query = document.getElementsByName("#place")[0].value;
-    //         place_query = document.getElementById("place").value;
-    //
-    //         if (place_query.length >= 3) {
-    //             let data = {
-    //                 query: place_query
-    //             };
-    //             $.ajax({
-    //                 type: 'POST',
-    //                 url: '/createraid/places',
-    //                 data: data,
-    //                 success: function (data) {
-    //                     console.log(data);
-    //                     let datas = JSON.parse(data);
-    //                     datas.forEach(function (element) {
-    //                         console.log(element['name']);
-    //                     })
-    //                     console.log("------------------");
-    //                     //console.log(JSON.parse(data)[0]['name']);
-    //                 }
-    //             });
-    //
-    //         }
-    //     }
-    // );
 
-    // $(document).ready(function () {
-    //     $('#place').typeahead({
-    //         name: "placeRaid",
-    //         remote: '/createraid/places?query=%QUERY',
-    //         limit: 3,
-    //         source: {
-    //             groupName: {
-    //                 // Ajax Request
-    //                 url: "/createraid/places"
-    //             }
-    //         },
-    //         callback: {
-    //             onResult: function (node, query, result, resultCount, resultCountPerGroup) {
-    //                 console.log(node, query, result, resultCount, resultCountPerGroup);
-    //             }
-    //         }
-    //
-    //
-    //
-    //
-    //     });
-    // });
-
-    $(document).ready(function() {
-        let dataList = document.getElementById('json-datalist');
-        let input = document.getElementById('ajax');
-
-        $('#ajax').keyup(function(){
-            place_query = input.value;
-            let data;
-
-            if(place_query.length >= 3){
-                data = {query: place_query};
+    $(document).ready(function () {
+        $("#ajax").keyup(function () {
+            if ($("#ajax").val().length >= 3) {
+                $("#search-button").addClass('btn-default');
+                $("#search-button").attr('onclick', 'loadDataList()');
+            } else {
+                $("#search-button").removeClass('btn-default');
+                $("#search-button").attr('onclick', '');
             }
-
-            $.ajax({
-                type: 'POST',
-                url: '/createraid/places',
-                data: data,
-                success: function(data){
-                    let datas = JSON.parse(data);
-                    console.log(datas);
-
-                    datas.forEach(function(element){
-                        console.log(element);
-                        console.log(element.name);
-
-                        let option = document.createElement('option');
-                        option.value = element.name;
-                        datalist.appendChild(option);
-                    });
-                },
-                error: function (msg) {
-                    console.log(msg);
-                }
-            });
         });
     });
+
+    let input = document.getElementById('ajax');
+    let datalist = document.getElementById('json-datalist');
+    let select = document.getElementById('select-datalist');
+    let options = select.options;
+
+    select.addEventListener('change', fill_input);
+    input.addEventListener('focus', hide_select);
+
+    function toggle_ddl() {
+        datalist.style.display = 'block';
+        /* If input already has a value, select that option from DDL */
+        var val = input.value;
+        for (var i = 0; i < options.length; i++) {
+            if (options[i].text === val) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    }
+
+    function fill_input() {
+        input.value = options[this.selectedIndex].value;
+        hide_select();
+    }
+
+    function searching() {
+        datalist.style.display = 'block';
+        $("#select-datalist").append($('<option>recherche en cours...</option>'));
+    }
+
+    function hide_select() {
+        datalist.style.display = '';
+    }
+
+    function loadDataList() {
+        searching();
+        let data = {query: input.value};
+        $.ajax({
+            type: 'POST',
+            url: '/createraid/places',
+            data: data,
+            success: function (data) {
+                let datas = JSON.parse(data);
+
+                $("#select-datalist").empty();
+                $.each(datas, function (i, item) {
+                    $("#select-datalist").append($('<option>').attr('value', item).text(item));
+
+                });
+                toggle_ddl();
+            },
+            error: function (msg) {
+                console.log(msg);
+            }
+        });
+    }
+
 </script>

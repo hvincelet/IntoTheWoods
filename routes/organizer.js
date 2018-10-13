@@ -69,9 +69,9 @@ exports.register = function (req, res) {
                  errorMessage: "Cette adresse email est déjà utilisée..."
              });
              */
-            res.send(JSON.stringify({msg: "alreay-exist"}));
-            // res.writeHead(200, {'Content-Type': 'application/json'});
-            // res.end(JSON.stringify({msg: "already-exist"}));
+            res.send(JSON.stringify({msg: "already-exist"}));
+
+
         } else { // registration of the new organizer
             models.organizer.create({
                 email: req.body.email,
@@ -80,10 +80,7 @@ exports.register = function (req, res) {
                 password: hash
             }).then(function () {
                 //res.redirect('/login');
-
                 res.send(JSON.stringify({msg: "ok"}));
-                // res.writeHead(200, {'Content-Type': 'application/json'});
-                // res.end(JSON.stringify({msg: "ok"}));
             });
         }
     });

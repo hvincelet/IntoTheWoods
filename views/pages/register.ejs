@@ -81,8 +81,11 @@
             type: 'POST',
             url: '/register',
             data: data,
-            success: function (msg) {
+            success: function (response) {
+                let msg = JSON.parse(response).msg;
+
                 if (msg==="already-exist"){
+
                     $('.modal-title').text('bonjour !');
                     $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
                     $('#submit-button').text('Retourner à la page de connexion');
