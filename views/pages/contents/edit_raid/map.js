@@ -37,6 +37,8 @@ let map = new ol.Map({
     })
 });
 
+loadPointsOfInterest();
+
 /**********************************/
 /*  Fn dedicated to PoI edition   */
 /**********************************/
@@ -51,6 +53,7 @@ function addInteractions() {
         source: source,
         type: "Point"
     });
+
     map.addInteraction(draw);
     snap = new ol.interaction.Snap({source: source});
     map.addInteraction(snap);
@@ -66,24 +69,48 @@ function getVectorCoordonates() {
 
     // Go through this array and get coordinates of their geometry.
     features.forEach(function (feature) {
-        console.log(ol.proj.toLonLat(feature.getGeometry().getCoordinates())); // /!\ retourne des projections != coord lonlat
+        console.log(feature.getId());
+        console.log(ol.proj.toLonLat(feature.getGeometry().getCoordinates()));
     });
 }
 
-function addVectorCoordonates() {
+function storePointsOfInterest() {
+    let pointOfInterestArrayToStore = [];
 
-    let pointsOfInterest = [[-3.4455227851867667, 48.818696208434886],
-        [-3.4416174888610835, 48.81996777291283],
-        [-3.437025547027587, 48.820363364171556]];
+    let features = vector.getSource().getFeatures();
 
-    pointsOfInterest.forEach(function (pointsOfInterestCoords) {
-        let geom = new ol.geom.Point(ol.proj.fromLonLat(pointsOfInterestCoords));
+    features.forEach(function (feature) {
+        pointOfInterestArrayToStore.push({
+            id: feature.getId(),
+            lng: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[0],
+            lat: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[1]
+        });
+    });
+
+    let data = {
+        pointOfInterestArray: pointOfInterestArrayToStore
+    };
+    $.ajax({
+        type: 'POST',
+        url: '/editraid/map',
+        data: data,
+        success: function (response) {
+        },
+        error: function (response) {
+        }
+    });
+
+}
+
+function loadPointsOfInterest() {
+
+    pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
+        let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
         let feature = new ol.Feature({
-                id: 'pointOfInterest',
                 geometry: geom,
-                popuptext: 'test'
             }
         );
+        feature.setId(pointOfInterest.id);
         source.addFeature(feature);
     });
 

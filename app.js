@@ -55,7 +55,8 @@ app.route('/createraid/places')
     .post(checkAuth, raid.getGeocodedResults);
 
 app.route('/editraid/map')
-    .get(checkAuth, raid.displayMap);
+    .get(checkAuth, raid.displayMap)
+    .post(checkAuth, raid.storeMapDatas);
 
 app.route('/termsandpolicy')
     .get(misc.cgu);

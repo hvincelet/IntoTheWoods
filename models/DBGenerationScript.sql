@@ -108,7 +108,6 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`course` (
   `order_num` SMALLINT UNSIGNED NOT NULL,
   `label` VARCHAR(45) NULL,
   `id_sport` INT UNSIGNED NOT NULL,
-  `id_track` INT UNSIGNED NULL,
   `id_raid` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `id_sport`
@@ -161,7 +160,7 @@ ENGINE = InnoDB;
 -- Table `intoTheWoodsDB`.`point_of_interest`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`point_of_interest` (
-  `id` INT UNSIGNED NOT NULL,
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `id_track` INT UNSIGNED NOT NULL,
   `lat` DOUBLE NULL,
   `lng` DOUBLE NULL,
@@ -222,3 +221,6 @@ ENGINE = InnoDB;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+
+INSERT INTO `sport` (`id`, `name`, `area_type`) VALUES (NULL, 'Canoë', 'Eau'), (NULL, 'Kayak', 'Eau'), (NULL, 'Rafting', 'Eau'), (NULL, 'Course à pied', 'Sol'), (NULL, 'Trail', 'Sol'), (NULL, 'Course d\'orientation', 'Sol'), (NULL, 'Run & Bike', 'Sol'), (NULL, 'Swimrun', 'Eau'), (NULL, 'Escalade', 'Parois rocheuse'), (NULL, 'VTT', 'Sol'), (NULL, 'Trekking', 'Sol'), (NULL, 'Ski de fond', 'Neige'), (NULL, 'Ski alpin', 'Neige'), (NULL, 'Ski slalom', 'Neige'), (NULL, 'Saut à ski', 'Neige');

@@ -63,14 +63,8 @@ exports.register = function (req, res) {
         }
     }).then(function (organizer_found) {
         if (organizer_found !== null) { // organizer with entered email already exist
-            /*
-             res.render(pages_path + "register.ejs", {
-                 pageTitle: "Inscription",
-                 errorMessage: "Cette adresse email est déjà utilisée..."
-             });
-             */
-            res.send(JSON.stringify({msg: "already-exist"}));
 
+            res.send(JSON.stringify({msg: "already-exist"}));
 
         } else { // registration of the new organizer
             models.organizer.create({

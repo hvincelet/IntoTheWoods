@@ -5,7 +5,7 @@ const models = require('../models');
 const Nominatim = require('nominatim-geocoder');
 const geocoder = new Nominatim();
 
-let idCurrentRaid;
+let idCurrentRaid = 1; //for tests
 
 exports.displayDescriptionForm = function (req, res) {
     let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
@@ -61,12 +61,7 @@ exports.createRaid = function (req, res) {
 
 exports.getGeocodedResults = function (req, res) {
     let geocoded_results = [];
-    /*
-    geocoderCallback.search( { q: 'Berlin, Germany' }, {}, function(error, response) {
-        console.log(error, response)
-    });
-    */
-    //console.log(req.body.query);
+
     geocoder.search({q: req.body.query})
         .then((response) => {
 
@@ -94,24 +89,68 @@ exports.getGeocodedResults = function (req, res) {
 
 exports.displayMap = function (req, res) {
 
-    models.raid.findOne({
+    models.raid.findOne({ // loads the map associated with the raid "idCurrentRaid"
         where: {
             id: idCurrentRaid
         }
     }).then(function (raid_found) {
-        let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
-        res.render(pages_path + "template.ejs", {
-            pageTitle: "Gestion des Raids",
-            page: "edit_raid/map",
-            userName_fn: user.first_name,
-            userName_ln: user.last_name,
-            userName_initials: user.initials,
-            userPicture: picture,
-            raid: raid_found.dataValues
+        models.course.findAll({
+            where: {
+                id_raid: raid_found.id
+            }
+        }).then(function (courses_found) {
+            let pointOfInterestArray = [];
+            models.point_of_interest.findAll({ // loads the array of points-of-interest
+                where: {
+                    id_track: courses_found[0].id
+                }
+            }).then(function (points_of_interest_found) {
+                points_of_interest_found.forEach(function (point_of_interest) {
+                    pointOfInterestArray.push({
+                        id: point_of_interest.id,
+                        lonlat: [point_of_interest.lng, point_of_interest.lat]
+                    });
+                });
+
+                let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
+                res.render(pages_path + "template.ejs", {
+                    pageTitle: "Gestion des Raids",
+                    page: "edit_raid/map",
+                    userName_fn: user.first_name,
+                    userName_ln: user.last_name,
+                    userName_initials: user.initials,
+                    userPicture: picture,
+                    raid: raid_found.dataValues,
+                    pointOfInterestArray: pointOfInterestArray
+                });
+            });
         });
-
-
     });
 
+};
 
+exports.storeMapDatas = function (req, res) {
+
+    req.body.pointOfInterestArray.forEach(function (vector) {
+
+        models.point_of_interest.findById(vector.id)
+            .then(function (vector_found) {
+                if (vector_found !== null) { // point of interest is already present in DB, it must be updated
+                    console.log(vector);
+
+                    vector_found.update({
+                        lat: vector.lat,
+                        lng: vector.lng
+                    }).then(() => {
+                    })
+
+                } else { // this is a new point, it must be added
+                    models.point_of_interest.create({
+                        id_track: 1,
+                        lat: vector.lat,
+                        lng: vector.lng
+                    })
+                }
+            });
+    })
 };

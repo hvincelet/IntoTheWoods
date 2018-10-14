@@ -16,10 +16,12 @@
                     <div class="card-header d-flex align-items-center">
                         <h4>Edition des parcours</h4>
                         <button id="type" class="btn btn-xs" onclick="addPointOfInterest()">Ajouter des points d'intérêt</button>
+                        <button id="type" class="btn btn-xs" onclick="storePointsOfInterest()">Enregistrer les points d'intérêt</button>
                     </div>
                     <div class="card-body">
                         <div id="map"></div>
-                        <script> var raid = <%- JSON.stringify(raid) %>; </script>
+                        <script> const raid = <%- JSON.stringify(raid) %>; </script>
+                        <script> const pointOfInterestArrayToLoad = <%- JSON.stringify(pointOfInterestArray) %>; </script>
                         <script src="/views/pages/contents/edit_raid/map.js"></script>
                     </div>
                 </div>
