@@ -34,9 +34,9 @@
                         <label for="register-run" class="col-sm-2 control-label">Voeux</label>
                         <div class="col-sm-10">
                             <select id="register-run" name="registerRun" multiple class="form-control">
-                                <option value="10001">Activity 1</option>
-                                <option value="10002">Activity 2</option>
-                                <option value="10003">Activity 3</option>
+                                <% raids.forEach(function(item){ %>
+                                  <option value=""> <%- item.id item.name item.edition item.date item.place %> </option>
+                                <% }); %>
                             </select>
                         </div>
                     </div>
