@@ -5,8 +5,7 @@ module.exports = function(sequelize, DataTypes) {
     id: {
       type: DataTypes.INTEGER(10).UNSIGNED,
       allowNull: false,
-      primaryKey: true,
-      autoIncrement: true
+      primaryKey: true
     },
     id_track: {
       type: DataTypes.INTEGER(10).UNSIGNED,
@@ -17,11 +16,11 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     lat: {
-      type: DataTypes.FLOAT,
+      type: "DOUBLE",
       allowNull: true
     },
     lng: {
-      type: DataTypes.FLOAT,
+      type: "DOUBLE",
       allowNull: true
     }
   }, {
