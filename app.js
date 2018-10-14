@@ -49,6 +49,10 @@ app.route('/register')
     .get(organizer.displayRegister)
     .post(organizer.register);
 
+// NEW:
+app.route('/validate')
+    .post(organizer.validate);
+
 // BEGIN: Guillaume
 // routes dedicated to helper
 app.route('/helper')

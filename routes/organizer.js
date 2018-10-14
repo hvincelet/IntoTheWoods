@@ -3,6 +3,8 @@ const pages_path = "../views/pages/";
 const models = require('../models');
 const crypto = require('crypto');
 
+const sender = require('../views/pages/contents/email/sender');
+
 exports.displayHome = function (req, res) {
     let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
 
@@ -67,16 +69,43 @@ exports.register = function (req, res) {
                 pageTitle: "Inscription",
                 errorMessage: "Cette adresse email est déjà utilisée..."
             });
-        } else { // registration of the new organizer
+        } else {
+
+            // NEW : send confirmation mail
+            sender.sendMail(email,req.body.registerUserFn, req.body.registerUserLn, hash);
+
+            // TODO: redirect to login with message for user (check mail)
+            res.render(pages_path + "register.ejs", {
+                pageTitle: "Inscription",
+                errorMessage: "Suite à votre inscription, vous venez de recevoir un mail. Veuillez confirmer votre inscription avant de vous connecter..."
+            });
+        }
+    });
+};
+
+exports.validate = function (req, res) {
+
+    models.organizer.findOne({
+        where: {
+            email: req.body.registerEmail
+        }
+    }).then(function (organizer_found) {
+        if (organizer_found !== null) { // organizer with entered email already exist
+            res.render(pages_path + "register.ejs", {
+                pageTitle: "Inscription",
+                errorMessage: "Cette adresse email est déjà utilisée..."
+            });
+        } else {
+
+            // registration of the new organizer
             models.organizer.create({
-                email: email,
+                email: req.body.registerEmail,
                 first_name: req.body.registerUserFn,
                 last_name: req.body.registerUserLn,
-                password: hash
+                password: req.body.registerPassword
             }).then(function () {
                 res.redirect('/login');
             });
         }
     });
-
 };
