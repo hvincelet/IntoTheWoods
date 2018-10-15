@@ -72,20 +72,22 @@
                                             <span class="table-add float-right mb-3 mr-2"><a href="#!" class="text-success"><i class="fa fa-plus fa-2x" aria-hidden="true"></i></a></span>
                                             <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
                                                 <tr>
+                                                    <th class="text-center">Ordre</th>
                                                     <th class="text-center">Type de sport</th>
                                                     <th class="text-center">Nom de l'épreuve</th>
                                                     <th class="text-center">Tri</th>
                                                     <th class="text-center">Suppression</th>
                                                 </tr>
                                                 <tr>
-                                                    <td class="pt-3-half" contenteditable="true" width="45%">
+                                                    <td class="pt-3-half row-number" width="2%">1</td>
+                                                    <td class="pt-3-half" contenteditable="false" width="44%">
                                                         <select name="sport_type" class="select2-selection--single" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
                                                             <% sports.forEach(function(sport){ %>
                                                                 <option value="<%= sport %>"><%= sport %></option>
                                                             <% }); %>
                                                         </select>
                                                     </td>
-                                                    <td class="pt-3-half" contenteditable="true" width="45%"></td>
+                                                    <td class="pt-3-half" contenteditable="true" width="44%"></td>
                                                     <td class="pt-3-half" width="5%">
                                                         <span class="table-up" style="margin-right: 5px;"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-up"></i></a></span>
                                                         <span class="table-down"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-down"></i></a></span>
@@ -98,19 +100,20 @@
                                             <table id="hidden-table" style="display: none;">
                                                 <!-- Default added row -->
                                                 <tr class="hide">
-                                                    <td class="pt-3-half" contenteditable="true">
+                                                    <td class="pt-3-half row-number" width="2%"></td>
+                                                    <td class="pt-3-half" contenteditable="false" width="44%">
                                                         <select name="sport_type" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
                                                             <% sports.forEach(function(sport){ %>
                                                                 <option value="<%= sport %>"><%= sport %></option>
                                                             <% }); %>
                                                         </select>
                                                     </td>
-                                                    <td class="pt-3-half" contenteditable="true"></td>
-                                                    <td class="pt-3-half">
+                                                    <td class="pt-3-half" contenteditable="true" width="44%"></td>
+                                                    <td class="pt-3-half" width="5%">
                                                         <span class="table-up" style="margin-right: 5px;"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-up"></i></a></span>
                                                         <span class="table-down"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-down"></i></a></span>
                                                     </td>
-                                                    <td>
+                                                    <td width="5%">
                                                         <span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Remove</button></span>
                                                     </td>
                                                 </tr>
@@ -123,7 +126,6 @@
                             </div>
                             <div class="form-group row">
                                 <div class="col-sm-12">
-                                    <button id="addNewRow" class="btn btn-warning" type="button">Ajouter une ligne supplémentaire</button>
                                     <input type="submit" value="Enregistrer mon Raid" class="btn btn-primary">
                                 </div>
                             </div>
@@ -141,32 +143,46 @@
             width: 'resolve'
         });
     });
+
     var $TABLE = $('#table');
     var $HIDDEN_TABLE = $('#hidden-table');
     var $BTN = $('#export-btn');
     var $EXPORT = $('#export');
+    var nbrow = $TABLE.length;
 
     $('.table-add').click(function () {
         var $clone = $HIDDEN_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
         $clone.find('select').addClass('select2-selection--single');
+        nbrow++;
+        $clone.find('td.row-number').html(nbrow);
         $TABLE.find('table').append($clone);
         $('.select2-selection--single').select2({width: 'resolve'});
+        update_index();
     });
 
     $('.table-remove').click(function () {
         $(this).parents('tr').detach();
+        update_index();
     });
 
     $('.table-up').click(function () {
         var $row = $(this).parents('tr');
         if ($row.index() === 1) return; // Don't go above the header
         $row.prev().before($row.get(0));
+        update_index();
     });
 
     $('.table-down').click(function () {
         var $row = $(this).parents('tr');
         $row.next().after($row.get(0));
+        update_index();
     });
+
+    function update_index(){
+        $TABLE.find('tr').each(function () {
+            $(this).find('td.row-number').html($(this).index());
+        });
+    }
 
     // A few jQuery helpers for exporting only
     jQuery.fn.pop = [].pop;
