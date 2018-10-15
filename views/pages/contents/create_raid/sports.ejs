@@ -1,0 +1,201 @@
+<div class="breadcrumb-holder">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+            <li class="breadcrumb-item active">Organiser un Raid</li>
+            <li class="breadcrumb-item active">Sélection des sports</li>
+        </ul>
+    </div>
+</div>
+<section class="forms">
+    <div class="container-fluid">
+        <header></header>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <h4>Sélection des sports du Raid</h4>
+                    </div>
+                    <div class="card-body">
+                        <form class="form-horizontal" method="post" action="/createraid/sports">
+                            <div class="form-group row">
+                                <!--<label class="col-sm-3">Choisissez les sports :</label>
+                                <div class="col-sm-9">
+                                    <div id="sports">
+                                        <select id="sport_type0" name="sport_type0" class="select2-selection--single" style="width: 50% !important; height: auto; margin-right: 0; padding-right: 0;">
+                                            <% sports.forEach(function(sport){ %>
+                                                <option value="<%= sport %>"><%= sport %></option>
+                                            <% }); %>
+                                        </select>
+                                        <input type="text" id="sport_name0" name="sport_name0" class="form-control form-control-success" placeholder="Saisissez le nom de l'étape" style="width: 50% !important; margin-left: 0; padding-left: 0;">
+                                    </div>
+                                    <button type="button" onclick="add_row()" class="btn btn-info">Ajouter un sport</button>
+                                    <!--<select id="raidSports" name="raidSports" class="form-control form-control-success" multiple required size="<%= sports.length %>">
+                                    <select class="select2-selection--multiple" name="sports[]" multiple="multiple" style="width: 100% !important;">
+                                        <% sports.forEach(function(sport){ %>
+                                            <option value="<%= sport %>"><%= sport %></option>
+                                        <% }); %>
+                                    </select>-->
+                                <!--</div>-->
+                                <!--<h2 class="h3 col-sm-12">Choisissez vos sports</h2>
+                                <div class="col-sm-12">
+                                    <table class="table table-bordered table-striped table-hover table-condensed text-center" id="DyanmicTable">
+                                        <thead>
+                                        <tr>
+                                            <th class="text-center" width="46%">
+                                                Type de sport
+                                            </th>
+                                            <th class="text-center" width="46%">
+                                                Nom du sport
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>
+                                                <select id="sport_type0" name="sport_type0" class="select2-selection--single" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
+                                                    <% sports.forEach(function(sport){ %>
+                                                        <option value="<%= sport %>"><%= sport %></option>
+                                                    <% }); %>
+                                                </select>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>-->
+                                <!-- Editable table -->
+                                <div class="card col-sm-12">
+                                    <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Choisissez vos sports</h3>
+                                    <div class="card-body">
+                                        <div id="table" class="table-editable">
+                                            <span class="table-add float-right mb-3 mr-2"><a href="#!" class="text-success"><i class="fa fa-plus fa-2x" aria-hidden="true"></i></a></span>
+                                            <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
+                                                <tr>
+                                                    <th class="text-center">Type de sport</th>
+                                                    <th class="text-center">Nom de l'épreuve</th>
+                                                    <th class="text-center">Tri</th>
+                                                    <th class="text-center">Suppression</th>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pt-3-half" contenteditable="true" width="45%">
+                                                        <select name="sport_type" class="select2-selection--single" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
+                                                            <% sports.forEach(function(sport){ %>
+                                                                <option value="<%= sport %>"><%= sport %></option>
+                                                            <% }); %>
+                                                        </select>
+                                                    </td>
+                                                    <td class="pt-3-half" contenteditable="true" width="45%"></td>
+                                                    <td class="pt-3-half" width="5%">
+                                                        <span class="table-up" style="margin-right: 5px;"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-up"></i></a></span>
+                                                        <span class="table-down"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-down"></i></a></span>
+                                                    </td>
+                                                    <td width="5%">
+                                                        <span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Remove</button></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <table id="hidden-table" style="display: none;">
+                                                <!-- Default added row -->
+                                                <tr class="hide">
+                                                    <td class="pt-3-half" contenteditable="true">
+                                                        <select name="sport_type" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
+                                                            <% sports.forEach(function(sport){ %>
+                                                                <option value="<%= sport %>"><%= sport %></option>
+                                                            <% }); %>
+                                                        </select>
+                                                    </td>
+                                                    <td class="pt-3-half" contenteditable="true"></td>
+                                                    <td class="pt-3-half">
+                                                        <span class="table-up" style="margin-right: 5px;"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-up"></i></a></span>
+                                                        <span class="table-down"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-down"></i></a></span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Remove</button></span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Editable table -->
+
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-sm-12">
+                                    <button id="addNewRow" class="btn btn-warning" type="button">Ajouter une ligne supplémentaire</button>
+                                    <input type="submit" value="Enregistrer mon Raid" class="btn btn-primary">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.select2-selection--single').select2({
+            placeholder: 'Choisissez un sport.',
+            width: 'resolve'
+        });
+    });
+    var $TABLE = $('#table');
+    var $HIDDEN_TABLE = $('#hidden-table');
+    var $BTN = $('#export-btn');
+    var $EXPORT = $('#export');
+
+    $('.table-add').click(function () {
+        var $clone = $HIDDEN_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
+        $clone.find('select').addClass('select2-selection--single');
+        $TABLE.find('table').append($clone);
+        $('.select2-selection--single').select2({width: 'resolve'});
+    });
+
+    $('.table-remove').click(function () {
+        $(this).parents('tr').detach();
+    });
+
+    $('.table-up').click(function () {
+        var $row = $(this).parents('tr');
+        if ($row.index() === 1) return; // Don't go above the header
+        $row.prev().before($row.get(0));
+    });
+
+    $('.table-down').click(function () {
+        var $row = $(this).parents('tr');
+        $row.next().after($row.get(0));
+    });
+
+    // A few jQuery helpers for exporting only
+    jQuery.fn.pop = [].pop;
+    jQuery.fn.shift = [].shift;
+
+    $BTN.click(function () {
+        var $rows = $TABLE.find('tr:not(:hidden)');
+        var headers = [];
+        var data = [];
+
+// Get the headers (add special header logic here)
+        $($rows.shift()).find('th:not(:empty)').each(function () {
+            headers.push($(this).text().toLowerCase());
+        });
+
+// Turn all existing rows into a loopable array
+        $rows.each(function () {
+            var $td = $(this).find('td');
+            var h = {};
+
+// Use the headers from earlier to name our hash keys
+            headers.forEach(function (header, i) {
+                h[header] = $td.eq(i).text();
+            });
+
+            data.push(h);
+        });
+
+// Output the result
+        $EXPORT.text(JSON.stringify(data));
+    });
+</script>

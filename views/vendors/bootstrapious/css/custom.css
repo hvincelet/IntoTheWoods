@@ -59,3 +59,7 @@ footer.main-footer{
 .selection{
     width: 100% !important;
 }
+
+.pt-3-half {
+    padding-top: 1.4rem;
+}

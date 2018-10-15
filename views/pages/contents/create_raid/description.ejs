@@ -43,28 +43,8 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-sm-3">Choisissez les sports :</label>
-                                <div class="col-sm-9">
-                                    <div id="sports">
-                                        <select id="sport_type0" name="sport_type0" class="select2-selection--single" style="width: 50% !important; height: auto; margin-right: 0; padding-right: 0;">
-                                            <% sports.forEach(function(sport){ %>
-                                                <option value="<%= sport %>"><%= sport %></option>
-                                            <% }); %>
-                                        </select>
-                                        <input type="text" id="sport_name0" name="sport_name0" class="form-control form-control-success" placeholder="Saisissez le nom de l'étape" style="width: 50% !important; margin-left: 0; padding-left: 0;">
-                                    </div>
-                                    <button type="button" onclick="add_row()" class="btn btn-info">Ajouter un sport</button>
-                                    <!--<select id="raidSports" name="raidSports" class="form-control form-control-success" multiple required size="<%= sports.length %>">
-                                    <select class="select2-selection--multiple" name="sports[]" multiple="multiple" style="width: 100% !important;">
-                                        <% sports.forEach(function(sport){ %>
-                                            <option value="<%= sport %>"><%= sport %></option>
-                                        <% }); %>
-                                    </select>-->
-                                </div>
-                            </div>
-                            <div class="form-group row">
                                 <div class="col-sm-9 offset-sm-3">
-                                    <input type="submit" value="Enregistrer mon Raid" class="btn btn-primary">
+                                    <input type="submit" value="Sélectionner les sports" class="btn btn-primary">
                                 </div>
                             </div>
                         </form>
