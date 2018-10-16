@@ -12,5 +12,10 @@ module.exports = {
     },
     production: {
         // configuration dedicated to the production environment
+    },
+    mail: {
+        service: "gmail",
+        login: "intothewoods.app@gmail.com",
+        password: "jdburdrqdlqcocrh"
     }
 };
