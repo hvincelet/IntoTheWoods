@@ -60,6 +60,7 @@
                                     <small class="form-text">Entrez l'adresse de l'évenement, puis cliquez sur la
                                         loupe.
                                     </small>
+                                    <input type="hidden" id="selectedPlace" name="selectedPlace" />
 
                                 </div>
                             </div>
@@ -111,8 +112,12 @@
         }
     }
 
+    let datas;
+
     function fill_input() {
         input.value = options[this.selectedIndex].value;
+        $("#selectedPlace").val(JSON.stringify(datas[this.selectedIndex]));
+
         hide_select();
     }
 
@@ -134,11 +139,11 @@
             url: '/createraid/places',
             data: data,
             success: function (data) {
-                let datas = JSON.parse(data);
+                datas = JSON.parse(data);
 
                 $("#select-datalist").empty();
                 $.each(datas, function (i, item) {
-                    $("#select-datalist").append($('<option>').attr('value', item).text(item));
+                    $("#select-datalist").append($('<option>').attr('value', item.name).text(item.name));
 
                 });
                 toggle_ddl();
