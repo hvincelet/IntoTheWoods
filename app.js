@@ -17,7 +17,7 @@ global.user = {
     first_name: "",
     last_name: "",
     initials: "",
-    authenticated: true
+    authenticated: false
 };
 
 let checkAuth = function (req, res, next) {

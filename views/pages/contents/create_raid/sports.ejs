@@ -17,71 +17,84 @@
                         <h4>Sélection des sports du Raid</h4>
                     </div>
                     <div class="card-body">
-                        <form class="form-horizontal" method="post" action="/createraid/sports">
-                            <div class="form-group row">
-                                <!-- Editable table -->
-                                <div class="card col-sm-12">
-                                    <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Choisissez vos sports</h3>
-                                    <div class="card-body">
-                                        <div id="table" class="table-editable">
-                                            <span class="table-add float-right mb-3 mr-2"><a href="#!" class="text-success"><i class="fa fa-plus fa-2x" aria-hidden="true"></i></a></span>
-                                            <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
-                                                <tr>
-                                                    <th class="text-center">Ordre</th>
-                                                    <th class="text-center">Type de sport</th>
-                                                    <th class="text-center">Nom de l'épreuve</th>
-                                                    <th class="text-center">Tri</th>
-                                                    <th class="text-center">Suppression</th>
-                                                </tr>
-                                                <tr>
-                                                    <td class="pt-3-half row-number" width="2%">1</td>
-                                                    <td class="pt-3-half" contenteditable="false" width="44%">
-                                                        <select name="sport_type" class="select2-selection--single" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
-                                                            <% sports.forEach(function(sport){ %>
-                                                                <option value="<%= sport %>"><%= sport %></option>
-                                                            <% }); %>
-                                                        </select>
-                                                    </td>
-                                                    <td class="pt-3-half" contenteditable="true" width="44%"></td>
-                                                    <td class="pt-3-half" width="5%">
-                                                        <span class="table-up" style="margin-right: 5px;"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-up"></i></a></span>
-                                                        <span class="table-down"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-down"></i></a></span>
-                                                    </td>
-                                                    <td width="5%">
-                                                        <span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Remove</button></span>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                            <table id="hidden-table" style="display: none;">
-                                                <!-- Default added row -->
-                                                <tr class="hide">
-                                                    <td class="pt-3-half row-number" width="2%"></td>
-                                                    <td class="pt-3-half" contenteditable="false" width="44%">
-                                                        <select name="sport_type" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
-                                                            <% sports.forEach(function(sport){ %>
-                                                                <option value="<%= sport %>"><%= sport %></option>
-                                                            <% }); %>
-                                                        </select>
-                                                    </td>
-                                                    <td class="pt-3-half" contenteditable="true" width="44%"></td>
-                                                    <td class="pt-3-half" width="5%">
-                                                        <span class="table-up" style="margin-right: 5px;"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-up"></i></a></span>
-                                                        <span class="table-down"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-down"></i></a></span>
-                                                    </td>
-                                                    <td width="5%">
-                                                        <span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Remove</button></span>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </div>
+                        <div class="form-group row">
+                            <!-- Editable table -->
+                            <div class="card col-sm-12">
+                                <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Choisissez vos
+                                    sports</h3>
+                                <div class="card-body">
+                                    <div id="table" class="table-editable">
+                                        <span class="table-add float-right mb-3 mr-2"><a href="#!" class="text-success"><i
+                                                        class="fa fa-plus fa-2x" aria-hidden="true"></i></a></span>
+                                        <table id="table"
+                                               class="table table-bordered table-responsive-md table-striped text-center">
+                                            <tr>
+                                                <th class="text-center">Ordre</th>
+                                                <th class="text-center">Type de sport</th>
+                                                <th class="text-center">Nom de l'épreuve</th>
+                                                <th class="text-center">Tri</th>
+                                                <th class="text-center">Suppression</th>
+                                            </tr>
+                                            <tr>
+                                                <td class="pt-3-half row-number" width="2%">1</td>
+                                                <td class="pt-3-half" contenteditable="false" width="44%">
+                                                    <select name="sport_type" class="select2-selection--single"
+                                                            style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
+                                                        <% sports.forEach(function(sport){ %>
+                                                            <option value="<%= sport %>"><%= sport %></option>
+                                                        <% }); %>
+                                                    </select>
+                                                </td>
+                                                <td class="pt-3-half sport_name" contenteditable="true" width="44%"></td>
+                                                <td class="pt-3-half" width="5%">
+                                                    <span class="table-up" style="margin-right: 5px;"><a href="#!"
+                                                                                                         class="indigo-text"><i
+                                                                    class="fas fa-long-arrow-alt-up"></i></a></span>
+                                                    <span class="table-down"><a href="#!" class="indigo-text"><i
+                                                                    class="fas fa-long-arrow-alt-down"></i></a></span>
+                                                </td>
+                                                <td width="5%">
+                                                    <span class="table-remove"><button type="button"
+                                                                                       class="btn btn-danger btn-rounded btn-sm my-0">Remove</button></span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table id="hidden-table" style="display: none;">
+                                            <!-- Default added row -->
+                                            <tr class="hide">
+                                                <td class="pt-3-half row-number" width="2%"></td>
+                                                <td class="pt-3-half" contenteditable="false" width="44%">
+                                                    <select name="sport_type"
+                                                            style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
+                                                        <% sports.forEach(function(sport){ %>
+                                                            <option value="<%= sport %>"><%= sport %></option>
+                                                        <% }); %>
+                                                    </select>
+                                                </td>
+                                                <td class="pt-3-half sport_name" contenteditable="true" width="44%"></td>
+                                                <td class="pt-3-half" width="5%">
+                                                    <span class="table-up" style="margin-right: 5px;"><a href="#!"
+                                                                                                         class="indigo-text"><i
+                                                                    class="fas fa-long-arrow-alt-up"></i></a></span>
+                                                    <span class="table-down"><a href="#!" class="indigo-text"><i
+                                                                    class="fas fa-long-arrow-alt-down"></i></a></span>
+                                                </td>
+                                                <td width="5%">
+                                                    <span class="table-remove"><button type="button"
+                                                                                       class="btn btn-danger btn-rounded btn-sm my-0">Remove</button></span>
+                                                </td>
+                                            </tr>
+                                        </table>
                                     </div>
                                 </div>
-                                <!-- Editable table -->
-
                             </div>
+                            <!-- Editable table -->
+                        </div>
+                        <form class="form-horizontal" method="post" action="/createraid/sports" id="sports_form">
                             <div class="form-group row">
                                 <div class="col-sm-12">
-                                    <input type="submit" value="Enregistrer mon Raid" class="btn btn-primary">
+                                    <input type="hidden" name="sports_list" id="sports_list">
+                                    <input type="button" onclick="validateSports()" value="Enregistrer mon Raid" class="btn btn-primary">
                                 </div>
                             </div>
                         </form>
@@ -92,7 +105,25 @@
     </div>
 </section>
 <script type="text/javascript">
-    $(document).ready(function() {
+    function validateSports(){
+        let sports = [];
+
+        $('#table').find('tr').each(function () {
+            let index = $(this).find('td.row-number').html()
+            if($.isNumeric( index ) && parseInt(index) > 0){
+                sports.push({
+                    order: $(this).find('td.row-number').html(),
+                    sport: $(this).find('td .select2-selection__rendered').html(),
+                    name: $(this).find('td.sport_name').html()
+                });
+            }
+        });
+
+        $('#sports_list').val( JSON.stringify(sports) );
+        $('#sports_form').submit();
+    }
+
+    $(document).ready(function () {
         $('.select2-selection--single').select2({
             placeholder: 'Choisissez un sport.',
             width: 'resolve'
@@ -110,7 +141,7 @@
         $clone.find('select').addClass('select2-selection--single');
         nbrow++;
         $clone.find('td.row-number').html(nbrow);
-        $TABLE.find('table').append($clone);
+        $TABLE.find('#table').append($clone);
         $('.select2-selection--single').select2({width: 'resolve'});
         update_index();
     });
@@ -133,7 +164,7 @@
         update_index();
     });
 
-    function update_index(){
+    function update_index() {
         $TABLE.find('tr').each(function () {
             $(this).find('td.row-number').html($(this).index());
         });
