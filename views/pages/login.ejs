@@ -16,6 +16,14 @@
                         </button>
                     </div>
                 <% } %>
+                <% if(typeof successMessage !== "undefined") { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+                        <%= successMessage %>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <% } %>
                 <form method="post" class="text-left form-validate" action="/login">
                     <div class="form-group-material">
                         <input id="login-username" type="text" name="loginUsername" required data-msg="Merci d'entrer votre identifiant" class="input-material">

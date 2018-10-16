@@ -72,7 +72,7 @@ exports.displaySportsTable = function (req, res) {
         order: ['name']
     }).then(function (sports_found) {
         sports_found.forEach(function (sport) {
-            sports.push(sport.dataValues.name);
+            sports.push({name:sport.dataValues.name, id:sport.dataValues.id});
         });
 
         res.render(pages_path + "template.ejs", {

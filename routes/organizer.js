@@ -98,6 +98,9 @@ exports.validate = function(req, res) {
                 active: '1'
             });
         }
-        res.redirect('/login');
+        res.render(pages_path + "login.ejs", {
+            pageTitle: "Connexion",
+            successMessage: "Votre adresse mail a bien été confirmée."
+        });
     })
 }
