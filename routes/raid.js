@@ -10,23 +10,13 @@ let idCurrentRaid = 1; //for tests
 exports.displayDescriptionForm = function (req, res) {
     let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
 
-    const sports = [];
-    models.sport.findAll({
-        order: ['name']
-    }).then(function (sports_found) {
-        sports_found.forEach(function (sport) {
-            sports.push(sport.dataValues.name);
-        });
-
-        res.render(pages_path + "template.ejs", {
-            pageTitle: "Création d'un Raid",
-            page: "create_raid/description",
-            sports: sports,
-            userName_fn: user.first_name,
-            userName_ln: user.last_name,
-            userName_initials: user.initials,
-            userPicture: picture
-        });
+    res.render(pages_path + "template.ejs", {
+        pageTitle: "Création d'un Raid",
+        page: "create_raid/description",
+        userName_fn: user.first_name,
+        userName_ln: user.last_name,
+        userName_initials: user.initials,
+        userPicture: picture
     });
 };
 
@@ -44,17 +34,56 @@ exports.createRaid = function (req, res) {
 
         geocoder.search({q: req.body.raidPlace}) // allows to list all the locations corresponding to the city entered
             .then((response) => {
-                raid_created.update({
-                    lat: response[0].lat,
-                    lng: response[0].lon
-                }).then(() => {
-                    res.redirect('/editraid/map');
-                })
+                if (response.lat !== undefined) {
+                    raid_created.update({
+                        lat: response[0].lat,
+                        lng: response[0].lon
+                    }).then(() => {
+                        res.redirect('/createraid/sports');
+                    })
+                } else {
+                    if (req.body.selectedPlace !== "") {
+                        let selectedParse = JSON.parse(req.body.selectedPlace);
+
+                        raid_created.update({
+                            lat: selectedParse.lat,
+                            lng: selectedParse.lon
+                        }).then(() => {
+                            res.redirect('/createraid/sports');
+                        })
+                    }
+                    res.redirect('/createraid/sports');
+                }
             })
             .catch((error) => {
                 console.log(error);
-                res.redirect('/editraid/map');
+                res.redirect('/createraid/sports');
             });
+    });
+
+};
+
+exports.displaySportsTable = function (req, res) {
+
+    let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
+
+    const sports = [];
+    models.sport.findAll({
+        order: ['name']
+    }).then(function (sports_found) {
+        sports_found.forEach(function (sport) {
+            sports.push(sport.dataValues.name);
+        });
+
+        res.render(pages_path + "template.ejs", {
+            pageTitle: "Création d'un Raid",
+            page: "create_raid/sports",
+            sports: sports,
+            userName_fn: user.first_name,
+            userName_ln: user.last_name,
+            userName_initials: user.initials,
+            userPicture: picture
+        });
     });
 
 };
@@ -76,9 +105,9 @@ exports.getGeocodedResults = function (req, res) {
                 data_to_send.push(place.display_name);
             });
 
-            res.send(JSON.stringify(data_to_send));
+            //res.send(JSON.stringify(data_to_send));
 
-            //res.send(JSON.stringify(geocoded_results));
+            res.send(JSON.stringify(geocoded_results));
 
         })
         .catch((error) => {
