@@ -30,7 +30,9 @@ exports.idVerification = function (req, res) {
     let hash = crypto.createHmac('sha256', req.body.loginPassword).digest('hex');
     models.organizer.findOne({
         where: {
-            email: id, password: hash
+            email: id,
+            password: hash,
+            active: '1'
         }
     }).then(function (organizer_found) {
         if (organizer_found !== null) { // the (email,password) couple exists => the organizer is authenticated
@@ -42,7 +44,7 @@ exports.idVerification = function (req, res) {
         } else {
             res.render(pages_path + "login.ejs", {
                 pageTitle: "Connexion",
-                errorMessage: "Identifiants incorrects..."
+                errorMessage: "Identifiants incorrects ou confirmation par mail requise."
             });
         }
     });
@@ -63,10 +65,10 @@ exports.register = function (req, res) {
             email: req.body.email
         }
     }).then(function (organizer_found) {
-        console.log(organizer_found);
         if (organizer_found !== null) {
             res.send(JSON.stringify({msg: "already-exist"}));
         } else {
+            console.log(organizer_found);
             models.organizer.create({
                 email: req.body.email,
                 first_name: req.body.firstname,
