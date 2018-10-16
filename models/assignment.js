@@ -19,6 +19,10 @@ module.exports = function(sequelize, DataTypes) {
         model: 'helper_post',
         key: 'id'
       }
+    },
+    attributed: {
+      type: DataTypes.STRING(45),
+      allowNull: true
     }
   }, {
     tableName: 'assignment'
