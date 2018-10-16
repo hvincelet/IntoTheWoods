@@ -38,13 +38,14 @@ const misc = require('./routes/misc');
 //routes dedicated to register and connection
 app.route('/')
     .get(checkAuth, organizer.displayHome);
+
 app.route('/login')
     .get(organizer.displayLogScreen)
     .post(organizer.idVerification);
+
 app.route('/register')
     .get(organizer.displayRegister)
     .post(organizer.register);
-
 
 //routes dedicated to the raids' pages
 app.route('/createraid/description')

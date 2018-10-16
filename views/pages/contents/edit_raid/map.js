@@ -46,7 +46,7 @@ loadPointsOfInterest();
 let modify = new ol.interaction.Modify({source: source});
 map.addInteraction(modify);
 
-let draw, snap; // global so we can remove them later
+var draw, snap; // global so we can remove them later
 
 function addInteractions() {
     draw = new ol.interaction.Draw({
@@ -61,6 +61,11 @@ function addInteractions() {
 
 function addPointOfInterest() {
     addInteractions();
+}
+
+function stopAddingPointOfInterest(){
+    delete draw;
+    delete snap;
 }
 
 function getVectorCoordonates() {
@@ -119,3 +124,24 @@ function loadPointsOfInterest() {
 //https://openlayers.org/en/latest/examples/select-features.html
 //selectInteraction.getFeatures();
 
+/****************Interactions**/
+
+
+
+let selectSingleClick = new ol.interaction.Select();
+
+let changeInteraction = function() {
+
+    if (selectSingleClick !== null) {
+        map.addInteraction(selectSingleClick);
+        selectSingleClick.on('select', function(e) {
+            console.log('&nbsp;' +
+                e.target.getFeatures().getLength() +
+                ' selected features (last operation selected ' + e.selected.length +
+                ' and deselected ' + e.deselected.length + ' features)') ;
+        });
+    }
+};
+
+
+changeInteraction();
