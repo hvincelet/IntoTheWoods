@@ -2,6 +2,7 @@ const jdenticon = require('jdenticon');
 const pages_path = "../views/pages/";
 const models = require('../models');
 const crypto = require('crypto');
+const sender = require('./sender');
 
 exports.displayHome = function (req, res) {
     let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
@@ -62,21 +63,39 @@ exports.register = function (req, res) {
             email: req.body.email
         }
     }).then(function (organizer_found) {
-        if (organizer_found !== null) { // organizer with entered email already exist
-
+        console.log(organizer_found);
+        if (organizer_found !== null) {
             res.send(JSON.stringify({msg: "already-exist"}));
-
-        } else { // registration of the new organizer
+        } else {
             models.organizer.create({
                 email: req.body.email,
                 first_name: req.body.firstname,
                 last_name: req.body.lastname,
                 password: hash
             }).then(function () {
-                //res.redirect('/login');
+                sender.sendMail(req.body.email, hash);
                 res.send(JSON.stringify({msg: "ok"}));
             });
         }
     });
 
 };
+
+
+exports.validate = function(req, res) {
+    models.organizer.findOne({
+        where: {
+            email: req.query.id,
+            password: req.query.hash
+        }
+    }).then(function (organizer_found) {
+        if (organizer_found === null) {
+            console.log("Validating invalid user");
+        } else {
+            organizer_found.updateAttributes({
+                active: '1'
+            });
+        }
+        res.redirect('/login');
+    })
+}

@@ -47,6 +47,9 @@ app.route('/register')
     .get(organizer.displayRegister)
     .post(organizer.register);
 
+app.route('/validate')
+    .get(organizer.validate);
+
 //routes dedicated to the raids' pages
 app.route('/createraid/description')
     .get(checkAuth, raid.displayDescriptionForm)
