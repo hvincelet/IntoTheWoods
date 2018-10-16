@@ -11,11 +11,11 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     lat: {
-      type: DataTypes.FLOAT,
+      type: "DOUBLE",
       allowNull: true
     },
     lng: {
-      type: DataTypes.FLOAT,
+      type: "DOUBLE",
       allowNull: true
     }
   }, {

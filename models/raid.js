@@ -16,12 +16,20 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DATEONLY,
       allowNull: true
     },
+    edition: {
+      type: DataTypes.INTEGER(6),
+      allowNull: true
+    },
     place: {
       type: DataTypes.STRING(45),
       allowNull: true
     },
-    edition: {
-      type: DataTypes.INTEGER(6),
+    lat: {
+      type: "DOUBLE",
+      allowNull: true
+    },
+    lng: {
+      type: "DOUBLE",
       allowNull: true
     }
   }, {

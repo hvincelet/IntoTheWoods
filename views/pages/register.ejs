@@ -77,17 +77,27 @@
             email : $('#register-email').val(),
             password : $('#register-password').val()
         };
-
         $.ajax({
             type: 'POST',
             url: '/register',
             data: data,
-            success: function (msg) {
-                $('.modal-title').text('Inscription enregistrée !');
-                $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
-                $('#submit-button').text('Retourner à la page de connexion');
-                $('#submit-button').attr('onclick', 'document.location.href=/login');
-                $('#modal').modal('show');
+            success: function (response) {
+                let msg = JSON.parse(response).msg;
+
+                if (msg==="already-exist"){
+
+                    $('.modal-title').text('bonjour !');
+                    $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
+                    $('#submit-button').text('Retourner à la page de connexion');
+                    $('#submit-button').attr('onclick', 'document.location.href=#');
+                    $('#modal').modal('show');
+                }else if (msg==="ok"){
+                    $('.modal-title').text('Inscription enregistrée !');
+                    $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
+                    $('#submit-button').text('Retourner à la page de connexion');
+                    $('#submit-button').attr('onclick', 'document.location.href=/login');
+                    $('#modal').modal('show');
+                }
             },
             error: function (msg) {
                 $('.modal-title').text('Erreur lors de l\'inscription...');

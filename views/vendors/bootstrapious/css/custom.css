@@ -60,6 +60,15 @@ footer.main-footer{
     width: 100% !important;
 }
 
+.card{
+    margin-top: 20px !important;
+}
+
+.map {
+    height: 400px;
+    width: 100%;
+}
+
 .pt-3-half {
     padding-top: 1.4rem;
 }
