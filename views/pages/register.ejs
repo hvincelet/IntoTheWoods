@@ -86,16 +86,16 @@
 
                 if (msg==="already-exist"){
 
-                    $('.modal-title').text('bonjour !');
-                    $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
+                    $('.modal-title').text('Adresse e-mail déjà utilisée !');
+                    $('.modal-body').text("Cette adresse e-mail ("+data['email']+") est déjà utilisée, merci d'en utiliser une autre.");
                     $('#submit-button').text('Retourner à la page de connexion');
-                    $('#submit-button').attr('onclick', 'document.location.href=#');
+                    $('#submit-button').attr('data-dismiss', 'modal');
                     $('#modal').modal('show');
                 }else if (msg==="ok"){
                     $('.modal-title').text('Inscription enregistrée !');
                     $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
                     $('#submit-button').text('Retourner à la page de connexion');
-                    $('#submit-button').attr('onclick', 'document.location.href=/login');
+                    $('#submit-button').attr('onclick', 'document.location.href=\'/login\'');
                     $('#modal').modal('show');
                 }
             },
