@@ -3,6 +3,7 @@ const pages_path = "../views/pages/";
 const models = require('../models');
 const crypto = require('crypto');
 const sender = require('./sender');
+const Sequelize = require('sequelize');
 
 exports.displayHome = function (req, res) {
     console.log(user.picture);
@@ -35,11 +36,38 @@ exports.idVerification = function (req, res) {
     }).then(function (organizer_found) {
         if (organizer_found !== null) { // the (email,password) couple exists => the organizer is authenticated
             user.authenticated = true;
+            user.login = organizer_found.dataValues.email;
             user.first_name = organizer_found.dataValues.first_name;
             user.last_name = organizer_found.dataValues.last_name;
             user.initials = user.first_name.charAt(0).concat(user.last_name.charAt(0)).toUpperCase();
             user.picture = organizer_found.dataValues.picture;
 
+            let team_model = models.team;
+            let raid_model = models.raid;
+            
+            raid_model.belongsTo(team_model, {foreignKey: 'id'});
+
+            raid_model.findAll({
+                include: [{
+                    model: team_model,
+                    where: {
+                        id_raid: Sequelize.col('raid.id'),
+                        id_organizer: user.login
+                        //date > date_of_the_day - one_month
+                    }
+                }],
+                attributes: ['id', 'name', 'edition'],
+            }).then(function(raids_found){
+                if(raids_found){
+                    raids_found.forEach(function(tuple){
+                        user.raid_list.push({
+                            id: tuple.dataValues.id,
+                            name: tuple.dataValues.name,
+                            edition: tuple.dataValues.edition
+                        });
+                    });
+                }
+            });
             return res.redirect('/');
         } else {
             res.render(pages_path + "login.ejs", {

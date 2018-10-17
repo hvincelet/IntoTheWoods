@@ -17,7 +17,8 @@ global.user = {
     first_name: "",
     last_name: "",
     initials: "",
-    authenticated: true
+    authenticated: false,
+    raid_list: [] // {id, name, edition}
 };
 
 global.raid = {
