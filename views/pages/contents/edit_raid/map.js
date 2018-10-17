@@ -93,7 +93,8 @@ function storePointsOfInterest() {
     });
 
     let data = {
-        pointOfInterestArray: pointOfInterestArrayToStore
+        pointOfInterestArray: pointOfInterestArrayToStore,
+        courseArray: courseArray
     };
     $.ajax({
         type: 'POST',

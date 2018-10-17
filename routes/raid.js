@@ -7,7 +7,7 @@ const geocoder = new Nominatim();
 
 let idCurrentRaid;
 
-exports.init = function(req, res){
+exports.init = function (req, res) {
     let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
     res.render(pages_path + "template.ejs", {
         pageTitle: "Création d'un Raid",
@@ -46,8 +46,9 @@ exports.createRaid = function (req, res) {
 
         geocoder.search({q: req.body.raidPlace}) // allows to list all the locations corresponding to the city entered
             .then((response) => {
-                if (response.lat !== undefined) {
+                if (response[0].lat !== undefined) {
                     raid_created.update({
+                        place: response[0].display_name,
                         lat: response[0].lat,
                         lng: response[0].lon
                     }).then(() => {
@@ -84,7 +85,7 @@ exports.displaySportsTable = function (req, res) {
         order: ['name']
     }).then(function (sports_found) {
         sports_found.forEach(function (sport) {
-            sports.push({name:sport.dataValues.name, id:sport.dataValues.id});
+            sports.push({name: sport.dataValues.name, id: sport.dataValues.id});
         });
 
         res.render(pages_path + "template.ejs", {
@@ -104,19 +105,10 @@ exports.saveSportsRanking = function (req, res) {
 
     JSON.parse(req.body.sports_list).forEach(function (sport_row) {
 
-        let id_sport = 1;
-        models.sport.findOne({
-            where: {
-                name: sport_row.sport
-            }
-        }).then(function (sport_found) {
-            id_sport = sport_found.id;
-        });
-
         models.course.create({
             order_num: sport_row.order,
             label: sport_row.name,
-            id_sport: id_sport,
+            id_sport: sport_row.sport,
             id_raid: idCurrentRaid
         }).then(function () {
             res.redirect('/editraid/map');
@@ -158,6 +150,7 @@ exports.displayMap = function (req, res) {
                 id_raid: raid_found.id
             }
         }).then(function (courses_found) {
+
             let pointOfInterestArray = [];
             models.point_of_interest.findAll({ // loads the array of points-of-interest
                 where: {
@@ -180,6 +173,7 @@ exports.displayMap = function (req, res) {
                     userName_initials: user.initials,
                     userPicture: picture,
                     raid: raid_found.dataValues,
+                    courseArray: courses_found,
                     pointOfInterestArray: pointOfInterestArray
                 });
             });
@@ -205,7 +199,7 @@ exports.storeMapDatas = function (req, res) {
 
                 } else { // this is a new point, it must be added
                     models.point_of_interest.create({
-                        id_track: 1,
+                        id_track: req.body.courseArray[0].id,
                         lat: vector.lat,
                         lng: vector.lng
                     })

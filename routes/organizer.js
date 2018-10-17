@@ -83,7 +83,6 @@ exports.register = function (req, res) {
 
 };
 
-
 exports.validate = function(req, res) {
     models.organizer.findOne({
         where: {
