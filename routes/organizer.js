@@ -2,6 +2,7 @@ const jdenticon = require('jdenticon');
 const pages_path = "../views/pages/";
 const models = require('../models');
 const crypto = require('crypto');
+const sender = require('./sender');
 
 exports.displayHome = function (req, res) {
     let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
@@ -29,7 +30,9 @@ exports.idVerification = function (req, res) {
     let hash = crypto.createHmac('sha256', req.body.loginPassword).digest('hex');
     models.organizer.findOne({
         where: {
-            email: id, password: hash
+            email: id,
+            password: hash,
+            active: '1'
         }
     }).then(function (organizer_found) {
         if (organizer_found !== null) { // the (email,password) couple exists => the organizer is authenticated
@@ -41,7 +44,7 @@ exports.idVerification = function (req, res) {
         } else {
             res.render(pages_path + "login.ejs", {
                 pageTitle: "Connexion",
-                errorMessage: "Identifiants incorrects..."
+                errorMessage: "Identifiants incorrects ou confirmation par mail requise."
             });
         }
     });
@@ -62,21 +65,42 @@ exports.register = function (req, res) {
             email: req.body.email
         }
     }).then(function (organizer_found) {
-        if (organizer_found !== null) { // organizer with entered email already exist
-
+        if (organizer_found !== null) {
             res.send(JSON.stringify({msg: "already-exist"}));
-
-        } else { // registration of the new organizer
+        } else {
+            console.log(organizer_found);
             models.organizer.create({
                 email: req.body.email,
                 first_name: req.body.firstname,
                 last_name: req.body.lastname,
                 password: hash
             }).then(function () {
-                //res.redirect('/login');
+                sender.sendMail(req.body.email, hash);
                 res.send(JSON.stringify({msg: "ok"}));
             });
         }
     });
 
 };
+
+
+exports.validate = function(req, res) {
+    models.organizer.findOne({
+        where: {
+            email: req.query.id,
+            password: req.query.hash
+        }
+    }).then(function (organizer_found) {
+        if (organizer_found === null) {
+            console.log("Validating invalid user");
+        } else {
+            organizer_found.updateAttributes({
+                active: '1'
+            });
+        }
+        res.render(pages_path + "login.ejs", {
+            pageTitle: "Connexion",
+            successMessage: "Votre adresse mail a bien été confirmée."
+        });
+    })
+}

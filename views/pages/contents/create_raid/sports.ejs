@@ -41,7 +41,7 @@
                                                     <select name="sport_type" class="select2-selection--single"
                                                             style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
                                                         <% sports.forEach(function(sport){ %>
-                                                            <option value="<%= sport %>"><%= sport %></option>
+                                                            <option value="<%= sport.id %>"><%= sport.name %></option>
                                                         <% }); %>
                                                     </select>
                                                 </td>
@@ -67,7 +67,7 @@
                                                     <select name="sport_type"
                                                             style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
                                                         <% sports.forEach(function(sport){ %>
-                                                            <option value="<%= sport %>"><%= sport %></option>
+                                                            <option value="<%= sport.id %>"><%= sport.name %></option>
                                                         <% }); %>
                                                     </select>
                                                 </td>
@@ -106,15 +106,34 @@
 </section>
 <script type="text/javascript">
     function validateSports(){
+        let list = [
+            <% sports.forEach(function(sport){ %>
+            {id: <%=sport.id%>, name: '<%= sport.name%>'},
+            <% }); %>
+        ];
+        list.forEach(function (sport) {
+            let elem = document.createElement('textarea');
+            elem.innerHTML = sport.name;
+            sport.name = elem.value;
+        });
+
         let sports = [];
 
         $('#table').find('tr').each(function () {
             let index = $(this).find('td.row-number').html()
+            let selected_sport = $(this).find('td .select2-selection__rendered').text();
+
             if($.isNumeric( index ) && parseInt(index) > 0){
+                let sport_type = 0;
+                list.forEach(function (sport) {
+                    if(sport.name === selected_sport){
+                        sport_type = sport.id;
+                    }
+                });
                 sports.push({
-                    order: $(this).find('td.row-number').html(),
-                    sport: $(this).find('td .select2-selection__rendered').html(),
-                    name: $(this).find('td.sport_name').html()
+                    order: index,
+                    sport: sport_type,
+                    name: $(this).find('td.sport_name').html().replace('/<br>/g', '')
                 });
             }
         });
