@@ -48,6 +48,10 @@ global.connected_user = function(uuid){
     });
 };
 
+global.raid = {
+    idCurrentRaid: 1 //for tests
+}
+
 let checkAuth = function (req, res, next) {
     // const user = connected_users.find(function(user){
     //     return user.uuid == req.sessionID;
