@@ -17,12 +17,13 @@ global.user = {
     first_name: "",
     last_name: "",
     initials: "",
-    authenticated: true
+    raid_list : [{id:1, name:"Enssat raid", edition:2018}, {id:5, name:"Enssat raid", edition:2019}],
+    authenticated: false
 };
 
 let checkAuth = function (req, res, next) {
     if (!user.authenticated) {
-        res.redirect('/login');
+        return res.redirect('/login');
     }
     next();
 };

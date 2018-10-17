@@ -5,7 +5,6 @@ const crypto = require('crypto');
 const sender = require('./sender');
 
 exports.displayHome = function (req, res) {
-    console.log(user.picture);
     res.render(pages_path + "template.ejs", {
         pageTitle: "Accueil",
         page: "accueil",
@@ -40,7 +39,7 @@ exports.idVerification = function (req, res) {
             user.initials = user.first_name.charAt(0).concat(user.last_name.charAt(0)).toUpperCase();
             user.picture = organizer_found.dataValues.picture;
 
-            return res.redirect('/');
+            res.redirect('/');
         } else {
             res.render(pages_path + "login.ejs", {
                 pageTitle: "Connexion",
@@ -68,7 +67,6 @@ exports.register = function (req, res) {
         if (organizer_found !== null) {
             res.send(JSON.stringify({msg: "already-exist"}));
         } else {
-            console.log(jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64'));
             models.organizer.create({
                 email: req.body.email,
                 first_name: req.body.firstname,
