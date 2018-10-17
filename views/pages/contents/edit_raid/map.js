@@ -135,10 +135,13 @@ let changeInteraction = function() {
     if (selectSingleClick !== null) {
         map.addInteraction(selectSingleClick);
         selectSingleClick.on('select', function(e) {
-            console.log('&nbsp;' +
-                e.target.getFeatures().getLength() +
-                ' selected features (last operation selected ' + e.selected.length +
-                ' and deselected ' + e.deselected.length + ' features)') ;
+            // console.log('&nbsp;' +
+            //     e.target.getFeatures().getLength() +
+            //     ' selected features (last operation selected ' + e.selected.length +
+            //     ' and deselected ' + e.deselected.length + ' features)') ;
+            console.log(e.selected);
+            //e.selected.values().id
+
         });
     }
 };

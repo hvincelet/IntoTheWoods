@@ -5,7 +5,7 @@ const models = require('../models');
 const Nominatim = require('nominatim-geocoder');
 const geocoder = new Nominatim();
 
-let idCurrentRaid = 1; //for tests
+let idCurrentRaid;
 
 exports.displayDescriptionForm = function (req, res) {
     let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
@@ -88,27 +88,45 @@ exports.displaySportsTable = function (req, res) {
 
 };
 
+exports.saveSportsRanking = function (req, res) {
+
+    JSON.parse(req.body.sports_list).forEach(function (sport_row) {
+
+        let id_sport = 1;
+        models.sport.findOne({
+            where: {
+                name: sport_row.sport
+            }
+        }).then(function (sport_found) {
+            id_sport = sport_found.id;
+        });
+
+        models.course.create({
+            order_num: sport_row.order,
+            label: sport_row.name,
+            id_sport: id_sport,
+            id_raid: idCurrentRaid
+        }).then(function () {
+            res.redirect('/editraid/map');
+        });
+
+    })
+
+};
+
 exports.getGeocodedResults = function (req, res) {
     let geocoded_results = [];
 
     geocoder.search({q: req.body.query})
         .then((response) => {
-
-            let data_to_send = [];
             response.forEach(function (place) {
                 geocoded_results.push({
                     name: place.display_name,
                     lat: place.lat,
                     lon: place.lon
                 });
-
-                data_to_send.push(place.display_name);
             });
-
-            //res.send(JSON.stringify(data_to_send));
-
             res.send(JSON.stringify(geocoded_results));
-
         })
         .catch((error) => {
             console.log("Error: " + error);
