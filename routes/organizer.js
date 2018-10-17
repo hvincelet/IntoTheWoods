@@ -5,17 +5,15 @@ const crypto = require('crypto');
 const sender = require('./sender');
 
 exports.displayHome = function (req, res) {
-    let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
-
+    console.log(user.picture);
     res.render(pages_path + "template.ejs", {
         pageTitle: "Accueil",
         page: "accueil",
         userName_fn: user.first_name,
         userName_ln: user.last_name,
         userName_initials: user.initials,
-        userPicture: picture
+        userPicture: user.picture
     });
-    res.end();
 };
 
 exports.displayLogScreen = function (req, res) {
@@ -40,6 +38,8 @@ exports.idVerification = function (req, res) {
             user.first_name = organizer_found.dataValues.first_name;
             user.last_name = organizer_found.dataValues.last_name;
             user.initials = user.first_name.charAt(0).concat(user.last_name.charAt(0)).toUpperCase();
+            user.picture = organizer_found.dataValues.picture;
+
             return res.redirect('/');
         } else {
             res.render(pages_path + "login.ejs", {
@@ -68,12 +68,13 @@ exports.register = function (req, res) {
         if (organizer_found !== null) {
             res.send(JSON.stringify({msg: "already-exist"}));
         } else {
-            console.log(organizer_found);
+            console.log(jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64'));
             models.organizer.create({
                 email: req.body.email,
                 first_name: req.body.firstname,
                 last_name: req.body.lastname,
-                password: hash
+                password: hash,
+                picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
             }).then(function () {
                 sender.sendMail(req.body.email, hash);
                 res.send(JSON.stringify({msg: "ok"}));
