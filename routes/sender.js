@@ -2,31 +2,31 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 let nodemailer = require('nodemailer');
 let ejs = require('ejs-html');
 let fs = require('fs');
-//const config = require(__dirname + '/../config/config.js')['mail'];
+const config = require(__dirname + '/../config/config.js')['mail'];
 
-exports.sendMail = function(email, password){
+exports.sendMail = function(email, password_hash){
 
   require.extensions['.html'] = function(module, filename){
     module.exports = fs.readFileSync(filename, 'utf-8');
   };
 
   let transporter = nodemailer.createTransport({
-    service: "gmail",
+    service: config.service,
     auth: {
-      user: "intothewoods.app@gmail.com",
-      pass: "jdburdrqdlqcocrh"
+      user: config.login,
+      pass: config.password
     }
   });
 
   let ejsTemplate = fs.readFileSync(__dirname + '/../views/pages/contents/email/content.ejs','utf-8');
   let content = ejs.render(ejsTemplate, 
-    {email: email, password: password},
+    {email: email, password: password_hash},
     {vars: ["email", "password"]});
   
   let mailOptions = {
-    from: "intothewoods.app@gmail.com",
+    from: "Into the Woods",
     to: email,
-    subject: "[IntoTheWoods] - Confirmation d'inscription",
+    subject: "Confirmation d'inscription",
     html: content
   };
 
@@ -37,4 +37,4 @@ exports.sendMail = function(email, password){
       console.log('Email sent: ' + info.response);
     }
   });
-}
+};

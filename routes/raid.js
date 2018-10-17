@@ -7,28 +7,25 @@ const geocoder = new Nominatim();
 
 let idCurrentRaid;
 
-exports.init = function (req, res) {
-    let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
+exports.init = function(req, res){
     res.render(pages_path + "template.ejs", {
         pageTitle: "Création d'un Raid",
         page: "create_raid/start",
         userName_fn: user.first_name,
         userName_ln: user.last_name,
         userName_initials: user.initials,
-        userPicture: picture
+        userPicture: user.picture
     });
 };
 
 exports.displayDescriptionForm = function (req, res) {
-    let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
-
     res.render(pages_path + "template.ejs", {
         pageTitle: "Création d'un Raid",
         page: "create_raid/description",
         userName_fn: user.first_name,
         userName_ln: user.last_name,
         userName_initials: user.initials,
-        userPicture: picture
+        userPicture: user.picture
     });
 };
 
@@ -77,9 +74,6 @@ exports.createRaid = function (req, res) {
 };
 
 exports.displaySportsTable = function (req, res) {
-
-    let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
-
     const sports = [];
     models.sport.findAll({
         order: ['name']
@@ -95,7 +89,7 @@ exports.displaySportsTable = function (req, res) {
             userName_fn: user.first_name,
             userName_ln: user.last_name,
             userName_initials: user.initials,
-            userPicture: picture
+            userPicture: user.picture
         });
     });
 
@@ -164,14 +158,13 @@ exports.displayMap = function (req, res) {
                     });
                 });
 
-                let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
                 res.render(pages_path + "template.ejs", {
                     pageTitle: "Gestion des Raids",
                     page: "edit_raid/map",
                     userName_fn: user.first_name,
                     userName_ln: user.last_name,
                     userName_initials: user.initials,
-                    userPicture: picture,
+                    userPicture: user.picture,
                     raid: raid_found.dataValues,
                     courseArray: courses_found,
                     pointOfInterestArray: pointOfInterestArray

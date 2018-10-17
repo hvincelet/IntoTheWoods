@@ -15,8 +15,6 @@ CREATE USER 'gluser2018'@'localhost' IDENTIFIED BY 'glpass2018';
 GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'localhost' IDENTIFIED BY 'glpass2018' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'148.60.%.%' IDENTIFIED BY 'glpass2018' WITH GRANT OPTION;
 
-#sequelize-auto -o "./models" -d intoTheWoodsDB -h localhost -u gluser2018 -x glpass2018 -e mysql
-
 -- -----------------------------------------------------
 -- Schema intoTheWoodsDB
 -- -----------------------------------------------------
@@ -65,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`organizer` (
   `first_name` VARCHAR(30) NULL,
   `password` BLOB(128) NULL,
   `active` TINYINT(1) NULL DEFAULT 0,
-  `picture` VARCHAR(45) NULL,
+  `picture` TEXT NULL,
   PRIMARY KEY (`email`))
 ENGINE = InnoDB;
 
@@ -136,7 +134,6 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`course` (
   `order_num` SMALLINT UNSIGNED NOT NULL,
   `label` VARCHAR(45) NULL,
   `id_sport` INT UNSIGNED NOT NULL,
-  `id_track` INT UNSIGNED NULL,
   `id_raid` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `id_sport`
