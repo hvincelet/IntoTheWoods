@@ -7,6 +7,18 @@ const geocoder = new Nominatim();
 
 let idCurrentRaid = 1; //for tests
 
+exports.init = function(req, res){
+    let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
+    res.render(pages_path + "template.ejs", {
+        pageTitle: "Création d'un Raid",
+        page: "create_raid/start",
+        userName_fn: user.first_name,
+        userName_ln: user.last_name,
+        userName_initials: user.initials,
+        userPicture: picture
+    });
+};
+
 exports.displayDescriptionForm = function (req, res) {
     let picture = jdenticon.toPng(user.first_name.concat(user.last_name), 80).toString('base64');
 
