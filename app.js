@@ -66,6 +66,12 @@ app.route('/createraid/sports')
     .get(checkAuth, raid.displaySportsTable)
     .post(checkAuth, raid.saveSportsRanking);
 
+app.route('/editraid')
+    .get(checkAuth, raid.displayAllRaids);
+
+app.route('/editraid/:id')
+    .get(checkAuth, raid.displayRaid);
+
 app.route('/editraid/map')
     .get(checkAuth, raid.displayMap)
     .post(checkAuth, raid.storeMapDatas);

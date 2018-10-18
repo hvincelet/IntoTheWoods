@@ -5,6 +5,8 @@ const models = require('../models');
 const Nominatim = require('nominatim-geocoder');
 const geocoder = new Nominatim();
 
+const Sequelize = require('sequelize');
+
 let idCurrentRaid;
 
 exports.init = function(req, res){
@@ -199,4 +201,44 @@ exports.storeMapDatas = function (req, res) {
                 }
             });
     })
+};
+
+exports.displayAllRaids = function (req, res) {
+    let team_model = models.team;
+    let raid_model = models.raid;
+    let raid_list = [{id:1, name:"Enssat raid", edition:2018}, {id:5, name:"Enssat raid", edition:2019}]; // TODO Remove this debug
+
+    raid_model.belongsTo(team_model, {foreignKey: 'id'});
+    raid_model.findAll({
+        include: [{
+            model: team_model,
+            where: {
+                id_raid: Sequelize.col('raid.id'),
+                id_organizer: user.login
+            }
+        }]
+    }).then(function(raids_found){
+        if(raids_found){
+            console.log(raids_found);
+            raids_found.forEach(function(tuple){
+                raid_list.push(tuple.dataValues);
+            });
+
+            res.render(pages_path + "template.ejs", {
+                pageTitle: "Gestion des Raids",
+                page: "edit_raid/all",
+                userName_fn: user.first_name,
+                userName_ln: user.last_name,
+                userName_initials: user.initials,
+                userPicture: user.picture,
+                raid_list: raid_list
+            });
+        }else{
+            res.redirect('/');
+        }
+    });
+};
+
+exports.displayRaid = function (req, res) {
+    res.send(req.params.id);
 };
