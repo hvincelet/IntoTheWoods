@@ -66,10 +66,7 @@ const organizer = require('./routes/organizer');
 const raid = require('./routes/raid');
 const map = require('./routes/map');
 const misc = require('./routes/misc');
-
-// BEGIN: Guillaume
 const helper = require('./routes/helper');
-// END: Guillaume
 
 /**********************************/
 /*             Routes             */

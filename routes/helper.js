@@ -4,28 +4,53 @@ const models = require('../models');
 
 exports.displayRegister = function(req, res){
 
-    // TODO : get raid and activities informations from database and send it to ejs
-    models.raid.findAll({
-        attributes: ['id','name','edition','date','place']
-    }).then(function(get_raid) {
+    // TODO : get helper post from database (link to current raid) and send it to ejs
 
-        // TODO : get helper post  from database and send it to ejs
-        //models.helper_post.findAll({
-        //    attributes: ['id','id_point_of_interest','description']
-        //});
+    let find_id = 3; // temporary
+    let get_post_clean = [];
 
-        let get_raid_clean = [];
-        for(let raid in get_raid) {
-            get_raid_clean.push(get_raid[raid]['dataValues']);
+    models.course.findAll({
+        attributes: ['id'],
+        where: {
+            id_raid: find_id
+        }
+    }).then(function(get_course){
+
+        if(get_course !== null) {
+          
         }
 
-        if(get_raid_clean.length > 0) {
-            res.render(pages_path + "helper_register.ejs", {
-                pageTitle: "Inscription Bénévole",
-                raids: get_raid_clean
-          });
+        for(let course in get_course){
+            models.point_of_interest.findAll({
+                attributes: ['id'],
+                where: {
+                    id_track: get_course[course]['dataValues']['id']
+                }
+            }).then(function(get_point_of_interest){
+
+                for(let point_of_interest in get_point_of_interest){
+                    models.helper_post.findAll({
+                        attributes: ['id','description'],
+                        where: {
+                            id_point_of_interest: get_point_of_interest[point_of_interest]['dataValues']['id']
+                        }
+                    }).then(function(get_helper_post){
+
+                        for(let helper_post in get_helper_post) {
+                            console.log(get_helper_post[helper_post]['dataValues']);
+                            get_post_clean.push(get_helper_post[helper_post]['dataValues']);
+                        }
+                    });
+                }
+            });
+
+            console.log(get_post_clean);
         }
 
+        res.render(pages_path + "helper_register.ejs", {
+            pageTitle: "Inscription Bénévole",
+            activity: get_post_clean
+        });
     });
 };
 
