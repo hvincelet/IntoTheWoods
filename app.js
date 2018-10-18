@@ -17,9 +17,13 @@ global.user = {
     first_name: "",
     last_name: "",
     initials: "",
-    raid_list : [{id:1, name:"Enssat raid", edition:2018}, {id:5, name:"Enssat raid", edition:2019}],
-    authenticated: false
+    authenticated: false,
+    raid_list: [] // {id, name, edition}
 };
+
+global.raid = {
+    idCurrentRaid: 1 //for tests
+}
 
 let checkAuth = function (req, res, next) {
     if (!user.authenticated) {

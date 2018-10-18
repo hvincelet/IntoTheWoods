@@ -10,7 +10,6 @@ let source = new ol.source.Vector();
 
 let vector = new ol.layer.Vector({
     source: source,
-
     style: new ol.style.Style({
         fill: new ol.style.Fill({
             color: 'rgba(255, 255, 255, 0.2)'
@@ -53,7 +52,6 @@ function addInteractions() {
         source: source,
         type: "Point"
     });
-
     map.addInteraction(draw);
     snap = new ol.interaction.Snap({source: source});
     map.addInteraction(snap);
@@ -149,3 +147,58 @@ let changeInteraction = function() {
 
 
 changeInteraction();
+
+function addOrResetFile(input_elem)
+{
+    let style =
+    {
+        'Point': new ol.style.Style(
+        {
+            image: new ol.style.Circle(
+            {
+                fill: new ol.style.Fill(
+                {
+                    color: 'rgba(255,255,0,0.4)'
+                }),
+                radius: 5,
+                stroke: new ol.style.Stroke(
+                {
+                    color: '#ff0',
+                    width: 1
+                })
+            })
+        }),
+        'LineString': new ol.style.Style(
+        {
+            stroke: new ol.style.Stroke(
+            {
+                color: '#f00',
+                width: 3
+            })
+        }),
+        'MultiLineString': new ol.style.Style(
+        {
+            stroke: new ol.style.Stroke(
+            {
+                color: '#0f0',
+                width: 3
+            })
+        })
+    };
+    console.log(vector);
+    /*vector = new ol.layer.Vector(
+    {
+        source: new ol.source.Vector(
+        {
+            url: input_elem.files[0].name,
+            format: new ol.format.GPX()
+        }),
+        style: function(feature)
+        {
+            return style[feature.getGeometry().getType()];
+        }
+    });*/
+    //map.removeLayer(map.getLayerGroup().getLayers()[0]);
+    //map.addLayer(vectorLayer);
+    //console.log(map.getLayerGroup().getLayers());
+}

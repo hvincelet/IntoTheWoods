@@ -19,7 +19,6 @@ exports.init = function(req, res){
         userPicture: user.picture
     });
 };
-
 exports.displayDescriptionForm = function (req, res) {
     res.render(pages_path + "template.ejs", {
         pageTitle: "Création d'un Raid",
@@ -41,7 +40,12 @@ exports.createRaid = function (req, res) {
         lat: 0.0,
         lng: 0.0
     }).then(function (raid_created) {
+
         idCurrentRaid = raid_created.dataValues.id;
+        models.team.create({
+            id_raid: idCurrentRaid,
+            id_organizer: user.login
+        });
 
         geocoder.search({q: req.body.raidPlace}) // allows to list all the locations corresponding to the city entered
             .then((response) => {
