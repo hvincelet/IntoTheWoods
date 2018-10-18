@@ -12,24 +12,24 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(45),
       allowNull: true
     },
-    edition: {
-      type: DataTypes.INTEGER(6),
-      allowNull: true
-    },
     date: {
       type: DataTypes.DATEONLY,
       allowNull: true
     },
+    edition: {
+      type: DataTypes.INTEGER(6),
+      allowNull: true
+    },
     place: {
-      type: DataTypes.STRING(45),
+      type: DataTypes.TEXT,
       allowNull: true
     },
     lat: {
-      type: DataTypes.FLOAT,
+      type: "DOUBLE",
       allowNull: true
     },
     lng: {
-      type: DataTypes.FLOAT,
+      type: "DOUBLE",
       allowNull: true
     }
   }, {

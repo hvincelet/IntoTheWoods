@@ -20,38 +20,51 @@
                             <div class="form-group row">
                                 <label class="col-sm-3">Nom du Raid :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidName" name="raidName" type="text" placeholder="Nom du Raid" class="form-control form-control-success"><small class="form-text">Exemple : Raid &lt;Mon association sportive&gt;</small>
+                                    <input id="raidName" name="raidName" type="text" placeholder="Nom du Raid"
+                                           class="form-control form-control-success">
+                                    <small class="form-text">Exemple : Raid &lt;Mon association sportive&gt;</small>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3">Édition :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidEdition" name="raidEdition" type="number" placeholder="Édition n°" class="form-control form-control-success" min="1"><small class="form-text">Exemple : Édition 1, Édition 2018</small>
+                                    <input id="raidEdition" name="raidEdition" type="number" placeholder="Édition n°"
+                                           class="form-control form-control-success" min="1">
+                                    <small class="form-text">Exemple : Édition 1, Édition 2018</small>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3">Date de l'événement :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidStartDate" name="raidStartDate" type="date" placeholder="Date de début" class="form-control form-control-success" min="<%= new Date().toISOString().split('T')[0] %>">
+                                    <input id="raidStartDate" name="raidStartDate" type="date"
+                                           placeholder="Date de début" class="form-control form-control-success"
+                                           min="<%= new Date().toISOString().split('T')[0] %>">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-sm-3">Lieu :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidPlace" name="raidPlace" type="text" placeholder="rue, ville" class="form-control form-control-success" min="1"><small class="form-text">Exemple : Avenue des Champs-Élysées, Paris</small>
+
+                                    <div class="input-group sm-3">
+                                        <div class="input-group-prepend">
+                                            <button type="button" class="input-group-text" id="search-button"><i
+                                                        class="fas fa-search-location" id="search"></i></button>
+                                        </div>
+                                        <input type="text" id="ajax" name="raidPlace" list="json-datalist"
+                                               placeholder="Ex : Avenue des Champs Élysées, Paris"
+                                               class="form-control form-control-success" aria-describedby="search">
+                                    </div>
+                                    <datalist id="json-datalist">
+                                        <select id="select-datalist" multiple size=3 class="form-control"></select>
+                                    </datalist>
+                                    <small class="form-text">Entrez l'adresse de l'évenement, puis cliquez sur la
+                                        loupe.
+                                    </small>
+                                    <input type="hidden" id="selectedPlace" name="selectedPlace" />
+
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <label class="col-sm-3">Choisissez les sports :<br/><small>Utilisez la touche ctrl pour en sélectionner plusieur</small></label>
-                                <div class="col-sm-9">
-                                    <!--<select id="raidSports" name="raidSports" class="form-control form-control-success" multiple required size="<%= sports.length %>">-->
-                                    <select class="select2-selection--multiple" name="sports[]" multiple="multiple" style="width: 100% !important;">
-                                        <% sports.forEach(function(sport){ %>
-                                            <option value="<%= sport %>"><%= sport %></option>
-                                        <% }); %>
-                                    </select>
-                                </div>
-                            </div>
+
                             <div class="form-group row">
                                 <div class="col-sm-9 offset-sm-3">
                                     <input type="submit" value="Enregistrer mon Raid" class="btn btn-primary">
@@ -64,3 +77,81 @@
         </div>
     </div>
 </section>
+
+<script type="application/javascript">
+
+    $(document).ready(function () {
+        $("#ajax").keyup(function () {
+            if ($("#ajax").val().length >= 3) {
+                $("#search-button").addClass('btn-default');
+                $("#search-button").attr('onclick', 'loadDataList()');
+            } else {
+                $("#search-button").removeClass('btn-default');
+                $("#search-button").attr('onclick', '');
+            }
+        });
+    });
+
+    let input = document.getElementById('ajax');
+    let datalist = document.getElementById('json-datalist');
+    let select = document.getElementById('select-datalist');
+    let options = select.options;
+
+    select.addEventListener('change', fill_input);
+    input.addEventListener('focus', hide_select);
+
+    function toggle_ddl() {
+        datalist.style.display = 'block';
+        /* If input already has a value, select that option from DDL */
+        var val = input.value;
+        for (var i = 0; i < options.length; i++) {
+            if (options[i].text === val) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    }
+
+    let datas;
+
+    function fill_input() {
+        input.value = options[this.selectedIndex].value;
+        $("#selectedPlace").val(JSON.stringify(datas[this.selectedIndex]));
+
+        hide_select();
+    }
+
+    function searching() {
+        $("#select-datalist").empty();
+        datalist.style.display = 'block';
+        $("#select-datalist").append($('<option>recherche en cours...</option>'));
+    }
+
+    function hide_select() {
+        datalist.style.display = '';
+    }
+
+    function loadDataList() {
+        searching();
+        let data = {query: input.value};
+        $.ajax({
+            type: 'POST',
+            url: '/createraid/places',
+            data: data,
+            success: function (data) {
+                datas = JSON.parse(data);
+
+                $("#select-datalist").empty();
+                $.each(datas, function (i, item) {
+                    $("#select-datalist").append($('<option>').attr('value', item.name).text(item.name));
+
+                });
+                toggle_ddl();
+            },
+            error: function (msg) {
+                console.log(msg);
+            }
+        });
+    }
+
+</script>

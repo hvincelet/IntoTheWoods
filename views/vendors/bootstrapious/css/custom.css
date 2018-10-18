@@ -68,3 +68,7 @@ footer.main-footer{
     height: 400px;
     width: 100%;
 }
+
+.pt-3-half {
+    padding-top: 1.4rem;
+}

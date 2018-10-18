@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -36,15 +37,9 @@
         <div class="form-outer text-center d-flex align-items-center">
             <div class="form-inner">
                 <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
-                <p>Bonjour <%=registerUserFn%>,</p>
                 <p>Merci de vous être inscrit sur notre site.<br/>Pour valider votre inscription, cliquez sur le bouton ci-dessous.</p>
-                <form method="POST" action="http://localhost:8080/validate">
-                    <input type="hidden" name="registerEmail" value="<%=registerEmail%>"/>
-                    <input type="hidden" name="registerUserFn" value="<%=registerUserFn%>"/>
-                    <input type="hidden" name="registerUserLn" value="<%=registerUserLn%>"/>
-                    <input type="hidden" name="registerPassword" value="<%=registerPassword%>"/>
-                    <input type="submit" value="Valider mon inscription" name="Confirmer"/>
-                </form>
+                <a href="http://localhost:8080/validate?id=<%=email%>&hash=<%=password%>" class="btn btn-primary">Valider mon inscription</a><br/>
+                <small>Si le bouton ne fonctionne pas, utilisez le lien suivant : http://localhost:8080/validate?id=<%=email%>&hash=<%=password%></small>
             </div>
         </div>
     </div>

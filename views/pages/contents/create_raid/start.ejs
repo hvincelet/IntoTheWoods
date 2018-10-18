@@ -10,24 +10,30 @@
 <section class="forms">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-12" style="height: 300px;">
                 <div class="card">
                     <div class="card-header d-flex align-items-center">
                         <h4>Initialisation</h4>
                     </div>
                     <div class="card-body">
-                        <form class="form-horizontal" method="post" action="/createraid/sports">
-                            <div class="form-group row">
-                                <div class="col-sm-1 offset-sm-11">
-
+                        <div class="row">
+                            <div class="col-lg-6" onclick="document.location.href='/createraid/description'">
+                                <div class="card text-white bg-primary mb-3" style="height: 150px;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Créer un Raid à partir d'un précédent</h5>
+                                        <p class="card-text text-white">Les champs seront pré-remplis avec les tracés du Raid importé.</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <div class="col-sm-11 offset-sm-1">
-                                    <input type="submit" value="Vérifier et enregistrer" class="btn btn-primary">
+                            <div class="col-lg-6" onclick="document.location.href='/createraid/description'">
+                                <div class="card text-white bg-secondary mb-3" style="height: 150px;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Créer un nouveau Raid</h5>
+                                        <p class="card-text text-white">Vous commencez tout à 0.</p>
+                                    </div>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>

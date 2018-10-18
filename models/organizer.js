@@ -18,6 +18,15 @@ module.exports = function(sequelize, DataTypes) {
     password: {
       type: "TINYBLOB",
       allowNull: true
+    },
+    active: {
+      type: DataTypes.INTEGER(1),
+      allowNull: true,
+      defaultValue: '0'
+    },
+    picture: {
+      type: DataTypes.STRING(45),
+      allowNull: true
     }
   }, {
     tableName: 'organizer'

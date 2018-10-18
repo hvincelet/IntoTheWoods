@@ -17,8 +17,13 @@ global.user = {
     first_name: "",
     last_name: "",
     initials: "",
-    authenticated: false
+    authenticated: false,
+    raid_list: [] // {id, name, edition}
 };
+
+global.raid = {
+    idCurrentRaid: 1 //for tests
+}
 
 let checkAuth = function (req, res, next) {
     if (!user.authenticated) {
@@ -39,9 +44,11 @@ const helper = require('./routes/helper');
 //routes dedicated to register and connection
 app.route('/')
     .get(checkAuth, organizer.displayHome);
+
 app.route('/login')
     .get(organizer.displayLogScreen)
     .post(organizer.idVerification);
+
 app.route('/register')
     .get(organizer.displayRegister)
     .post(organizer.register);
@@ -58,12 +65,23 @@ app.route('/helper/:id')
     .get(helper.displayHome); // home default page for helper
 
 //routes dedicated to the raids' pages
+app.route('/createraid/start')
+    .get(checkAuth, raid.init);
+
 app.route('/createraid/description')
     .get(checkAuth, raid.displayDescriptionForm)
-    .post(checkAuth,raid.createRaid);
+    .post(checkAuth, raid.createRaid);
+
+app.route('/createraid/places')
+    .post(checkAuth, raid.getGeocodedResults);
+
+app.route('/createraid/sports')
+    .get(checkAuth, raid.displaySportsTable)
+    .post(checkAuth, raid.saveSportsRanking);
 
 app.route('/editraid/map')
-    .get(checkAuth, raid.displayMap);
+    .get(checkAuth, raid.displayMap)
+    .post(checkAuth, raid.storeMapDatas);
 
 app.route('/termsandpolicy')
     .get(misc.cgu);

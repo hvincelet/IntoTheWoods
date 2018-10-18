@@ -17,18 +17,19 @@
         <h5 class="sidenav-heading">Menu</h5>
         <ul id="side-main-menu" class="side-menu list-unstyled">
             <li><a href="/" <% if (page == "accueil"){%> class="active" <%}%> > <i class="icon-home"></i>Accueil</a></li>
-            <li><a href="/createraid/description" <% if (page.includes("create_raid")){%> class="active" <%}%> > <i class="icon-form"></i>Organiser un Raid</a>
+            <li><a href="/createraid/start" <% if (page.includes("create_raid")){%> class="active" <%}%> > <i class="icon-form"></i>Organiser un Raid</a>
                 <% if (page.includes("create_raid")){%>
                     <ul class="list-unstyled ">
                         <li><a href="#" <% if (page.includes("create_raid/start")){%> style="border-left: 2px solid #379392;" <%}%>>Initialisation</a></li>
                         <li><a href="#" <% if (page.includes("create_raid/description")){%> style="border-left: 2px solid #379392;" <%}%>>Description</a></li>
+                        <li><a href="#" <% if (page.includes("create_raid/sports")){%> style="border-left: 2px solid #379392;" <%}%>>Sélection des sports</a></li>
                         <li><a href="#" <% if (page.includes("create_raid/summary")){%> style="border-left: 2px solid #379392;" <%}%>>Validation</a></li>
                     </ul>
                 <%}%>
             </li>
             <li><a href="#manageraid" aria-expanded="false" data-toggle="collapse"> <i class="icon-list"></i>Gérer mes Raids</a>
                 <ul id="manageraid" class="collapse list-unstyled ">
-                    <li><a href="#">page</a></li>
+                    <li><a href="/editraid/map">Map</a></li>
                     <li><a href="#">page</a></li>
                     <li><a href="#">page</a></li>
                 </ul>

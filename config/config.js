@@ -5,11 +5,17 @@ module.exports = {
         database: 'intoTheWoodsDB',
         host: 'localhost',
         dialect: 'mysql',
+        logging: true, // True for logging sequelize message
         define: {
             timestamps: false
         }
     },
     production: {
         // configuration dedicated to the production environment
+    },
+    mail: {
+        service: "gmail",
+        login: "intothewoods.app@gmail.com",
+        password: "jdburdrqdlqcocrh"
     }
 };

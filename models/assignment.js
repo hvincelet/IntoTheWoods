@@ -20,7 +20,7 @@ module.exports = function(sequelize, DataTypes) {
         key: 'id'
       }
     },
-    filled: {
+    attributed: {
       type: DataTypes.INTEGER(1),
       allowNull: false,
       defaultValue: '0'
