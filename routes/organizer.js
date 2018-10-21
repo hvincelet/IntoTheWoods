@@ -5,8 +5,6 @@ const crypto = require('crypto');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
 
-const sender = require('../views/pages/contents/email/sender');
-
 exports.displayHome = function (req, res) {
     console.log(user.picture);
     res.render(pages_path + "template.ejs", {

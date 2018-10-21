@@ -1,62 +1,74 @@
 const jdenticon = require('jdenticon');
 const pages_path = "../views/pages/";
 const models = require('../models');
+const Sequelize = require('sequelize');
 
 exports.displayRegister = function(req, res){
-
-    // TODO : get helper post from database (link to current raid) and send it to ejs
 
     let find_id = 3; // temporary
     let get_post_clean = [];
 
-    models.course.findAll({
-        attributes: ['id'],
-        where: {
-            id_raid: find_id
+    let course_model = models.course;
+    let point_of_interest_model = models.point_of_interest;
+    let helper_post_model = models.helper_post;
+
+    point_of_interest_model.belongsTo(course_model, {foreignKey: 'id_track'});
+    helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
+
+    // TODO : get point of interest from database link to current raid (JOIN LEVEL 1)
+    /*
+    point_of_interest_model.findAll({
+        include: [{
+            model: course_model,
+            where: {
+                id_raid: find_id
+            }
+        }],
+        attributes: ['id','lat','lng']
+    }).then(function(point_of_interest_found){
+        if(point_of_interest_found){
+            //console.log(point_of_interest_found);
+            point_of_interest_found.forEach(function(tuple){
+                console.log(tuple.dataValues);
+            });
         }
-    }).then(function(get_course){
+    });
+    */
 
-        if(get_course !== null) {
-          
-        }
-
-        for(let course in get_course){
-            models.point_of_interest.findAll({
-                attributes: ['id'],
-                where: {
-                    id_track: get_course[course]['dataValues']['id']
-                }
-            }).then(function(get_point_of_interest){
-
-                for(let point_of_interest in get_point_of_interest){
-                    models.helper_post.findAll({
-                        attributes: ['id','description'],
-                        where: {
-                            id_point_of_interest: get_point_of_interest[point_of_interest]['dataValues']['id']
-                        }
-                    }).then(function(get_helper_post){
-
-                        for(let helper_post in get_helper_post) {
-                            console.log(get_helper_post[helper_post]['dataValues']);
-                            get_post_clean.push(get_helper_post[helper_post]['dataValues']);
-                        }
-                    });
+    // TODO : get helper_post from database link to point of interest of current raid (JOIN LEVEL 2)
+    helper_post_model.findAll({
+      include: [{
+          model: point_of_interest_model,
+          include: [{
+              model: course_model,
+              where: {
+                  id_raid: find_id
+              }
+          }]
+      }],
+      attributes: ['id','description']
+    }).then(function(helper_post_found){
+        if(helper_post_found !== null){
+            helper_post_found.forEach(function(tuple){
+                if(tuple.dataValues.point_of_interest != null){
+                    get_post_clean.push({'id':tuple.dataValues.id,'description':tuple.dataValues.description});
                 }
             });
-
-            console.log(get_post_clean);
+            res.render(pages_path + "helper_register.ejs", {
+                pageTitle: "Inscription Bénévole",
+                activity: get_post_clean
+            });
         }
-
-        res.render(pages_path + "helper_register.ejs", {
-            pageTitle: "Inscription Bénévole",
-            activity: get_post_clean
-        });
     });
 };
 
 exports.register = function(req, res){
 
     let id = Math.random().toString(36).substr(2, 6); // generate id helper
+    let registerEmail = req.body.registerEmail;
+    let registerUserLn = req.body.registerUserLn;
+    let registerUserFn = req.body.registerUserFn;
+    let registerRun = req.body.registerRun;
 
     models.helper.findOne({
         where: {
@@ -77,27 +89,21 @@ exports.register = function(req, res){
         } else { // helper with id generated does not exist
             models.helper.create({ // registration of the new helper
                 login: id,
-                email: req.body.registerEmail,
-                last_name: req.body.registerUserLn,
-                first_name: req.body.registerUserFn
+                email: registerEmail,
+                last_name: registerUserLn,
+                first_name: registerUserFn
             }).then(function () {
                 // TODO: create assignment with poste(s) and helper in assignment table
-
-                /*
-                models.assignment.create({ // create assignment with the new helper and poste(s)
-                    id_helper: id,
-                    id_helper: ...
-                }).then(function () {
-
-                    // TODO: redirect to helper_register with validMessage (organizer manage your inscription)
-
-                    //res.render(pages_path + "helper_register.ejs", {
-                    //    pageTitle: "Inscription Bénévole",
-                    //    valideMessage: "Organizer manage your inscription, you will be contact soon..."
-                    //});
-
+                registerRun.forEach(function(id_activity){
+                    models.assignment.create({ // create assignment with the new helper and poste(s)
+                        id_helper: id,
+                        id_helper_post: id_activity
+                    });
                 });
-                */
+                // TODO: redirect to helper_register with validMessage (organizer manage your inscription)
+                res.render(pages_path + "helper_register.ejs", {
+                    pageTitle: "Inscription Bénévole"
+                });
             });
         }
     });

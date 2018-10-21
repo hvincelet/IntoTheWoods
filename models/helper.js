@@ -27,10 +27,6 @@ module.exports = function(sequelize, DataTypes) {
     backup: {
       type: DataTypes.INTEGER(1),
       allowNull: true
-    },
-    email: {
-      type: DataTypes.TEXT,
-      allowNull: true
     }
   }, {
     tableName: 'helper'
