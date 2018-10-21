@@ -7,6 +7,52 @@
         </ul>
     </div>
 </div>
+
+<style>
+    .ol-popup {
+        position: absolute;
+        background-color: white;
+        -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #cccccc;
+        bottom: 12px;
+        left: -50px;
+        min-width: 280px;
+    }
+    .ol-popup:after, .ol-popup:before {
+        top: 100%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+    }
+    .ol-popup:after {
+        border-top-color: white;
+        border-width: 10px;
+        left: 48px;
+        margin-left: -10px;
+    }
+    .ol-popup:before {
+        border-top-color: #cccccc;
+        border-width: 11px;
+        left: 48px;
+        margin-left: -11px;
+    }
+    .ol-popup-closer {
+        text-decoration: none;
+        position: absolute;
+        top: 2px;
+        right: 8px;
+    }
+    .ol-popup-closer:after {
+        content: "✖";
+    }
+</style>
+
 <section class="forms">
     <div class="container-fluid">
         <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.2.0/css/ol.css" type="text/css">
@@ -16,10 +62,16 @@
                     <div class="card-header d-flex align-items-center">
                         <h4>Edition des parcours</h4>
                         <button id="type" class="btn btn-xs" onclick="addPointOfInterest()">Ajouter des points d'intérêt</button>
-                        <button id="type" class="btn btn-xs" onclick="storePointsOfInterest()">Enregistrer les points d'intérêt</button>
+                        <button id="type" class="btn btn-xs" onclick="addCourse()">Ajouter des parcours</button>
+                        <button id="type" class="btn btn-xs" onclick="resetInteraction()">Arreter édition</button>
+                        <button id="type" class="btn btn-xs" onclick="storeDatasToDB()">Enregistrer les points d'intérêt</button>
                     </div>
                     <div class="card-body">
                         <div id="map"></div>
+                        <div id="popup" class="ol-popup">
+                            <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                            <div id="popup-content"></div>
+                        </div>
                         <script> const raid = <%- JSON.stringify(raid) %>; </script>
                         <script> const courseArray = <%- JSON.stringify(courseArray) %>; </script>
                         <script> const pointOfInterestArrayToLoad = <%- JSON.stringify(pointOfInterestArray) %>; </script>

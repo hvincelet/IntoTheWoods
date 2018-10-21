@@ -20,6 +20,10 @@ global.user = {
     authenticated: true
 };
 
+global.raid = {
+    idCurrentRaid: null
+};
+
 let checkAuth = function (req, res, next) {
     if (!user.authenticated) {
         res.redirect('/login');
@@ -29,6 +33,7 @@ let checkAuth = function (req, res, next) {
 
 const organizer = require('./routes/organizer');
 const raid = require('./routes/raid');
+const map = require('./routes/map');
 const misc = require('./routes/misc');
 
 /**********************************/
@@ -65,9 +70,10 @@ app.route('/createraid/sports')
     .get(checkAuth, raid.displaySportsTable)
     .post(checkAuth, raid.saveSportsRanking);
 
+//routes dedicated to the map
 app.route('/editraid/map')
-    .get(checkAuth, raid.displayMap)
-    .post(checkAuth, raid.storeMapDatas);
+    .get(checkAuth, map.displayMap)
+    .post(checkAuth, map.storeMapDatas);
 
 app.route('/termsandpolicy')
     .get(misc.cgu);
