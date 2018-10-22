@@ -5,7 +5,33 @@ const crypto = require('crypto');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
 
-exports.displayHome = function (req, res) {
+exports.displayHome = function(req, res) {
+    models.raid.findAll({
+        attributes: ['id', 'name', 'date', 'edition', 'place']
+    }).then(function (raids_found){
+        let raids = [];
+        raids_found.forEach(function(raid){
+            raids.push({
+                id: raid.dataValues.id,
+                name: raid.dataValues.name,
+                date: raid.dataValues.date,
+                edition: raid.dataValues.edition,
+                place: raid.dataValues.place
+            });
+        });
+        let user_infos = undefined;
+        const user = connected_user(req.sessionID);
+        if(user){
+            user_infos = {
+                name: user.first_name + ' ' + user.last_name
+            };
+        }
+        //res.render(pages_path + "homepage.ejs", {raids: raids, user_infos: user_infos});
+        res.end("Page d'accueil");
+    });
+}
+
+exports.dashboard = function (req, res) {
     const user = connected_user(req.sessionID);
     if(!user){
         res.redirect('/login');
@@ -77,7 +103,7 @@ exports.idVerification = function (req, res) {
                 }
                 connected_users.push(user);
             });
-            return res.redirect('/');
+            return res.redirect('/dashboard');
         } else {
             res.render(pages_path + "login.ejs", {
                 pageTitle: "Connexion",
@@ -122,7 +148,7 @@ exports.register = function (req, res) {
                 first_name: req.body.firstname,
                 last_name: req.body.lastname,
                 password: hash,
-                //picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
+                picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
             }).then(function () {
                 sender.sendMail(req.body.email, hash);
                 res.send(JSON.stringify({msg: "ok"}));

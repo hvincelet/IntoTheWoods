@@ -16,7 +16,6 @@ app.set('view engine', 'ejs');
 
 app.use(session({
   genid: (req) => {
-    console.log("uuid = "+req.sessionID);
     return uuid();
   },
   secret: 'c97c3d803f65426e82f507ba3f84c725',
@@ -71,6 +70,10 @@ app.route('/validate')
     .get(organizer.validate);
 
 //routes dedicated to the raids' pages
+
+app.route('/dashboard')
+    .get(organizer.dashboard);
+
 app.route('/createraid/start')
     .get(raid.init);
 
