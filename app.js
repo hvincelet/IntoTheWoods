@@ -55,7 +55,7 @@ app.route('/register')
 
 // route dedicate to validate organizer inscription
 app.route('/validate')
-    .post(organizer.validate); // orhanizer method to send mail
+    .get(organizer.validate); // organizer method to send mail
 
 // routes dedicated to helper
 app.route('/helper')
@@ -85,6 +85,13 @@ app.route('/editraid/map')
 
 app.route('/termsandpolicy')
     .get(misc.cgu);
+
+// routes dedicated to the team' pages
+app.route('/manageteam') // manage helper and organizer of raid
+    .get(organizer.manageTeam);
+app.route('/manageteam/helper') // manage helper and organizer of raid
+    .get(organizer.manageHelper)
+    .post(organizer.assignHelper);
 
 //bad url route
 app.use(function (req, resp, next) {

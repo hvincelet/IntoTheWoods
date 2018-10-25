@@ -131,3 +131,89 @@ exports.validate = function(req, res) {
         });
     })
 }
+
+exports.manageTeam = function(req, res) {
+
+  res.render(pages_path + "template.ejs", {
+      pageTitle: "Equipe et organisateurs",
+      page: "manage_team/team",
+      userName_fn: user.first_name,
+      userName_ln: user.last_name,
+      userName_initials: user.initials,
+      userPicture: user.picture
+  });
+
+}
+
+exports.manageHelper = function(req, res) {
+
+    let data_helper = [];
+
+    let assignment_model = models.assignment;
+    let helper_model = models.helper;
+    let helper_post_model = models.helper_post;
+
+    helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
+    assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
+
+    helper_model.findAll({
+        include: [{
+            model: assignment_model,
+            attributes: ['id_helper','id_helper_post','attributed'],
+            include: [{
+                model: helper_post_model,
+                attributes: ['id','description']
+            }],
+        }],
+        attributes: ['login','email','last_name','first_name']
+    }).then(function(assignment_found){
+        if(assignment_found !== null){
+            assignment_found.forEach(function(tuple){
+                data_helper.push(
+                    {
+                        'login':tuple.dataValues.login,
+                        'email':tuple.dataValues.email,
+                        'last_name':tuple.dataValues.last_name,
+                        'first_name':tuple.dataValues.first_name,
+                        'id_helper':tuple.dataValues.assignment.dataValues.id_helper,
+                        'id_helper_post':tuple.dataValues.assignment.dataValues.id_helper_post,
+                        'attributed':tuple.dataValues.assignment.dataValues.attributed,
+                        'id':tuple.dataValues.assignment.dataValues.helper_post.dataValues.id,
+                        'description':tuple.dataValues.assignment.dataValues.helper_post.dataValues.description
+                    }
+                );
+            });
+            res.render(pages_path + "template.ejs", {
+                pageTitle: "Gérer les bénévoles",
+                page: "manage_team/helper",
+                userName_fn: user.first_name,
+                userName_ln: user.last_name,
+                userName_initials: user.initials,
+                userPicture: user.picture,
+                data: data_helper
+            });
+        }
+    });
+
+};
+
+exports.assignHelper = function(req, res) {
+
+    let id_helper = req.body.registerIdHelper;
+    let id_helper_post = req.body.registerIdHelperPost;
+
+    models.assignment.findOne({
+        where: {
+            id_helper: id_helper,
+            id_helper_post: id_helper_post
+        }
+    }).then(function(assignment_found){
+        if(assignment_found !== null){
+            assignment_found.update({
+                attributed: 1
+            }).then(function(){
+                res.redirect('/manageteam/helper');
+            });
+        }
+    });
+};
