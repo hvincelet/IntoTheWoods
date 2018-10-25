@@ -174,7 +174,7 @@ exports.validate = function (req, res) {
             successMessage: "Votre adresse mail a bien été confirmée."
         });
     })
-};
+}
 
 exports.shareRaidToOthersOrganizers = function(req, res) {
     const user = connected_user(req.sessionID);
@@ -196,19 +196,26 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
             });
         }
     });
+
 };
 
-exports.inviteHelper = function(req, res) {
-    const user = connected_user(req.sessionID);
-    if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
-        return res.redirect('/dashboard');
-    }
+exports.assignHelper = function(req, res) {
 
-    let helper_list_to_invite = ["hvincele@enssat.fr", "someone@domain-name.com"];
-    const current_user_email = connected_user(req.sessionID).login;
-    helper_list_to_invite.foreach(function(helper_email){
-        if(helper_email != user.login){
-            //sender.sendMail(helper_email, );
+    let id_helper = req.body.registerIdHelper;
+    let id_helper_post = req.body.registerIdHelperPost;
+
+    models.assignment.findOne({
+        where: {
+            id_helper: id_helper,
+            id_helper_post: id_helper_post
+        }
+    }).then(function(assignment_found){
+        if(assignment_found !== null){
+            assignment_found.update({
+                attributed: 1
+            }).then(function(){
+                res.redirect('/manageteam/helper');
+            });
         }
     });
 };

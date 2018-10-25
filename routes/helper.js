@@ -15,7 +15,7 @@ exports.displayRegister = function(req, res){
     point_of_interest_model.belongsTo(course_model, {foreignKey: 'id_track'});
     helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
-    // TODO : get point of interest from database link to current raid (JOIN LEVEL 1)
+    // Get point of interest from database link to current raid (JOIN LEVEL 1)
     /*
     point_of_interest_model.findAll({
         include: [{
@@ -35,7 +35,7 @@ exports.displayRegister = function(req, res){
     });
     */
 
-    // TODO : get helper_post from database link to point of interest of current raid (JOIN LEVEL 2)
+    // Get helper_post from database link to point of interest of current raid (JOIN LEVEL 2)
     helper_post_model.findAll({
       include: [{
           model: point_of_interest_model,
@@ -113,23 +113,60 @@ exports.displayHome = function(req, res){
 
     let id = req.params.id;
 
-    models.helper.findOne({
+    models.assignment.findOne({
         where: {
-            login: id
+            id_helper: id
         }
-    }).then(function (helper_found) {
-        if (helper_found !== null) { // id of helper exist
+    }).then(function (assignment_found) {
+        if (assignment_found !== null) { // id of helper exist
 
-            console.log(helper_found.login);
-            console.log(helper_found.last_name);
-            console.log(helper_found.first_name);
+            if (assignment_found.attributed == 0){
+                res.render(pages_path + "helper_register.ejs", {
+                    pageTitle: "Inscription Bénévole",
+                    errorMessage: "Cet identifiant n'a pas encore été attribué à un poste..."
+                });
+            } else {
+                // TODO : page to see the map with the path to go to helper post
+                console.log(assignment_found.id_helper);
+                console.log(assignment_found.id_helper_post);
 
-            // TODO : page to see the map with the path to go to helper post
+                models.helper.findOne({
+                    where: {
+                        login: assignment_found.id_helper
+                    }
+                }).then(function(helper_found){
+                    if (helper_found !== null){
+                        models.helper_post.findOne({
+                            where: {
+                                id: assignment_found.id_helper_post
+                            }
+                        }).then(function(helper_post_found){
+                            if (helper_post_found !== null){
+                                models.point_of_interest.findOne({
+                                    where: {
+                                        id: helper_post_found.id_point_of_interest
+                                    }
+                                }).then(function(point_of_interest_found){
+                                    if (point_of_interest_found !== null){
+                                        res.render(pages_path + "helper_home.ejs", {
+                                            pageTitle: "Parcours Bénévole",
+                                            assignment: assignment_found,
+                                            helper: helper_found,
+                                            helper_post: helper_post_found,
+                                            point_of_interest: point_of_interest_found
+                                        });
+                                    }
+                                });
+                            }
+                        })
+                    }
+                })
+            }
 
-        } else { // id of new helper does not exist
+        } else { // id of helper does not exist
             res.render(pages_path + "helper_register.ejs", {
                 pageTitle: "Inscription Bénévole",
-                errorMessage: "Cet identifiant n'existe pas..."
+                errorMessage: "Cet identifiant n'existe pas ..."
             });
         }
     });
