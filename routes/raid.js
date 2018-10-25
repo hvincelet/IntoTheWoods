@@ -4,8 +4,8 @@ const models = require('../models');
 const Nominatim = require('nominatim-geocoder');
 const geocoder = new Nominatim();
 
-exports.init = function (req, res) {
-    const user = connected_user(req.sessionID, res);
+exports.init = function(req, res){
+    const user = connected_user(req.sessionID);
     res.render(pages_path + "template.ejs", {
         pageTitle: "Création d'un Raid",
         page: "create_raid/start",
@@ -16,19 +16,15 @@ exports.init = function (req, res) {
     });
 };
 exports.displayDescriptionForm = function (req, res) {
-    const user = connected_user(req.sessionID, res);
-    if(!user){
-        res.redirect('/login');
-    }else{
-        res.render(pages_path + "template.ejs", {
-            pageTitle: "Création d'un Raid",
-            page: "create_raid/description",
-            userName_fn: user.first_name,
-            userName_ln: user.last_name,
-            userName_initials: user.initials,
-            userPicture: user.picture
-        });
-    }
+    const user = connected_user(req.sessionID);
+    res.render(pages_path + "template.ejs", {
+        pageTitle: "Création d'un Raid",
+        page: "create_raid/description",
+        userName_fn: user.first_name,
+        userName_ln: user.last_name,
+        userName_initials: user.initials,
+        userPicture: user.picture
+    });
 };
 
 exports.createRaid = function (req, res) {
@@ -41,8 +37,7 @@ exports.createRaid = function (req, res) {
         lat: 0.0,
         lng: 0.0
     }).then(function (raid_created) {
-
-        let user = connected_user(req.sessionID, res);
+        let user = connected_user(req.sessionID);
 
         user.idCurrentRaid = raid_created.dataValues.id;
         models.team.create({
@@ -90,20 +85,16 @@ exports.displaySportsTable = function (req, res) {
         sports_found.forEach(function (sport) {
             sports.push({name: sport.dataValues.name, id: sport.dataValues.id});
         });
-        const user = connected_user(req.sessionID, res);
-        if(!user){
-            res.redirect('/login');
-        }else{
-            res.render(pages_path + "template.ejs", {
-                pageTitle: "Création d'un Raid",
-                page: "create_raid/sports",
-                sports: sports,
-                userName_fn: user.first_name,
-                userName_ln: user.last_name,
-                userName_initials: user.initials,
-                userPicture: user.picture
-            });
-        }
+        const user = connected_user(req.sessionID);
+        res.render(pages_path + "template.ejs", {
+            pageTitle: "Création d'un Raid",
+            page: "create_raid/sports",
+            sports: sports,
+            userName_fn: user.first_name,
+            userName_ln: user.last_name,
+            userName_initials: user.initials,
+            userPicture: user.picture
+        });
     });
 
 };
@@ -112,6 +103,7 @@ exports.saveSportsRanking = function (req, res) {
 
     const user = connected_user(req.sessionID);
     JSON.parse(req.body.sports_list).forEach(function (sport_row) {
+
         models.course.create({
             order_num: sport_row.order,
             label: sport_row.name,
@@ -147,53 +139,44 @@ exports.getGeocodedResults = function (req, res) {
 exports.displayMap = function (req, res) {
 
     const user = connected_user(req.sessionID);
-    if(!user){
-        res.redirect('/login');
-    }else{
-        models.raid.findOne({ // loads the map associated with the raid "idCurrentRaid"
+    models.raid.findOne({ // loads the map associated with the raid "idCurrentRaid"
+        where: {
+            id: user.idCurrentRaid
+        }
+    }).then(function (raid_found) {
+        models.course.findAll({
             where: {
-                id: user.idCurrentRaid
+                id_raid: raid_found.id
             }
-        }).then(function (raid_found) {
-            models.course.findAll({
+        }).then(function (courses_found) {
+
+            let pointOfInterestArray = [];
+            models.point_of_interest.findAll({ // loads the array of points-of-interest
                 where: {
-                    id_raid: raid_found.id
+                    id_track: courses_found[0].id
                 }
-            }).then(function (courses_found) {
-
-                let pointOfInterestArray = [];
-                models.point_of_interest.findAll({ // loads the array of points-of-interest
-                    where: {
-                        id_track: courses_found[0].id
-                    }
-                }).then(function (points_of_interest_found) {
-                    points_of_interest_found.forEach(function (point_of_interest) {
-                        pointOfInterestArray.push({
-                            id: point_of_interest.id,
-                            lonlat: [point_of_interest.lng, point_of_interest.lat]
-                        });
+            }).then(function (points_of_interest_found) {
+                points_of_interest_found.forEach(function (point_of_interest) {
+                    pointOfInterestArray.push({
+                        id: point_of_interest.id,
+                        lonlat: [point_of_interest.lng, point_of_interest.lat]
                     });
+                });
 
-                    const user = connected_user(req.sessionID);
-                    if(!user){
-                        res.redirect('/login');
-                    }else{
-                        res.render(pages_path + "template.ejs", {
-                            pageTitle: "Gestion des Raids",
-                            page: "edit_raid/map",
-                            userName_fn: user.first_name,
-                            userName_ln: user.last_name,
-                            userName_initials: user.initials,
-                            userPicture: user.picture,
-                            raid: raid_found.dataValues,
-                            courseArray: courses_found,
-                            pointOfInterestArray: pointOfInterestArray
-                        });
-                    }
+                res.render(pages_path + "template.ejs", {
+                    pageTitle: "Gestion des Raids",
+                    page: "edit_raid/map",
+                    userName_fn: user.first_name,
+                    userName_ln: user.last_name,
+                    userName_initials: user.initials,
+                    userPicture: user.picture,
+                    raid: raid_found.dataValues,
+                    courseArray: courses_found,
+                    pointOfInterestArray: pointOfInterestArray
                 });
             });
         });
-    }
+    });
 
 };
 

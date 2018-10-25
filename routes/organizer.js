@@ -19,35 +19,33 @@ exports.displayHome = function(req, res) {
                 place: raid.dataValues.place
             });
         });
-        let user_infos = undefined;
         const user = connected_user(req.sessionID);
-        if(user){
-            user_infos = {
-                name: user.first_name + ' ' + user.last_name
-            };
-        }
-        //res.render(pages_path + "homepage.ejs", {raids: raids, user_infos: user_infos});
-        res.end("Page d'accueil");
+        res.render(pages_path + "contents/homepage.ejs", {
+            pageTitle: "Accueil",
+            page: "homepage",
+            raids: raids,
+            user: user
+        });
     });
 }
 
 exports.dashboard = function (req, res) {
     const user = connected_user(req.sessionID);
-    if(!user){
-        res.redirect('/login');
-    }else{
-        res.render(pages_path + "template.ejs", {
-            pageTitle: "Accueil",
-            page: "accueil",
-            userName_fn: user.first_name,
-            userName_ln: user.last_name,
-            userName_initials: user.initials,
-            userPicture: user.picture
-        });
-    }
+    res.render(pages_path + "template.ejs", {
+        pageTitle: "Tableau de bord",
+        page: "dashboard",
+        userName_fn: user.first_name,
+        userName_ln: user.last_name,
+        userName_initials: user.initials,
+        userPicture: user.picture
+    });
 };
 
 exports.displayLogScreen = function (req, res) {
+    const user = connected_user(req.sessionID);
+    if(user) {
+        return res.redirect("/");
+    }
     res.render(pages_path + "login.ejs", {
         pageTitle: "Connexion"
     });
@@ -69,12 +67,11 @@ exports.idVerification = function (req, res) {
                 login: organizer_found.dataValues.email,
                 first_name: organizer_found.dataValues.first_name,
                 last_name: organizer_found.dataValues.last_name,
-                initials: "",
+                initials: organizer_found.dataValues.first_name.charAt(0).concat(organizer_found.dataValues.last_name.charAt(0)).toUpperCase(),
                 picture: organizer_found.dataValues.picture,
                 raid_list: [],
                 idCurrentRaid: 0
             }
-            user.initials = user.first_name.charAt(0).concat(user.last_name.charAt(0)).toUpperCase();
 
             let team_model = models.team;
             let raid_model = models.raid;

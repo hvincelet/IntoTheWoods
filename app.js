@@ -32,6 +32,16 @@ global.connected_user = function(uuid){
     });
 };
 
+let checkAuth = function (req, res, next) {
+    const user = connected_users.find(function(user){
+        return user.uuid == req.sessionID;
+    });
+    if (!user) {
+        return res.redirect('/login');
+    }
+    next();
+};
+
 /*{
     login: "",
     first_name: "",
@@ -72,21 +82,21 @@ app.route('/validate')
 //routes dedicated to the raids' pages
 
 app.route('/dashboard')
-    .get(organizer.dashboard);
+    .get(checkAuth, organizer.dashboard);
 
 app.route('/createraid/start')
-    .get(raid.init);
+    .get(checkAuth, raid.init);
 
 app.route('/createraid/description')
-    .get(raid.displayDescriptionForm)
-    .post(raid.createRaid);
+    .get(checkAuth, raid.displayDescriptionForm)
+    .post(checkAuth, raid.createRaid);
 
 app.route('/createraid/places')
-    .post(raid.getGeocodedResults);
+    .post(checkAuth, raid.getGeocodedResults);
 
 app.route('/createraid/sports')
-    .get(raid.displaySportsTable)
-    .post(raid.saveSportsRanking);
+    .get(checkAuth, raid.displaySportsTable)
+    .post(checkAuth, raid.saveSportsRanking);
 
 //routes dedicated to the map
 app.route('/editraid/map')
