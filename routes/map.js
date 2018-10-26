@@ -4,8 +4,8 @@ const models = require('../models');
 exports.displayMap = function (req, res) {
     models.raid.findOne({ // loads the map associated with the raid "idCurrentRaid"
         where: {
-            id: raid.idCurrentRaid
-            //id: 1 // for tests
+            //id: raid.idCurrentRaid
+            id: 1 // for tests
         }
     }).then(function (raid_found) {
         models.course.findAll({
@@ -14,31 +14,46 @@ exports.displayMap = function (req, res) {
             }
         }).then(function (courses_found) {
 
-            let pointOfInterestArray = [];
-            models.point_of_interest.findAll({ // loads the array of points-of-interest
-                where: {
-                    id_track: courses_found[0].id
-                }
-            }).then(function (points_of_interest_found) {
-                points_of_interest_found.forEach(function (point_of_interest) {
-                    pointOfInterestArray.push({
-                        id: point_of_interest.id,
-                        lonlat: [point_of_interest.lng, point_of_interest.lat]
+            models.sport.findAll({}).then(function (all_sports) {
+                courses_found.forEach(function (course) {
+                    all_sports.forEach(function (sport) {
+                        if (course.id_sport === sport.id) {
+                            course.dataValues["sport_label"] = sport.name;
+                        }
+                    });
+                });
+                courses_found.sort(function(a, b) {
+                    return a.order_num - b.order_num;
+                });
+
+                let pointOfInterestArray = [];
+                models.point_of_interest.findAll({ // loads the array of points-of-interest
+                    where: {
+                        id_track: courses_found[0].id
+                    }
+                }).then(function (points_of_interest_found) {
+                    points_of_interest_found.forEach(function (point_of_interest) {
+                        pointOfInterestArray.push({
+                            id: point_of_interest.id,
+                            lonlat: [point_of_interest.lng, point_of_interest.lat]
+                        });
+                    });
+
+                    res.render(pages_path + "template.ejs", {
+                        pageTitle: "Gestion des Raids",
+                        page: "edit_raid/map",
+                        userName_fn: user.first_name,
+                        userName_ln: user.last_name,
+                        userName_initials: user.initials,
+                        userPicture: user.picture,
+                        raid: raid_found.dataValues,
+                        courseArray: courses_found,
+                        pointOfInterestArray: pointOfInterestArray
                     });
                 });
 
-                res.render(pages_path + "template.ejs", {
-                    pageTitle: "Gestion des Raids",
-                    page: "edit_raid/map",
-                    userName_fn: user.first_name,
-                    userName_ln: user.last_name,
-                    userName_initials: user.initials,
-                    userPicture: user.picture,
-                    raid: raid_found.dataValues,
-                    courseArray: courses_found,
-                    pointOfInterestArray: pointOfInterestArray
-                });
             });
+
         });
     });
 

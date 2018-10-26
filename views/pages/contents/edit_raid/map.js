@@ -16,13 +16,13 @@ let vector = new ol.layer.Vector({
             color: 'rgba(255, 255, 255, 0.2)'
         }),
         stroke: new ol.style.Stroke({
-            color: '#6200ee',
+            color: '#5c6bc0',
             width: 3
         }),
         image: new ol.style.Circle({
             radius: 7,
             fill: new ol.style.Fill({
-                color: '#6200ee'
+                color: '#e53935'
             })
         })
     })
@@ -66,12 +66,12 @@ let draw, snap; // global so we can remove them later
 let typeSelect;
 
 function addInteractions() {
-
     map.removeInteraction(draw);
     draw = new ol.interaction.Draw({
         source: source,
         type: typeSelect
     });
+
     map.addInteraction(draw);
 
 }
@@ -79,24 +79,32 @@ function addInteractions() {
 snap = new ol.interaction.Snap({source: source});
 map.addInteraction(snap);
 
-
 function addPointOfInterest() {
+    $('#panel-right').fadeOut();
     typeSelect = "Point";
     addInteractions();
 }
 
 function addCourse() {
+    //$('#current_course').text(courseArray[0].sport_label);
+    updateSelectedCourse();
+
+    console.log(courseArray); // besoin du nom du sport
+
+    $('#panel-right').fadeIn();
     typeSelect = "LineString";
     addInteractions();
 }
 
 function resetInteraction() {
+    $('#panel-right').hide();
     map.removeInteraction(draw);
 }
 
 
 // I/O DB
 const pointOfInterestArrayToStore = [];
+
 function storeDatasToDB() {
     let features = vector.getSource().getFeatures();
 
@@ -223,8 +231,10 @@ closer.onclick = function () {
 };
 
 function showPopup(feature, header) {
-    content.innerHTML = '<h6>' + header + '</h6><input type="text" class="form-control col-sm" placeholder="intitulé du poste">' +
-        '<button id="type" class="btn btn-xs btn-danger" onclick="removeFeature(\'' + feature.getId() + '\')">supprimer</button><button id="type" class="btn btn-xs btn-default">enregistrer</button><code>' + feature.getId() + '</code>';
+    content.innerHTML = '<h6>' + header + '</h6><div class="input-group input-group-sm"><input type="text" class="form-control" placeholder="intitulé du poste"><textarea class="form-control" rows="4" cols="50">\n' +
+        'At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies.\n' +
+        '</textarea></div>' +
+        '<button id="type" class="btn btn-xs btn-danger" onclick="removeFeature(\'' + feature.getId() + '\')">supprimer</button><button id="type" class="btn btn-xs btn-default">enregistrer</button>';
     overlay.setPosition(feature.getGeometry().getCoordinates());
 }
 
@@ -234,10 +244,59 @@ function removeFeature(featureId) {
     source.removeFeature(feature);
     // remove on the DB
     if (feature.getId().indexOf("new") === -1) {
-            pointOfInterestArrayToStore.push({
-                id: "remove_" + feature.getId().replace('point_of_interest_', '')
-            });
+        pointOfInterestArrayToStore.push({
+            id: "remove_" + feature.getId().replace('point_of_interest_', '')
+        });
     }
 
     overlay.setPosition(undefined);
-};
+}
+
+let editing = false;
+
+function animationTest() {
+
+    if (editing) {
+        resetInteraction();
+        $('#add_point_of_interest_button').hide();
+        $('#add_course_button').hide();
+        $('#edit_button_icon').text(' Éditer la carte');
+        $('#edit_button_icon').attr('class', 'fas fa-map-marked');
+        $('#edit_button').attr('class', 'btn btn-info');
+        editing = false;
+    } else {
+        $('#edit_button_icon').text('');
+        $('#edit_button_icon').attr('class', 'fas fa-check');
+        $('#edit_button').attr('class', 'btn btn-success');
+        $('#add_point_of_interest_button').show("fast");
+        $('#add_course_button').show("fast");
+        editing = true;
+    }
+
+}
+
+let idCurrentEditedCourse = 0;
+
+function previousCourse() {
+    if (idCurrentEditedCourse === 0) {
+        idCurrentEditedCourse = courseArray.length - 1;
+    } else {
+        idCurrentEditedCourse--;
+    }
+    updateSelectedCourse();
+}
+
+function nextCourse() {
+    if (idCurrentEditedCourse === courseArray.length - 1) {
+        idCurrentEditedCourse = 0;
+    } else {
+        idCurrentEditedCourse++;
+    }
+    updateSelectedCourse();
+}
+
+let courseColorArray = ["#5c6bc0", "#ef5350", "#ffa726", "#66bb6a", "#7e57c2"];
+function updateSelectedCourse() {
+    $('#current_course').css('background-color', courseColorArray[idCurrentEditedCourse]);
+    $('#current_course').text(courseArray[idCurrentEditedCourse].sport_label);
+}
