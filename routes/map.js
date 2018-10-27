@@ -13,7 +13,6 @@ exports.displayMap = function (req, res) {
                 id_raid: raid_found.id
             }
         }).then(function (courses_found) {
-
             models.sport.findAll({}).then(function (all_sports) {
                 courses_found.forEach(function (course) {
                     all_sports.forEach(function (sport) {
@@ -22,18 +21,29 @@ exports.displayMap = function (req, res) {
                         }
                     });
                 });
-                courses_found.sort(function(a, b) {
+                courses_found.sort(function (a, b) {
                     return a.order_num - b.order_num;
                 });
 
-                let pointOfInterestArray = [];
+
+                // let courseArrayToLoad = [];
+                // models.track_point.findAll({
+                //     where: {
+                //         id_track: course
+                //     }
+                // }).then(function () {
+                //
+                // })
+
+
+                let pointOfInterestArrayToLoad = [];
                 models.point_of_interest.findAll({ // loads the array of points-of-interest
                     where: {
                         id_track: courses_found[0].id
                     }
                 }).then(function (points_of_interest_found) {
                     points_of_interest_found.forEach(function (point_of_interest) {
-                        pointOfInterestArray.push({
+                        pointOfInterestArrayToLoad.push({
                             id: point_of_interest.id,
                             lonlat: [point_of_interest.lng, point_of_interest.lat]
                         });
@@ -48,7 +58,7 @@ exports.displayMap = function (req, res) {
                         userPicture: user.picture,
                         raid: raid_found.dataValues,
                         courseArray: courses_found,
-                        pointOfInterestArray: pointOfInterestArray
+                        pointOfInterestArrayToLoad: pointOfInterestArrayToLoad
                     });
                 });
 
@@ -62,10 +72,9 @@ exports.displayMap = function (req, res) {
 exports.storeMapDatas = function (req, res) {
 
     req.body.pointOfInterestArray.forEach(function (pointOfInterest) {
-
         if (pointOfInterest.id.indexOf("new") !== -1) {
             models.point_of_interest.create({
-                id_track: req.body.courseArray[0].id,
+                id_track: req.body.defaultCourseArrayID,
                 lat: pointOfInterest.lat,
                 lng: pointOfInterest.lng
             })
@@ -88,8 +97,28 @@ exports.storeMapDatas = function (req, res) {
                         console.log("error: existing point not found")
                     }
                 });
+        }
+    });
 
+    req.body.courseArray.forEach(function (course) {
+        if (course.id.indexOf("new") !== -1) {
+            course.id = course.id.replace('new_', ''); // temporary
         }
 
-    })
+        models.track_point.destroy({ // temporary
+            where: {
+                id_track: course.id
+            }
+        }).then(function () {
+            course.track_point_array.forEach(function (track_point) {
+                models.track_point.create({
+                    id_track: course.id,
+                    lat: track_point[1],
+                    lng: track_point[0]
+                });
+            });
+
+        });
+
+    });
 };

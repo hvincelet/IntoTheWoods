@@ -1,6 +1,8 @@
-/**********************************/
-/*       Instantiate the map      */
-/**********************************/
+/***************************************************************/
+/***************************************************************/
+/***                    Map Instantiation                    ***/
+/***************************************************************/
+/***************************************************************/
 
 let raster = new ol.layer.Tile({
     source: new ol.source.OSM()
@@ -55,9 +57,13 @@ let map = new ol.Map({
 
 loadPointsOfInterest();
 
-/**********************************/
-/*  Fn dedicated to PoI edition   */
-/**********************************/
+/***************************************************************/
+/***************************************************************/
+/***                      Draw & Modify                      ***/
+/***************************************************************/
+/***************************************************************/
+
+let currentFeatureEditing = "none";
 
 let modify = new ol.interaction.Modify({source: source});
 map.addInteraction(modify);
@@ -73,37 +79,42 @@ function addInteractions() {
     });
 
     map.addInteraction(draw);
-
 }
 
 snap = new ol.interaction.Snap({source: source});
 map.addInteraction(snap);
 
-function addPointOfInterest() {
-    $('#panel-right').fadeOut();
-    typeSelect = "Point";
-    addInteractions();
-}
-
-function addCourse() {
-    //$('#current_course').text(courseArray[0].sport_label);
-    updateSelectedCourse();
-
-    console.log(courseArray); // besoin du nom du sport
-
-    $('#panel-right').fadeIn();
-    typeSelect = "LineString";
-    addInteractions();
-}
-
 function resetInteraction() {
     $('#panel-right').hide();
+    currentFeatureEditing = "none";
     map.removeInteraction(draw);
 }
 
+/***************************************************************/
+/***************************************************************/
+/***                      Database access                    ***/
+/***************************************************************/
 
-// I/O DB
-const pointOfInterestArrayToStore = [];
+/***************************************************************/
+
+function loadPointsOfInterest() {
+    pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
+
+        let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
+        let feature = new ol.Feature({
+                geometry: geom,
+            }
+        );
+        feature.setId("point_of_interest_" + pointOfInterest.id);
+        source.addFeature(feature);
+    });
+}
+
+function loadCourses() {
+}
+
+let pointOfInterestArrayToStore = [];
+let courseArrayToStore = [];
 
 function storeDatasToDB() {
     let features = vector.getSource().getFeatures();
@@ -115,15 +126,21 @@ function storeDatasToDB() {
                 lng: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[0],
                 lat: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[1]
             });
+        } else if (feature.getId().indexOf("course") !== -1) {
+            courseArrayToStore.push({
+                id: feature.getId().replace('course_', ''),
+                track_point_array: feature.getGeometry().getCoordinates()
+            });
         } else {
-            console.log("not a point_of_interest");
+            console.log("unrecognized feature");
         }
 
     });
 
     let data = {
         pointOfInterestArray: pointOfInterestArrayToStore,
-        courseArray: courseArray
+        courseArray: courseArrayToStore,
+        defaultCourseArrayID: courseArray[0].id
     };
     $.ajax({
         type: 'POST',
@@ -134,29 +151,13 @@ function storeDatasToDB() {
         error: function (response) {
         }
     });
-
 }
 
-function loadPointsOfInterest() {
-
-    pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
-        let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
-        let feature = new ol.Feature({
-                geometry: geom,
-            }
-        );
-        feature.setId("point_of_interest_" + pointOfInterest.id);
-        source.addFeature(feature);
-    });
-
-}
-
-//https://openlayers.org/en/latest/examples/select-features.html
-//selectInteraction.getFeatures();
-
-/**********************************/
-/*           Interaction          */
-/**********************************/
+/***************************************************************/
+/***************************************************************/
+/***                        Interaction                      ***/
+/***************************************************************/
+/***************************************************************/
 
 let selectElement = "singleselect";
 // lookup for selection objects
@@ -177,53 +178,25 @@ map.on('click', function (event) {
         // add selected feature to lookup
         selection[fid] = feature;
 
-        // compare the coordinates with the features to get the id of the selected one
-        getFeatureIDFromCoordinates(ol.proj.toLonLat(selection[fid].getGeometry().getCoordinates()));
+        if (currentFeatureEditing === "course") {
+            setCourseFeature();
+        } else {
+            setPointOfInterestFromCoordinates(ol.proj.toLonLat(selection[fid].getGeometry().getCoordinates()));
+        }
+
+
     } else {
         overlay.setPosition(undefined);
         console.log("There is no feature(s) here");
     }
 });
 
-let temp_id_num = 1;
+/***************************************************************/
+/***************************************************************/
+/***                           Popup                         ***/
+/***************************************************************/
+/***************************************************************/
 
-function getFeatureIDFromCoordinates(coordinates) {
-    // Get the array of features
-    let allFeatures = vector.getSource().getFeatures();
-
-    // Go through this array and get coordinates of their geometry.
-    allFeatures.forEach(function (feature) {
-
-        if ((ol.proj.toLonLat(feature.getGeometry().getCoordinates())[0] === coordinates[0]) &&
-            (ol.proj.toLonLat(feature.getGeometry().getCoordinates())[1] === coordinates[1])) {
-
-            if (feature.getId() === undefined) { // this is a newly created feature
-                console.log("Newly created feature");
-                feature.setId("new_point_of_interest_" + temp_id_num++);
-                showPopup(feature, "Créer le point d'intérêt");
-            } else {
-                console.log("Id of the selected feature : " + feature.getId());
-                showPopup(feature, "Editer le point d'intérêt");
-            }
-
-        }
-
-    });
-    return undefined;
-}
-
-
-// TODO : popup à la création d'un point d'intérêt
-
-
-/**********************************/
-/*             Popup              */
-/**********************************/
-
-/**
- * Add a click handler to hide the popup.
- * @return {boolean} Don't follow the href.
- */
 closer.onclick = function () {
     overlay.setPosition(undefined);
     closer.blur();
@@ -231,48 +204,40 @@ closer.onclick = function () {
 };
 
 function showPopup(feature, header) {
-    content.innerHTML = '<h6>' + header + '</h6><div class="input-group input-group-sm"><input type="text" class="form-control" placeholder="intitulé du poste"><textarea class="form-control" rows="4" cols="50">\n' +
-        'At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies.\n' +
-        '</textarea></div>' +
-        '<button id="type" class="btn btn-xs btn-danger" onclick="removeFeature(\'' + feature.getId() + '\')">supprimer</button><button id="type" class="btn btn-xs btn-default">enregistrer</button>';
+    content.innerHTML = '<h6>' + header + '</h6>' +
+        '<div class="input-group input-group-sm">' +
+        '<input type="text" class="form-control" placeholder="intitulé du poste">' +
+        '</div>' +
+        '<button id="type" class="btn btn-xs btn-danger" onclick="removePointOfInterest(\'' + feature.getId() + '\')">supprimer</button>' +
+        '<button id="type" class="btn btn-xs btn-default">enregistrer</button>';
     overlay.setPosition(feature.getGeometry().getCoordinates());
 }
 
-function removeFeature(featureId) {
-    let feature = vector.getSource().getFeatureById(featureId);
-    // remove on the map
-    source.removeFeature(feature);
-    // remove on the DB
-    if (feature.getId().indexOf("new") === -1) {
-        pointOfInterestArrayToStore.push({
-            id: "remove_" + feature.getId().replace('point_of_interest_', '')
-        });
-    }
-
-    overlay.setPosition(undefined);
-}
+/***************************************************************/
+/***************************************************************/
+/***                         Top Panel                       ***/
+/***************************************************************/
+/***************************************************************/
 
 let editing = false;
 
 function animationTest() {
-
     if (editing) {
         resetInteraction();
         $('#add_point_of_interest_button').hide();
         $('#add_course_button').hide();
-        $('#edit_button_icon').text(' Éditer la carte');
-        $('#edit_button_icon').attr('class', 'fas fa-map-marked');
+        $('#edit_button_icon').text(' Éditer la carte')
+            .attr('class', 'fas fa-map-marked');
         $('#edit_button').attr('class', 'btn btn-info');
         editing = false;
     } else {
-        $('#edit_button_icon').text('');
-        $('#edit_button_icon').attr('class', 'fas fa-check');
+        $('#edit_button_icon').text('')
+            .attr('class', 'fas fa-check');
         $('#edit_button').attr('class', 'btn btn-success');
         $('#add_point_of_interest_button').show("fast");
         $('#add_course_button').show("fast");
         editing = true;
     }
-
 }
 
 let idCurrentEditedCourse = 0;
@@ -295,8 +260,11 @@ function nextCourse() {
     updateSelectedCourse();
 }
 
-let courseColorArray = ["#5c6bc0", "#ef5350", "#ffa726", "#66bb6a", "#7e57c2"];
+let courseColorArray = ["#5c6bc0", "#ef5350", "#ffa726", "#66bb6a", "#7e57c2", "#26c6da", "#ec407a"]; // https://material.io/tools/color #400 color range
+
 function updateSelectedCourse() {
-    $('#current_course').css('background-color', courseColorArray[idCurrentEditedCourse]);
-    $('#current_course').text(courseArray[idCurrentEditedCourse].sport_label);
+    $('#current_course').css('background-color', courseColorArray[idCurrentEditedCourse])
+        .text(courseArray[idCurrentEditedCourse].sport_label);
 }
+
+//TODO measurement: https://openlayers.org/en/latest/examples/measure.html

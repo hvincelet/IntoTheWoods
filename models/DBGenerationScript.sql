@@ -15,6 +15,8 @@ CREATE USER 'gluser2018'@'localhost' IDENTIFIED BY 'glpass2018';
 GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'localhost' IDENTIFIED BY 'glpass2018' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'148.60.%.%' IDENTIFIED BY 'glpass2018' WITH GRANT OPTION;
 
+-- sequelize-auto -o "./models" -d intoTheWoodsDB -h localhost -u gluser2018 -x glpass2018 -e mysql
+
 -- -----------------------------------------------------
 -- Schema intoTheWoodsDB
 -- -----------------------------------------------------
@@ -188,9 +190,11 @@ ENGINE = InnoDB;
 -- Table `intoTheWoodsDB`.`track_point`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`track_point` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `id_track` INT UNSIGNED NOT NULL,
   `lat` DOUBLE NULL,
   `lng` DOUBLE NULL,
+  PRIMARY KEY (`id`),
   CONSTRAINT `fk_track_point`
     FOREIGN KEY (`id_track`)
     REFERENCES `intoTheWoodsDB`.`course` (`id`)
