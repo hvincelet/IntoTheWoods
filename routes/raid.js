@@ -3,16 +3,15 @@ const models = require('../models');
 
 const Nominatim = require('nominatim-geocoder');
 const geocoder = new Nominatim();
+const Sequelize = require('sequelize');
+
 
 exports.init = function(req, res){
     const user = connected_user(req.sessionID);
     res.render(pages_path + "template.ejs", {
         pageTitle: "Création d'un Raid",
         page: "create_raid/start",
-        userName_fn: user.first_name,
-        userName_ln: user.last_name,
-        userName_initials: user.initials,
-        userPicture: user.picture
+        user: user
     });
 };
 exports.displayDescriptionForm = function (req, res) {
@@ -20,10 +19,7 @@ exports.displayDescriptionForm = function (req, res) {
     res.render(pages_path + "template.ejs", {
         pageTitle: "Création d'un Raid",
         page: "create_raid/description",
-        userName_fn: user.first_name,
-        userName_ln: user.last_name,
-        userName_initials: user.initials,
-        userPicture: user.picture
+        user: user
     });
 };
 
@@ -38,8 +34,8 @@ exports.createRaid = function (req, res) {
         lng: 0.0
     }).then(function (raid_created) {
         let user = connected_user(req.sessionID);
-
         user.idCurrentRaid = raid_created.dataValues.id;
+        console.log("user.idCurrentRaid = "+user.idCurrentRaid);
         models.team.create({
             id_raid: user.idCurrentRaid,
             id_organizer: user.login
@@ -90,18 +86,17 @@ exports.displaySportsTable = function (req, res) {
             pageTitle: "Création d'un Raid",
             page: "create_raid/sports",
             sports: sports,
-            userName_fn: user.first_name,
-            userName_ln: user.last_name,
-            userName_initials: user.initials,
-            userPicture: user.picture
+            user: user
         });
     });
 
 };
 
 exports.saveSportsRanking = function (req, res) {
-
-    const user = connected_user(req.sessionID);
+    let user = connected_user(req.sessionID);
+    if(user.idCurrentRaid == -1){
+        return res.redirect('/dashboard');
+    }
     JSON.parse(req.body.sports_list).forEach(function (sport_row) {
 
         models.course.create({
@@ -110,7 +105,18 @@ exports.saveSportsRanking = function (req, res) {
             id_sport: sport_row.sport,
             id_raid: user.idCurrentRaid
         }).then(function () {
-            res.redirect('/editraid/map');
+            models.raid.findOne({
+                attributes: ['id', 'name', 'edition'],
+                where: {id: user.idCurrentRaid}
+            }).then(function(unique_raid_found){
+                user.raid_list.push({
+                    id: user.idCurrentRaid,
+                    name: unique_raid_found.dataValues.name,
+                    edition: unique_raid_found.dataValues.edition
+                });
+                console.log(user.raid_list);
+                res.redirect('/editraid/map/' + user.idCurrentRaid);
+            });
         });
 
     });
@@ -136,71 +142,15 @@ exports.getGeocodedResults = function (req, res) {
 
 };
 
-exports.displayMap = function (req, res) {
-
+exports.displayAllRaids = function (req, res) {
     const user = connected_user(req.sessionID);
-    models.raid.findOne({ // loads the map associated with the raid "idCurrentRaid"
-        where: {
-            id: user.idCurrentRaid
-        }
-    }).then(function (raid_found) {
-        models.course.findAll({
-            where: {
-                id_raid: raid_found.id
-            }
-        }).then(function (courses_found) {
-
-            let pointOfInterestArray = [];
-            models.point_of_interest.findAll({ // loads the array of points-of-interest
-                where: {
-                    id_track: courses_found[0].id
-                }
-            }).then(function (points_of_interest_found) {
-                points_of_interest_found.forEach(function (point_of_interest) {
-                    pointOfInterestArray.push({
-                        id: point_of_interest.id,
-                        lonlat: [point_of_interest.lng, point_of_interest.lat]
-                    });
-                });
-
-                res.render(pages_path + "template.ejs", {
-                    pageTitle: "Gestion des Raids",
-                    page: "edit_raid/map",
-                    userName_fn: user.first_name,
-                    userName_ln: user.last_name,
-                    userName_initials: user.initials,
-                    userPicture: user.picture,
-                    raid: raid_found.dataValues,
-                    courseArray: courses_found,
-                    pointOfInterestArray: pointOfInterestArray
-                });
-            });
+    if(user.raid_list.length != 0) {
+        res.render(pages_path + "template.ejs", {
+            pageTitle: "Gestion des Raids",
+            page: "edit_raid/all",
+            user: user
         });
-    });
-
-};
-
-exports.storeMapDatas = function (req, res) {
-
-    req.body.pointOfInterestArray.forEach(function (vector) {
-
-        models.point_of_interest.findById(vector.id)
-            .then(function (vector_found) {
-                if (vector_found !== null) { // point of interest is already present in DB, it must be updated
-
-                    vector_found.update({
-                        lat: vector.lat,
-                        lng: vector.lng
-                    }).then(() => {
-                    })
-
-                } else { // this is a new point, it must be added
-                    models.point_of_interest.create({
-                        id_track: req.body.courseArray[0].id,
-                        lat: vector.lat,
-                        lng: vector.lng
-                    })
-                }
-            });
-    })
+    }else{
+        res.redirect('/dashboard');
+    }
 };

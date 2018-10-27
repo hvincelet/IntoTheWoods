@@ -98,8 +98,10 @@ app.route('/createraid/sports')
     .get(checkAuth, raid.displaySportsTable)
     .post(checkAuth, raid.saveSportsRanking);
 
-//routes dedicated to the map
-app.route('/editraid/map')
+app.route('/editraid')
+    .get(checkAuth, raid.displayAllRaids);
+
+app.route('/editraid/map/:id')
     .get(checkAuth, map.displayMap)
     .post(checkAuth, map.storeMapDatas);
 

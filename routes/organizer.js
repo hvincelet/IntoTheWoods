@@ -34,10 +34,7 @@ exports.dashboard = function (req, res) {
     res.render(pages_path + "template.ejs", {
         pageTitle: "Tableau de bord",
         page: "dashboard",
-        userName_fn: user.first_name,
-        userName_ln: user.last_name,
-        userName_initials: user.initials,
-        userPicture: user.picture
+        user: user
     });
 };
 
@@ -69,8 +66,8 @@ exports.idVerification = function (req, res) {
                 last_name: organizer_found.dataValues.last_name,
                 initials: organizer_found.dataValues.first_name.charAt(0).concat(organizer_found.dataValues.last_name.charAt(0)).toUpperCase(),
                 picture: organizer_found.dataValues.picture,
-                raid_list: [],
-                idCurrentRaid: 0
+                raid_list: [], // {id, name, edition}
+                idCurrentRaid: -1
             }
 
             let team_model = models.team;
@@ -87,7 +84,7 @@ exports.idVerification = function (req, res) {
                         //date > date_of_the_day - one_month
                     }
                 }],
-                attributes: ['id', 'name', 'edition'],
+                attributes: ['id', 'name', 'edition']
             }).then(function(raids_found){
                 if(raids_found){
                     raids_found.forEach(function(tuple){

@@ -2,10 +2,13 @@ const pages_path = "../views/pages/";
 const models = require('../models');
 
 exports.displayMap = function (req, res) {
-    models.raid.findOne({ // loads the map associated with the raid "idCurrentRaid"
+    const user = connected_user(req.sessionID);
+    if(!user.raid_list.find(function(raid){return raid.id == req.params.id})){
+        return res.redirect('/dashboard');
+    }
+    models.raid.findOne({
         where: {
-            //id: raid.idCurrentRaid
-            id: 1 // for tests
+            id: req.params.id
         }
     }).then(function (raid_found) {
         models.course.findAll({
@@ -38,14 +41,10 @@ exports.displayMap = function (req, res) {
                             lonlat: [point_of_interest.lng, point_of_interest.lat]
                         });
                     });
-                    const user = connected_user(req.sessionID);
                     res.render(pages_path + "template.ejs", {
                         pageTitle: "Gestion des Raids",
                         page: "edit_raid/map",
-                        userName_fn: user.first_name,
-                        userName_ln: user.last_name,
-                        userName_initials: user.initials,
-                        userPicture: user.picture,
+                        user: user,
                         raid: raid_found.dataValues,
                         courseArray: courses_found,
                         pointOfInterestArray: pointOfInterestArray
