@@ -5,20 +5,44 @@ const crypto = require('crypto');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
 
-exports.displayHome = function (req, res) {
-    console.log(user.picture);
+exports.displayHome = function(req, res) {
+    models.raid.findAll({
+        attributes: ['id', 'name', 'date', 'edition', 'place']
+    }).then(function (raids_found){
+        let raids = [];
+        raids_found.forEach(function(raid){
+            raids.push({
+                id: raid.dataValues.id,
+                name: raid.dataValues.name,
+                date: raid.dataValues.date,
+                edition: raid.dataValues.edition,
+                place: raid.dataValues.place
+            });
+        });
+        const user = connected_user(req.sessionID);
+        res.render(pages_path + "contents/homepage.ejs", {
+            pageTitle: "Accueil",
+            page: "homepage",
+            raids: raids,
+            user: user
+        });
+    });
+}
+
+exports.dashboard = function (req, res) {
+    const user = connected_user(req.sessionID);
     res.render(pages_path + "template.ejs", {
-        pageTitle: "Accueil",
-        page: "accueil",
-        userName_fn: user.first_name,
-        userName_ln: user.last_name,
-        userName_initials: user.initials,
-        userPicture: user.picture
+        pageTitle: "Tableau de bord",
+        page: "dashboard",
+        user: user
     });
 };
 
 exports.displayLogScreen = function (req, res) {
-    user.authenticated = false;
+    const user = connected_user(req.sessionID);
+    if(user) {
+        return res.redirect("/");
+    }
     res.render(pages_path + "login.ejs", {
         pageTitle: "Connexion"
     });
@@ -35,12 +59,16 @@ exports.idVerification = function (req, res) {
         }
     }).then(function (organizer_found) {
         if (organizer_found !== null) { // the (email,password) couple exists => the organizer is authenticated
-            user.authenticated = true;
-            user.login = organizer_found.dataValues.email;
-            user.first_name = organizer_found.dataValues.first_name;
-            user.last_name = organizer_found.dataValues.last_name;
-            user.initials = user.first_name.charAt(0).concat(user.last_name.charAt(0)).toUpperCase();
-            user.picture = organizer_found.dataValues.picture;
+            let user = {
+                uuid: req.sessionID,
+                login: organizer_found.dataValues.email,
+                first_name: organizer_found.dataValues.first_name,
+                last_name: organizer_found.dataValues.last_name,
+                initials: organizer_found.dataValues.first_name.charAt(0).concat(organizer_found.dataValues.last_name.charAt(0)).toUpperCase(),
+                picture: organizer_found.dataValues.picture,
+                raid_list: [], // {id, name, edition}
+                idCurrentRaid: -1
+            }
 
             let team_model = models.team;
             let raid_model = models.raid;
@@ -56,7 +84,7 @@ exports.idVerification = function (req, res) {
                         //date > date_of_the_day - one_month
                     }
                 }],
-                attributes: ['id', 'name', 'edition'],
+                attributes: ['id', 'name', 'edition']
             }).then(function(raids_found){
                 if(raids_found){
                     raids_found.forEach(function(tuple){
@@ -67,8 +95,9 @@ exports.idVerification = function (req, res) {
                         });
                     });
                 }
+                connected_users.push(user);
             });
-            return res.redirect('/');
+            return res.redirect('/dashboard');
         } else {
             res.render(pages_path + "login.ejs", {
                 pageTitle: "Connexion",
@@ -77,6 +106,18 @@ exports.idVerification = function (req, res) {
         }
     });
 };
+
+exports.logout = function (req, res) {
+    let connected_user_index;
+    const user = connected_users.find(function(user, index){
+        connected_user_index = index;
+        return user.uuid == req.sessionID;
+    });
+    if(user){
+        connected_users.splice(connected_user_index, 1);
+    }
+    res.redirect('/');
+}
 
 exports.displayRegister = function (req, res) {
     res.render(pages_path + "register.ejs", {
@@ -96,7 +137,6 @@ exports.register = function (req, res) {
         if (organizer_found !== null) {
             res.send(JSON.stringify({msg: "already-exist"}));
         } else {
-            console.log(jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64'));
             models.organizer.create({
                 email: req.body.email,
                 first_name: req.body.firstname,

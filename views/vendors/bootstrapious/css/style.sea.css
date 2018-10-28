@@ -473,7 +473,7 @@ nav.navbar a.menu-btn:hover {
     font-size: .85rem;
 }
 
-.side-navbar li ul.collapse a {
+.side-navbar li ul.collapse a .active{
     border-left: 2px solid #379392;
 }
 
