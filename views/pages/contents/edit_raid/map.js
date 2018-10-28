@@ -73,6 +73,53 @@ function addInteractions() {
     });
     map.addInteraction(draw);
 
+
+
+    createMeasureTooltip();
+
+
+
+    var listener;
+    draw.on('drawstart',
+        function(evt) {
+            // set sketch
+            sketch = evt.feature;
+
+            /** @type {module:ol/coordinate~Coordinate|undefined} */
+            var tooltipCoord = evt.coordinate;
+
+            listener = sketch.getGeometry().on('change', function(evt) {
+                var geom = evt.target;
+                var output;
+                if (geom instanceof ol.geom.Polygon) {
+                    output = formatArea(geom);
+                    tooltipCoord = geom.getInteriorPoint().getCoordinates();
+                } else if (geom instanceof ol.geom.LineString) {
+                    output = formatLength(geom);
+                    tooltipCoord = geom.getLastCoordinate();
+                }
+                measureTooltipElement.innerHTML = output;
+                measureTooltip.setPosition(tooltipCoord);
+            });
+        }, this);
+
+    draw.on('drawend',
+        function() {
+            measureTooltipElement.innerHTML += " de " + orderedCourseArray[idCurrentEditedCourse].sport_label;
+            measureTooltipElement.className = 'tooltip tooltip-static';
+            measureTooltipElement.style.backgroundColor = courseColorArray[idCurrentEditedCourse];
+            measureTooltipElement.style.borderTopColor = courseColorArray[idCurrentEditedCourse];
+
+            measureTooltip.setOffset([0, -7]);
+            // unset sketch
+            sketch = null;
+            // unset tooltip so that a new one can be created
+            measureTooltipElement = null;
+            createMeasureTooltip();
+            ol.Observable.unByKey(listener);
+        }, this);
+
+
 }
 
 snap = new ol.interaction.Snap({source: source});
@@ -282,16 +329,16 @@ function showPopup(feature, header) {
 let helpTooltipElement;
 let helpTooltip;
 
-createHelpTooltip();
-
 let pointerMoveHandler = function (evt) {
-    if (editing) {
+    if (currentFeatureEditing === "course") {
         if (evt.dragging) {
             return;
         }
         helpTooltip.setPosition(evt.coordinate);
     }
 };
+
+createHelpTooltip();
 
 map.on('pointermove', pointerMoveHandler);
 
@@ -320,6 +367,57 @@ function addHelpTooltipOverlay(msg){
 function updateHelpTooltipOverlay(msg){
     helpTooltipElement.innerHTML = msg;
 }
+
+/***************************************************************/
+/***************************************************************/
+/***                     Measure Tooltip                     ***/
+/***************************************************************/
+/***************************************************************/
+
+let measureTooltipElement;
+let measureTooltip;
+
+let formatLength = function(line) {
+    let length = ol.sphere.getLength(line);
+    let output;
+    if (length > 100) {
+        output = (Math.round(length / 1000 * 100) / 100) +
+            ' ' + 'km';
+    } else {
+        output = (Math.round(length * 100) / 100) +
+            ' ' + 'm';
+    }
+    return output;
+};
+
+let formatArea = function(polygon) {
+    let area = getArea(polygon);
+    let output;
+    if (area > 10000) {
+        output = (Math.round(area / 1000000 * 100) / 100) +
+            ' ' + 'km<sup>2</sup>';
+    } else {
+        output = (Math.round(area * 100) / 100) +
+            ' ' + 'm<sup>2</sup>';
+    }
+    return output;
+};
+
+function createMeasureTooltip() {
+    if (measureTooltipElement) {
+        measureTooltipElement.parentNode.removeChild(measureTooltipElement);
+    }
+    measureTooltipElement = document.createElement('div');
+    measureTooltipElement.className = 'tooltip tooltip-measure';
+    measureTooltip = new ol.Overlay({
+        element: measureTooltipElement,
+        offset: [0, -15],
+        positioning: 'bottom-center'
+    });
+    map.addOverlay(measureTooltip);
+}
+
+
 
 /***************************************************************/
 /***************************************************************/
@@ -377,3 +475,4 @@ function updateSelectedCourse() {
 }
 //TODO measurement: https://openlayers.org/en/latest/examples/measure.html
 //TODO Centré sur la france si pas de localisation
+//TODO bouton pour enregistrer les changements
