@@ -218,7 +218,7 @@ function storeDatasToDB() {
     };
     $.ajax({
         type: 'POST',
-        url: '/editraid/map',
+        url: '/editraid/map/' + raid.id,
         data: data,
         success: function (response) {
         },
@@ -434,6 +434,6 @@ function nextCourse() {
 //TODO Centré sur la france si pas de localisation
 //TODO bouton pour enregistrer les changements
 
-function createHelperPost(){
+function createHelperPost() {
 
 }
