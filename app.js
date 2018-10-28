@@ -101,9 +101,18 @@ app.route('/createraid/sports')
 app.route('/editraid')
     .get(checkAuth, raid.displayAllRaids);
 
-app.route('/editraid/map/:id')
+app.route('/editraid/:id/map')
     .get(checkAuth, map.displayMap)
     .post(checkAuth, map.storeMapDatas);
+
+app.route('/team/:raid_id')
+    .get(checkAuth, organizer.displayTeamManager);
+
+app.route('/team/:raid_id/inviteorganizers')
+    .post(checkAuth, organizer.shareRaidToOthersOrganizers);
+
+app.route('/team/:raid_id/invitehelpers')
+    .post(checkAuth, organizer.inviteHelper);
 
 app.route('/termsandpolicy')
     .get(misc.cgu);

@@ -115,7 +115,7 @@ exports.saveSportsRanking = function (req, res) {
                     edition: unique_raid_found.dataValues.edition
                 });
                 console.log(user.raid_list);
-                res.redirect('/editraid/map/' + user.idCurrentRaid);
+                res.redirect('/editraid/' + user.idCurrentRaid + '/map');
             });
         });
 
