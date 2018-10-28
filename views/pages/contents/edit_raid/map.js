@@ -16,10 +16,10 @@ let vector = new ol.layer.Vector({
         }),
         stroke: new ol.style.Stroke({
             color: '#5c6bc0',
-            width: 3
+            width: 6
         }),
         image: new ol.style.Circle({
-            radius: 7,
+            radius: 6,
             fill: new ol.style.Fill({
                 color: '#e53935'
             })
@@ -53,6 +53,7 @@ let map = new ol.Map({
 });
 
 loadPointsOfInterest();
+loadCourses();
 
 /**********************************/
 /*  Fn dedicated to PoI edition   */
@@ -89,19 +90,53 @@ function addCourse() {
 
     console.log(courseArray); // besoin du nom du sport
 
-    $('#panel-right').fadeIn();
-    typeSelect = "LineString";
-    addInteractions();
+function loadPointsOfInterest() {
+    pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
+        let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
+        let feature = new ol.Feature({
+                geometry: geom,
+            }
+        );
+        feature.setId("point_of_interest_" + pointOfInterest.id);
+        source.addFeature(feature);
+    });
 }
 
-function resetInteraction() {
-    $('#panel-right').hide();
-    map.removeInteraction(draw);
+function loadCourses() {
+    let courseID = 0;
+    courseArrayToLoad.forEach(function (course) {
+        if (course !== null && course.length > 1) {
+            let geom = new ol.geom.LineString(course);
+            let feature = new ol.Feature({
+                    geometry: geom,
+                }
+            );
+            let order_num = 0;
+            orderedCourseArray.forEach(function (orderedCourse) {
+                if (orderedCourse.id === courseID){
+                    order_num = orderedCourse.order_num;
+                }
+            });
+
+            feature.setId("course_" + courseID);
+            feature.setStyle(
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: courseColorArray[order_num-1],
+                        width: 6
+                    })
+                })
+
+            );
+            source.addFeature(feature);
+        }
+        courseID++;
+    });
 }
 
 
-// I/O DB
-const pointOfInterestArrayToStore = [];
+let pointOfInterestArrayToStore = [];
+let courseArrayToStore = [];
 
 function storeDatasToDB() {
     let features = vector.getSource().getFeatures();
@@ -114,14 +149,15 @@ function storeDatasToDB() {
                 lat: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[1]
             });
         } else {
-            console.log("not a point_of_interest");
+            console.log("error: unrecognized feature");
         }
 
     });
 
     let data = {
         pointOfInterestArray: pointOfInterestArrayToStore,
-        courseArray: courseArray
+        courseArray: courseArrayToStore,
+        defaultCourseArrayID: orderedCourseArray[0].id
     };
     $.ajax({
         type: 'POST',
@@ -277,7 +313,7 @@ let idCurrentEditedCourse = 0;
 
 function previousCourse() {
     if (idCurrentEditedCourse === 0) {
-        idCurrentEditedCourse = courseArray.length - 1;
+        idCurrentEditedCourse = orderedCourseArray.length - 1;
     } else {
         idCurrentEditedCourse--;
     }
@@ -285,7 +321,7 @@ function previousCourse() {
 }
 
 function nextCourse() {
-    if (idCurrentEditedCourse === courseArray.length - 1) {
+    if (idCurrentEditedCourse === orderedCourseArray.length - 1) {
         idCurrentEditedCourse = 0;
     } else {
         idCurrentEditedCourse++;
