@@ -19,10 +19,10 @@ let vector = new ol.layer.Vector({
         }),
         stroke: new ol.style.Stroke({
             color: '#5c6bc0',
-            width: 3
+            width: 6
         }),
         image: new ol.style.Circle({
-            radius: 7,
+            radius: 6,
             fill: new ol.style.Fill({
                 color: '#e53935'
             })
@@ -56,6 +56,7 @@ let map = new ol.Map({
 });
 
 loadPointsOfInterest();
+loadCourses();
 
 /***************************************************************/
 /***************************************************************/
@@ -99,7 +100,6 @@ function resetInteraction() {
 
 function loadPointsOfInterest() {
     pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
-
         let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
         let feature = new ol.Feature({
                 geometry: geom,
@@ -111,7 +111,37 @@ function loadPointsOfInterest() {
 }
 
 function loadCourses() {
+    let courseID = 0;
+    courseArrayToLoad.forEach(function (course) {
+        if (course !== null && course.length > 1) {
+            let geom = new ol.geom.LineString(course);
+            let feature = new ol.Feature({
+                    geometry: geom,
+                }
+            );
+            let order_num = 0;
+            orderedCourseArray.forEach(function (orderedCourse) {
+                if (orderedCourse.id === courseID){
+                    order_num = orderedCourse.order_num;
+                }
+            });
+
+            feature.setId("course_" + courseID);
+            feature.setStyle(
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: courseColorArray[order_num-1],
+                        width: 6
+                    })
+                })
+
+            );
+            source.addFeature(feature);
+        }
+        courseID++;
+    });
 }
+
 
 let pointOfInterestArrayToStore = [];
 let courseArrayToStore = [];
@@ -132,7 +162,7 @@ function storeDatasToDB() {
                 track_point_array: feature.getGeometry().getCoordinates()
             });
         } else {
-            console.log("unrecognized feature");
+            console.log("error: unrecognized feature");
         }
 
     });
@@ -140,7 +170,7 @@ function storeDatasToDB() {
     let data = {
         pointOfInterestArray: pointOfInterestArrayToStore,
         courseArray: courseArrayToStore,
-        defaultCourseArrayID: courseArray[0].id
+        defaultCourseArrayID: orderedCourseArray[0].id
     };
     $.ajax({
         type: 'POST',
@@ -244,7 +274,7 @@ let idCurrentEditedCourse = 0;
 
 function previousCourse() {
     if (idCurrentEditedCourse === 0) {
-        idCurrentEditedCourse = courseArray.length - 1;
+        idCurrentEditedCourse = orderedCourseArray.length - 1;
     } else {
         idCurrentEditedCourse--;
     }
@@ -252,19 +282,12 @@ function previousCourse() {
 }
 
 function nextCourse() {
-    if (idCurrentEditedCourse === courseArray.length - 1) {
+    if (idCurrentEditedCourse === orderedCourseArray.length - 1) {
         idCurrentEditedCourse = 0;
     } else {
         idCurrentEditedCourse++;
     }
     updateSelectedCourse();
-}
-
-let courseColorArray = ["#5c6bc0", "#ef5350", "#ffa726", "#66bb6a", "#7e57c2", "#26c6da", "#ec407a"]; // https://material.io/tools/color #400 color range
-
-function updateSelectedCourse() {
-    $('#current_course').css('background-color', courseColorArray[idCurrentEditedCourse])
-        .text(courseArray[idCurrentEditedCourse].sport_label);
 }
 
 //TODO measurement: https://openlayers.org/en/latest/examples/measure.html

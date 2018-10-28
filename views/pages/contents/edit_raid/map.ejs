@@ -96,7 +96,7 @@
 
                             <div id="panel-right" class="btn-group btn-group" role="group" aria-label="group" style="display: none">
                                 <button id="previous_button" class="btn btn-default" onclick="previousCourse()"><i class="fas fa-angle-left"></i></button>
-                                <button id="current_course" class="btn btn-default" style="width:150px; color:white"><i></i></button>
+                                <button id="current_course" class="btn btn-default" style="width:160px; color:white"><i></i></button>
                                 <button id="next_button" class="btn btn-default" onclick="nextCourse()"><i class="fas fa-angle-right"></i></button>
                             </div>
 
@@ -106,8 +106,9 @@
                             <div id="popup-content"></div>
                         </div>
                         <script> const raid = <%- JSON.stringify(raid) %>; </script>
-                        <script> const courseArray = <%- JSON.stringify(courseArray) %></script>
+                        <script> const orderedCourseArray = <%- JSON.stringify(orderedCourseArray) %></script>
                         <script> const pointOfInterestArrayToLoad = <%- JSON.stringify(pointOfInterestArrayToLoad) %>; </script>
+                        <script> const courseArrayToLoad = <%- JSON.stringify(courseArrayToLoad) %>; </script>
                         <script src="/views/pages/contents/edit_raid/point_of_interest.js"></script>
                         <script src="/views/pages/contents/edit_raid/course.js"></script>
                         <script src="/views/pages/contents/edit_raid/map.js"></script>

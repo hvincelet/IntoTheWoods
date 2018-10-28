@@ -13,28 +13,35 @@ exports.displayMap = function (req, res) {
                 id_raid: raid_found.id
             }
         }).then(function (courses_found) {
-            models.sport.findAll({}).then(function (all_sports) {
+            models.sport.findAll().then(function (all_sports) {
+                courses_found.sort(function (a, b) {
+                    return a.order_num - b.order_num;
+                });
+                let courseArrayToLoad = [];
                 courses_found.forEach(function (course) {
+                    console.log(course.id);
+                    courseArrayToLoad[course.id] = [];
+
+                    models.track_point.findAll({
+                        where: {
+                            id_track: course.id
+                        }
+                    }).then(function (track_points_found) {
+
+                        track_points_found.forEach(function (track_point) {
+                            courseArrayToLoad[course.id].push(
+                                [track_point.lng, track_point.lat]
+                            );
+                        });
+
+                    });
+
                     all_sports.forEach(function (sport) {
                         if (course.id_sport === sport.id) {
                             course.dataValues["sport_label"] = sport.name;
                         }
                     });
                 });
-                courses_found.sort(function (a, b) {
-                    return a.order_num - b.order_num;
-                });
-
-
-                // let courseArrayToLoad = [];
-                // models.track_point.findAll({
-                //     where: {
-                //         id_track: course
-                //     }
-                // }).then(function () {
-                //
-                // })
-
 
                 let pointOfInterestArrayToLoad = [];
                 models.point_of_interest.findAll({ // loads the array of points-of-interest
@@ -57,8 +64,9 @@ exports.displayMap = function (req, res) {
                         userName_initials: user.initials,
                         userPicture: user.picture,
                         raid: raid_found.dataValues,
-                        courseArray: courses_found,
-                        pointOfInterestArrayToLoad: pointOfInterestArrayToLoad
+                        orderedCourseArray: courses_found,
+                        pointOfInterestArrayToLoad: pointOfInterestArrayToLoad,
+                        courseArrayToLoad: courseArrayToLoad
                     });
                 });
 
