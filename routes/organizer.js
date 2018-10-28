@@ -208,7 +208,6 @@ exports.validate = function (req, res) {
                 last_name: organizer.dataValues.last_name
             });
         });
-
         let raid_model = models.raid;
         let course_model = models.course;
         let point_of_interest_model = models.point_of_interest;
