@@ -3,6 +3,7 @@ function addPointOfInterest() {
     currentFeatureEditing = "point_of_interest";
     typeSelect = "Point";
     addInteractions();
+    map.removeOverlay(helpTooltip);
 }
 
 function removePointOfInterest(featureId) {
@@ -38,6 +39,7 @@ function setPointOfInterestFromCoordinates(coordinates) {
                 showPopup(feature, "Editer le point d'intérêt");
             }
 
+            map.removeOverlay(helpTooltip);
         }
     });
 }

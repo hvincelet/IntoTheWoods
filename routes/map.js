@@ -19,7 +19,6 @@ exports.displayMap = function (req, res) {
                 });
                 let courseArrayToLoad = [];
                 courses_found.forEach(function (course) {
-                    console.log(course.id);
                     courseArrayToLoad[course.id] = [];
 
                     models.track_point.findAll({

@@ -4,10 +4,12 @@ function addCourse() {
     currentFeatureEditing = "course";
     typeSelect = "LineString";
     addInteractions();
+    addHelpTooltipOverlay("Un clic pour commencer le tracé");
 }
 
+let number_of_points = 0;
 function setCourseFeature() {
-    // Get the array of features
+        // Get the array of features
     let allFeatures = vector.getSource().getFeatures();
 
     // Go through this array and get coordinates of their geometry.
@@ -26,9 +28,15 @@ function setCourseFeature() {
 
             );
             nextCourse();
+            map.removeOverlay(helpTooltip);
+            number_of_points = 0
         }
 
     });
+    if (++number_of_points === 1){
+        updateHelpTooltipOverlay("Double-clic pour finir le tracé");
+    }
+
 }
 
 let courseColorArray = ["#5c6bc0", "#ef5350", "#ffa726", "#66bb6a", "#7e57c2", "#26c6da", "#ec407a"]; // https://material.io/tools/color #400 color range

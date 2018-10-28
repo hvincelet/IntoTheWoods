@@ -24,7 +24,7 @@ let vector = new ol.layer.Vector({
         image: new ol.style.Circle({
             radius: 6,
             fill: new ol.style.Fill({
-                color: '#e53935'
+                color: '#37474f'
             })
         })
     })
@@ -93,7 +93,7 @@ function resetInteraction() {
 
 /***************************************************************/
 /***************************************************************/
-/***                      Database access                    ***/
+/***                     Database access                     ***/
 /***************************************************************/
 
 /***************************************************************/
@@ -111,7 +111,7 @@ function loadPointsOfInterest() {
 }
 
 function loadCourses() {
-    let courseID = 0;
+    let courseId = 0;
     courseArrayToLoad.forEach(function (course) {
         if (course !== null && course.length > 1) {
             let geom = new ol.geom.LineString(course);
@@ -121,27 +121,24 @@ function loadCourses() {
             );
             let order_num = 0;
             orderedCourseArray.forEach(function (orderedCourse) {
-                if (orderedCourse.id === courseID){
+                if (orderedCourse.id === courseId) {
                     order_num = orderedCourse.order_num;
                 }
             });
-
-            feature.setId("course_" + courseID);
+            feature.setId("course_" + courseId);
             feature.setStyle(
                 new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: courseColorArray[order_num-1],
+                        color: courseColorArray[order_num - 1],
                         width: 6
                     })
                 })
-
             );
             source.addFeature(feature);
         }
-        courseID++;
+        courseId++;
     });
 }
-
 
 let pointOfInterestArrayToStore = [];
 let courseArrayToStore = [];
@@ -213,8 +210,6 @@ map.on('click', function (event) {
         } else {
             setPointOfInterestFromCoordinates(ol.proj.toLonLat(selection[fid].getGeometry().getCoordinates()));
         }
-
-
     } else {
         overlay.setPosition(undefined);
         console.log("There is no feature(s) here");
@@ -245,14 +240,63 @@ function showPopup(feature, header) {
 
 /***************************************************************/
 /***************************************************************/
+/***                       Help Tooltip                      ***/
+/***************************************************************/
+/***************************************************************/
+
+let helpTooltipElement;
+let helpTooltip;
+
+createHelpTooltip();
+
+let pointerMoveHandler = function (evt) {
+    if (editing) {
+        if (evt.dragging) {
+            return;
+        }
+        helpTooltip.setPosition(evt.coordinate);
+    }
+};
+
+map.on('pointermove', pointerMoveHandler);
+
+map.getViewport().addEventListener('mouseout', function () {
+    helpTooltipElement.classList.add('hidden');
+});
+
+function createHelpTooltip() {
+    if (helpTooltipElement) {
+        helpTooltipElement.parentNode.removeChild(helpTooltipElement);
+    }
+    helpTooltipElement = document.createElement('div');
+    helpTooltipElement.className = 'tooltip hidden';
+    helpTooltip = new ol.Overlay({
+        element: helpTooltipElement,
+        offset: [15, 0],
+        positioning: 'center-left'
+    });
+}
+
+function addHelpTooltipOverlay(msg){
+    helpTooltipElement.innerHTML = msg;
+    map.addOverlay(helpTooltip);
+}
+
+function updateHelpTooltipOverlay(msg){
+    helpTooltipElement.innerHTML = msg;
+}
+
+/***************************************************************/
+/***************************************************************/
 /***                         Top Panel                       ***/
 /***************************************************************/
 /***************************************************************/
 
 let editing = false;
 
-function animationTest() {
+function showTopPanel() {
     if (editing) {
+        map.removeOverlay(helpTooltip);
         resetInteraction();
         $('#add_point_of_interest_button').hide();
         $('#add_course_button').hide();
@@ -291,3 +335,4 @@ function nextCourse() {
 }
 
 //TODO measurement: https://openlayers.org/en/latest/examples/measure.html
+//TODO Centré sur la france si pas de localisation
