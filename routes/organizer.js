@@ -256,7 +256,7 @@ exports.validate = function (req, res) {
                                 }
                             }]
                         }]
-                    }]
+                    }]*/
                 }]
             }]
         }).then(function(assignments_found){
