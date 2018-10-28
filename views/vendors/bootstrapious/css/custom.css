@@ -65,7 +65,8 @@ footer.main-footer{
 }
 
 .map {
-    height: 400px;
+    /*height: 400px;*/
+    height: 100%;
     width: 100%;
 }
 
