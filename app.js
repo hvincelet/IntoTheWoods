@@ -105,8 +105,8 @@ app.route('/editraid/:id/map')
     .get(checkAuth, map.displayMap)
     .post(checkAuth, map.storeMapDatas);
 
-app.route('/team/:raid_id')
-    .get(checkAuth, organizer.displayTeamManager);
+app.route('/editraid/:id')
+    .get(checkAuth, organizer.displayRaid);
 
 app.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);

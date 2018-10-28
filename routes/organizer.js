@@ -173,14 +173,13 @@ exports.validate = function(req, res) {
     })
 };
 
-exports.displayTeamManager = function(req, res) {
+exports.displayRaid = function(req, res) {
     const user = connected_user(req.sessionID);
-    if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
+    if(!user.raid_list.find(function(raid){return raid.id == req.params.id})){
         return res.redirect('/dashboard');
     }
 
     let organizers_linked_with_the_current_raid = [];
-    let helpers_linked_with_the_current_raid = []; 
 
     let team_model = models.team;
     let organizer_model = models.organizer;
@@ -233,7 +232,7 @@ exports.displayTeamManager = function(req, res) {
                     model: point_of_interest_model,
                     where: {
                         id_track: Sequelize.col('course.id')
-                    },
+                    }/*,
                     include: [{
                         model: helper_post_model,
                         attributes: ['id', 'description'],
@@ -245,20 +244,20 @@ exports.displayTeamManager = function(req, res) {
                             attributes: ['attributed'],
                             where: {
                                 id_helper_post: Sequelize.col('helper_post.id')
-                            }/*,
+                            },
                             include: [{
                                 model: helper_model,
                                 attributes: ['email', 'last_name', 'first_name'],
                                 where: {
                                     login: Sequelize.col('id_helper')
                                 }
-                            }]*/
+                            }]
                         }]
-                    }]
+                    }]*/
                 }]
             }]
         }).then(function(assignments_found){
-            console.log(assignments_found);
+            let helpers_linked_with_the_current_raid = []; 
             /*helper_model.findAll({
                 attributes: ['login', 'last_name', 'first_name']
             }).then(function(all_helpers){
@@ -271,15 +270,40 @@ exports.displayTeamManager = function(req, res) {
                 });
             });*/
 
+            let courses_linked_with_the_current_raid = [];
 
-            /*res.render(pages_path + "template.ejs", {
-                pageTitle: "Équipe et organisateurs",
-                page: "",
-                user: user,
-                organizers: organizers_linked_with_the_current_raid, // [{email, first_name, last_name}]
-                helpers: helpers_linked_with_the_current_raid, // [{email, first_name, last_name, posts_asked:[{helper_post_id, description}]}]
-                raid_id: req.params.raid_id
-            });*/
+            let course_model = models.course;
+            let sport_model = models.sport;
+
+            sport_model.belongsTo(course_model, {foreignKey: 'id'});
+            sport_model.findAll({
+                attributes: ['name'],
+                include: [{
+                    model: course_model,
+                    attributes: ['order_num'],
+                    where: {
+                        id_sport: Sequelize.col('sport.id'),
+                        id_raid: req.params.id
+                    }
+                }]
+            }).then(function(course_name_and_order_found){
+                course_name_and_order_found.forEach(function(course){
+                    courses_linked_with_the_current_raid.push({
+                        order: course.dataValues.course.order_num,
+                        name: course.dataValues.name
+                    });
+                });
+                /*res.render(pages_path + "template.ejs", {
+                    pageTitle: "Équipe et organisateurs",
+                    page: "",
+                    user: user,
+                    organizers: organizers_linked_with_the_current_raid, // [{email, first_name, last_name}]
+                    helpers: helpers_linked_with_the_current_raid, // [{email, first_name, last_name, posts_asked:[{helper_post_id, description}]}]
+                    courses: courses_linked_with_the_current_raid,
+                    raid_id: req.params.raid_id
+                });*/
+            })
+
         });
 
     });
