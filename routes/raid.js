@@ -94,7 +94,7 @@ exports.displaySportsTable = function (req, res) {
 
 exports.saveSportsRanking = function (req, res) {
     let user = connected_user(req.sessionID);
-    if(user.idCurrentRaid == -1){
+    if(user.idCurrentRaid === -1){
         return res.redirect('/dashboard');
     }
     JSON.parse(req.body.sports_list).forEach(function (sport_row) {
@@ -115,7 +115,7 @@ exports.saveSportsRanking = function (req, res) {
                     edition: unique_raid_found.dataValues.edition
                 });
                 console.log(user.raid_list);
-                res.redirect('/editraid/map/' + user.idCurrentRaid);
+                res.redirect('/editraid/' + user.idCurrentRaid + '/map');
             });
         });
 
@@ -144,7 +144,7 @@ exports.getGeocodedResults = function (req, res) {
 
 exports.displayAllRaids = function (req, res) {
     const user = connected_user(req.sessionID);
-    if(user.raid_list.length != 0) {
+    if(user.raid_list.length !== 0) {
         res.render(pages_path + "template.ejs", {
             pageTitle: "Gestion des Raids",
             page: "edit_raid/all",
@@ -152,5 +152,26 @@ exports.displayAllRaids = function (req, res) {
         });
     }else{
         res.redirect('/dashboard');
+    }
+};
+
+exports.displayRaid = function (req, res) {
+    const user = connected_user(req.sessionID);
+    if(user.raid_list.length === 0) {
+        res.redirect('/dashboard');
+    }else{
+        let found = user.raid_list.find(function (raid) {
+            return raid.id === parseInt(req.params.id);
+        });
+        if(!found){
+            res.redirect('/editraid')
+        }else{
+            res.render(pages_path + "template.ejs", {
+                pageTitle: "Gestion d'un Raid",
+                page: "edit_raid/details",
+                user: user,
+                raid: found
+            });
+        }
     }
 };

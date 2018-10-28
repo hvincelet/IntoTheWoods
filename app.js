@@ -2,7 +2,7 @@ const express = require('express');
 const favicon = require('serve-favicon');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
-const session = require('express-session')
+const session = require('express-session');
 
 const app = express();
 
@@ -42,16 +42,6 @@ let checkAuth = function (req, res, next) {
     next();
 };
 
-/*{
-    login: "",
-    first_name: "",
-    last_name: "",
-    initials: "",
-    picture: first_name[0]+last_name[0],
-    idCurrentRaid: 1 //for tests
-    raid_list: [] // {id, name, edition}
-}*/
-
 const organizer = require('./routes/organizer');
 const raid = require('./routes/raid');
 const map = require('./routes/map');
@@ -80,7 +70,6 @@ app.route('/validate')
     .get(organizer.validate);
 
 //routes dedicated to the raids' pages
-
 app.route('/dashboard')
     .get(checkAuth, organizer.dashboard);
 
@@ -101,12 +90,12 @@ app.route('/createraid/sports')
 app.route('/editraid')
     .get(checkAuth, raid.displayAllRaids);
 
-app.route('/editraid/map/:id')
-    .get(checkAuth, map.displayMap)
-    .post(checkAuth, map.storeMapDatas);
-
 app.route('/editraid/:id')
     .get(checkAuth, raid.displayRaid);
+
+app.route('/editraid/:id/map')
+    .get(checkAuth, map.displayMap)
+    .post(checkAuth, map.storeMapDatas);
 
 app.route('/termsandpolicy')
     .get(misc.cgu);

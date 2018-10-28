@@ -27,7 +27,7 @@ exports.displayHome = function(req, res) {
             user: user
         });
     });
-}
+};
 
 exports.dashboard = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -84,14 +84,16 @@ exports.idVerification = function (req, res) {
                         //date > date_of_the_day - one_month
                     }
                 }],
-                attributes: ['id', 'name', 'edition']
+                attributes: ['id', 'name', 'edition', 'date', 'place']
             }).then(function(raids_found){
                 if(raids_found){
                     raids_found.forEach(function(tuple){
                         user.raid_list.push({
                             id: tuple.dataValues.id,
                             name: tuple.dataValues.name,
-                            edition: tuple.dataValues.edition
+                            edition: tuple.dataValues.edition,
+                            date: tuple.dataValues.date,
+                            place: tuple.dataValues.place
                         });
                     });
                 }
@@ -111,13 +113,13 @@ exports.logout = function (req, res) {
     let connected_user_index;
     const user = connected_users.find(function(user, index){
         connected_user_index = index;
-        return user.uuid == req.sessionID;
+        return user.uuid === req.sessionID;
     });
     if(user){
         connected_users.splice(connected_user_index, 1);
     }
     res.redirect('/');
-}
+};
 
 exports.displayRegister = function (req, res) {
     res.render(pages_path + "register.ejs", {
@@ -171,4 +173,4 @@ exports.validate = function(req, res) {
             successMessage: "Votre adresse mail a bien été confirmée."
         });
     })
-}
+};

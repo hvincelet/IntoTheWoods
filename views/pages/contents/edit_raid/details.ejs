@@ -16,7 +16,88 @@
                         <h4><%= raid.name%> - Édition <%= raid.edition%></h4>
                     </div>
                     <div class="card-body">
-
+                        <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
+                            <tr>
+                                <th class="text-center">Lieu</th>
+                                <th class="text-center">Date</th>
+                                <th class="text-center">Étapes</th>
+                                <th class="text-center">Carte</th>
+                            </tr>
+                            <tr>
+                                <td class="pt-3-half" contenteditable="false" width="40%"><%= raid.place %></td>
+                                <td class="pt-3-half" contenteditable="false" width="20%"><%= raid.date %></td>
+                                <td class="pt-3-half" contenteditable="false" width="20%">steps...</td>
+                                <td class="pt-3-half" contenteditable="false" width="20%">
+                                    <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='/editraid/<%=raid.id%>/map';">Éditer la carte</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="forms">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <h4>Organisateurs</h4>
+                        <button style="margin-left: 1em;" type="button" class="btn btn-info btn-rounded btn-sm" onclick="location.href='mailto:orgamail@mail.com,orgamail2@mail.com?subject=[Into The Woods] Organisation <%=raid.name%> - <%=raid.edition%>';">Contacter tous les organisateurs</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-editable">
+                            <form class="form-inline" style="margin-bottom: 1em !important;">
+                                <input style="margin-right: 0.5em;" type="email" placeholder="Saisir l'adresse e-mail d'un organisateur" class="form-control form-control-success col-sm-4 ">
+                                <button type="button" class="btn btn-primary btn-rounded">Ajouter un organisateur</button>
+                            </form>
+                            <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
+                                <tr>
+                                    <th class="text-center">Nom</th>
+                                    <th class="text-center">Contacter</th>
+                                    <th class="text-center">Supprimer</th>
+                                </tr>
+                                <tr>
+                                    <td class="pt-3-half" contenteditable="false" width="60%">Orga name</td>
+                                    <td width="20%"><span class="table-remove"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='mailto:orgamail@mail.com?subject=[Into The Woods] Organisation <%=raid.name%> - <%=raid.edition%>';">Contacter</button></span></td>
+                                    <td width="20%"><span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button></span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="forms">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <h4>Bénévoles</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-editable">
+                            <button type="button" class="btn btn-primary btn-rounded" style="margin-bottom: 1em;">Ajouter des helpers</button>
+                            <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
+                                <tr>
+                                    <th class="text-center">Nom</th>
+                                    <th class="text-center">Poste(s)</th>
+                                    <th class="text-center">Contacter</th>
+                                    <th class="text-center">Supprimer</th>
+                                </tr>
+                                <tr>
+                                    <td class="pt-3-half" contenteditable="false" width="40%">Helper name</td>
+                                    <td class="pt-3-half" contenteditable="false" width="20%">Poste</td>
+                                    <td width="20%"><span class="table-remove"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='mailto:helpermail@mail.com?subject=[Into The Woods] Bénévolat <%=raid.name%> - <%=raid.edition%>';">Contacter</button></span></td>
+                                    <td width="20%"><span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button></span></td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
