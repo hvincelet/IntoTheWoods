@@ -74,21 +74,19 @@ function addInteractions() {
     map.addInteraction(draw);
 
 
-
     createMeasureTooltip();
-
 
 
     var listener;
     draw.on('drawstart',
-        function(evt) {
+        function (evt) {
             // set sketch
             sketch = evt.feature;
 
             /** @type {module:ol/coordinate~Coordinate|undefined} */
             var tooltipCoord = evt.coordinate;
 
-            listener = sketch.getGeometry().on('change', function(evt) {
+            listener = sketch.getGeometry().on('change', function (evt) {
                 var geom = evt.target;
                 var output;
                 if (geom instanceof ol.geom.Polygon) {
@@ -104,11 +102,12 @@ function addInteractions() {
         }, this);
 
     draw.on('drawend',
-        function() {
+        function () {
             measureTooltipElement.innerHTML += " de " + orderedCourseArray[idCurrentEditedCourse].sport_label;
             measureTooltipElement.className = 'tooltip tooltip-static';
             measureTooltipElement.style.backgroundColor = courseColorArray[idCurrentEditedCourse];
             measureTooltipElement.style.borderTopColor = courseColorArray[idCurrentEditedCourse];
+
 
             measureTooltip.setOffset([0, -7]);
             // unset sketch
@@ -313,10 +312,12 @@ closer.onclick = function () {
 };
 
 function showPopup(feature, header) {
-    content.innerHTML = '<h6>' + header + '</h6><div class="input-group input-group-sm"><input type="text" class="form-control" placeholder="intitulé du poste"><textarea class="form-control" rows="4" cols="50">\n' +
-        'At w3schools.com you will learn how to make a website. We offer free tutorials in all web development technologies.\n' +
-        '</textarea></div>' +
-        '<button id="type" class="btn btn-xs btn-danger" onclick="removeFeature(\'' + feature.getId() + '\')">supprimer</button><button id="type" class="btn btn-xs btn-default">enregistrer</button>';
+    content.innerHTML = '<h6>' + header + '</h6>' +
+        '<div class="input-group input-group-sm">' +
+        '<input type="text" class="form-control" placeholder="intitulé du poste">' +
+        '</div>' +
+        '<button id="type" class="btn btn-xs btn-danger" onclick="removePointOfInterest(\'' + feature.getId() + '\')">supprimer</button>' +
+        '<button id="type" class="btn btn-xs btn-default" onclick="createHelperPost()">enregistrer</button>';
     overlay.setPosition(feature.getGeometry().getCoordinates());
 }
 
@@ -359,12 +360,12 @@ function createHelpTooltip() {
     });
 }
 
-function addHelpTooltipOverlay(msg){
+function addHelpTooltipOverlay(msg) {
     helpTooltipElement.innerHTML = msg;
     map.addOverlay(helpTooltip);
 }
 
-function updateHelpTooltipOverlay(msg){
+function updateHelpTooltipOverlay(msg) {
     helpTooltipElement.innerHTML = msg;
 }
 
@@ -377,7 +378,7 @@ function updateHelpTooltipOverlay(msg){
 let measureTooltipElement;
 let measureTooltip;
 
-let formatLength = function(line) {
+let formatLength = function (line) {
     let length = ol.sphere.getLength(line);
     let output;
     if (length > 100) {
@@ -390,7 +391,7 @@ let formatLength = function(line) {
     return output;
 };
 
-let formatArea = function(polygon) {
+let formatArea = function (polygon) {
     let area = getArea(polygon);
     let output;
     if (area > 10000) {
@@ -416,7 +417,6 @@ function createMeasureTooltip() {
     });
     map.addOverlay(measureTooltip);
 }
-
 
 
 /***************************************************************/
@@ -476,3 +476,9 @@ function updateSelectedCourse() {
 //TODO measurement: https://openlayers.org/en/latest/examples/measure.html
 //TODO Centré sur la france si pas de localisation
 //TODO bouton pour enregistrer les changements
+//TODO Centré sur la france si pas de localisation
+//TODO bouton pour enregistrer les changements
+
+function createHelperPost(){
+
+}
