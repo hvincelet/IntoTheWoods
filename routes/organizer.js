@@ -5,7 +5,38 @@ const crypto = require('crypto');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
 
+function getRaids(){
+    let team_model = models.team;
+    let raid_model = models.raid;
+
+    raid_model.belongsTo(team_model, {foreignKey: 'id'});
+
+    raid_model.findAll({
+        include: [{
+            model: team_model,
+            where: {
+                id_raid: Sequelize.col('raid.id'),
+                id_organizer: user.login
+                //date > date_of_the_day - one_month
+            }
+        }],
+        attributes: ['id', 'name', 'edition'],
+    }).then(function(raids_found){
+        if(raids_found){
+            while (user.raid_list.length) {user.raid_list.pop();}
+            raids_found.forEach(function(tuple){
+                user.raid_list.push({
+                    id: tuple.dataValues.id,
+                    name: tuple.dataValues.name,
+                    edition: tuple.dataValues.edition
+                });
+            });
+        }
+    });
+}
+
 exports.displayHome = function (req, res) {
+    getRaids();
     res.render(pages_path + "template.ejs", {
         pageTitle: "Accueil",
         page: "accueil",
@@ -41,32 +72,8 @@ exports.idVerification = function (req, res) {
             user.initials = user.first_name.charAt(0).concat(user.last_name.charAt(0)).toUpperCase();
             user.picture = organizer_found.dataValues.picture;
 
-            let team_model = models.team;
-            let raid_model = models.raid;
+            getRaids();
 
-            raid_model.belongsTo(team_model, {foreignKey: 'id'});
-
-            raid_model.findAll({
-                include: [{
-                    model: team_model,
-                    where: {
-                        id_raid: Sequelize.col('raid.id'),
-                        id_organizer: user.login
-                        //date > date_of_the_day - one_month
-                    }
-                }],
-                attributes: ['id', 'name', 'edition'],
-            }).then(function(raids_found){
-                if(raids_found){
-                    raids_found.forEach(function(tuple){
-                        user.raid_list.push({
-                            id: tuple.dataValues.id,
-                            name: tuple.dataValues.name,
-                            edition: tuple.dataValues.edition
-                        });
-                    });
-                }
-            });
             return res.redirect('/');
         } else {
             res.render(pages_path + "login.ejs", {

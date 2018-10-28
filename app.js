@@ -73,12 +73,12 @@ app.route('/createraid/sports')
 app.route('/editraid')
     .get(checkAuth, raid.displayAllRaids);
 
-app.route('/editraid/:id')
-    .get(checkAuth, raid.displayRaid);
-
 app.route('/editraid/map')
     .get(checkAuth, raid.displayMap)
     .post(checkAuth, raid.storeMapDatas);
+
+app.route('/editraid/:id')
+    .get(checkAuth, raid.displayRaid);
 
 app.route('/termsandpolicy')
     .get(misc.cgu);

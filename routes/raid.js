@@ -208,41 +208,48 @@ exports.storeMapDatas = function (req, res) {
 };
 
 exports.displayAllRaids = function (req, res) {
-    let team_model = models.team;
-    let raid_model = models.raid;
-    let raid_list = [{id:1, name:"Enssat raid", edition:2018}, {id:5, name:"Enssat raid", edition:2019}]; // TODO Remove this debug
 
-    raid_model.belongsTo(team_model, {foreignKey: 'id'});
-    raid_model.findAll({
-        include: [{
-            model: team_model,
-            where: {
-                id_raid: Sequelize.col('raid.id'),
-                id_organizer: user.login
+    if(typeof user.raid_list === "undefined" || user.raid_list.length < 1){
+        res.redirect('/');
+    }else{
+        res.render(pages_path + "template.ejs", {
+            pageTitle: "Gestion des Raids",
+            page: "edit_raid/all",
+            userName_fn: user.first_name,
+            userName_ln: user.last_name,
+            userName_initials: user.initials,
+            userPicture: user.picture,
+            raid_list: user.raid_list
+        });
+    }
+};
+
+exports.displayRaid = function (req, res) {
+    if(typeof user.raid_list === "undefined" || user.raid_list.length < 1){
+        res.redirect('/');
+    }else{
+        let valid_user = false;
+        user.raid_list.forEach(function (raid) {
+            if (raid.id === parseInt(req.params.id)) {
+                valid_user = true;
             }
-        }]
-    }).then(function(raids_found){
-        if(raids_found){
-            console.log(raids_found);
-            raids_found.forEach(function(tuple){
-                raid_list.push(tuple.dataValues);
-            });
+        });
 
+        if (valid_user){
             res.render(pages_path + "template.ejs", {
                 pageTitle: "Gestion des Raids",
-                page: "edit_raid/all",
+                page: "edit_raid/details",
                 userName_fn: user.first_name,
                 userName_ln: user.last_name,
                 userName_initials: user.initials,
                 userPicture: user.picture,
-                raid_list: raid_list
+                raid: {
+                    name: 'Test',
+                    edition: '1'
+                }
             });
         }else{
-            res.redirect('/');
+            res.redirect('/editraid');
         }
-    });
-};
-
-exports.displayRaid = function (req, res) {
-    res.send(req.params.id);
+    }
 };
