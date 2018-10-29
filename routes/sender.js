@@ -4,11 +4,7 @@ let ejs = require('ejs-html');
 let fs = require('fs');
 const config = require(__dirname + '/../config/config.js')['mail'];
 
-exports.sendMail = function(email, password_hash){
-
-  require.extensions['.html'] = function(module, filename){
-    module.exports = fs.readFileSync(filename, 'utf-8');
-  };
+exports.sendMail = function(email, password_hash, ejs_file, subject){
 
   let transporter = nodemailer.createTransport({
     service: config.service,
@@ -18,15 +14,15 @@ exports.sendMail = function(email, password_hash){
     }
   });
 
-  let ejsTemplate = fs.readFileSync(__dirname + '/../views/pages/contents/email/content.ejs','utf-8');
-  let content = ejs.render(ejsTemplate, 
+  let ejsTemplate = fs.readFileSync(__dirname + ejs_file,'utf-8');
+  let content = ejs.render(ejsTemplate,
     {email: email, password: password_hash},
     {vars: ["email", "password"]});
-  
+
   let mailOptions = {
     from: "Into the Woods",
     to: email,
-    subject: "Confirmation d'inscription",
+    subject: subject,
     html: content
   };
 
