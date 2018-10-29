@@ -32,24 +32,44 @@
                                     <% data.forEach(function(item){ %>
                                     <form class="text-left form-validate" method="post" action="/manageteam/helper">
                                         <tr>
-                                            <input type="hidden" name="registerIdHelper" value='<%-item.id_helper%>'/>
-                                            <input type="hidden" name="registerIdHelperPost" value='<%-item.id_helper_post%>'/>
-                                            <td><%-item.email%></td>
-                                            <td><%-item.last_name%></td>
-                                            <td><%-item.first_name%></td>
-                                            <td><%-item.description%></td>
+                                            <td><%-item.data.email%></td>
+                                            <td><%-item.data.last_name%></td>
+                                            <td><%-item.data.first_name%></td>
                                             <td>
-                                              <% if(item.attributed == 0){ %>
-                                                  <input type="submit" name="Assign" value='Assign' class="btn btn-primary"/>
-                                              <% }else { %>
-                                                  <input type="submit" name="Assign" value='Assign' class="btn btn-primary" disabled/>
-                                              <% } %>
+                                              <select id="registerIdHelperPost" onchange="buttonToValidCurrentPost()" name="registerHelper" class="form-control">
+                                                <% item.data.assignment.forEach(function(assignment){ %>
+                                                  <option value='<%-item.user%>:<%-assignment.id%>'> <%-assignment.description%> </option>
+                                                <% }); %>
+                                              </select>
+                                            </td>
+                                            <td>
+                                              <input type="submit" id="Assign" name="Assign" value='Assign' class="btn btn-primary" disabled/>
                                             </td>
                                         </tr>
                                     </form>
                                     <% }); %>
                                 </tbody>
                             </table>
+                            <script>
+                              function buttonToValidCurrentPost(){
+                                let value = document.getElementById("registerIdHelperPost").value;
+                                let tab = value.split(':');
+                                let local_data = <%- JSON.stringify(data) %>;
+                                local_data.forEach(function(item){
+                                  if(item.user == tab[0]){
+                                    item.data.assignment.forEach(function(assignment){
+                                      if(assignment.id == tab[1]){
+                                        if(assignment.attributed == 0){
+                                          document.getElementById("Assign").removeAttribute("disabled");
+                                        } else {
+                                          document.getElementById("Assign").setAttribute("disabled","disabled");
+                                        }
+                                      }
+                                    });
+                                  }
+                                });
+                              }
+                            </script>
                         </div>
                         <% } %>
                     </div>

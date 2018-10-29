@@ -1,48 +1,28 @@
 const jdenticon = require('jdenticon');
 const pages_path = "../views/pages/";
 const models = require('../models');
-const Sequelize = require('sequelize');
 
+// Register new Helper default page
 exports.displayRegister = function(req, res){
 
-    let find_id = 3; // temporary
+    let find_id = 1; // temporary
     let get_post_clean = [];
 
-    let course_model = models.course;
+    let raid_model = models.raid;
     let point_of_interest_model = models.point_of_interest;
     let helper_post_model = models.helper_post;
 
-    point_of_interest_model.belongsTo(course_model, {foreignKey: 'id_track'});
+    point_of_interest_model.belongsTo(raid_model, {foreignKey: 'id_raid'});
     helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
-
-    // Get point of interest from database link to current raid (JOIN LEVEL 1)
-    /*
-    point_of_interest_model.findAll({
-        include: [{
-            model: course_model,
-            where: {
-                id_raid: find_id
-            }
-        }],
-        attributes: ['id','lat','lng']
-    }).then(function(point_of_interest_found){
-        if(point_of_interest_found){
-            //console.log(point_of_interest_found);
-            point_of_interest_found.forEach(function(tuple){
-                console.log(tuple.dataValues);
-            });
-        }
-    });
-    */
 
     // Get helper_post from database link to point of interest of current raid (JOIN LEVEL 2)
     helper_post_model.findAll({
       include: [{
           model: point_of_interest_model,
           include: [{
-              model: course_model,
+              model: raid_model,
               where: {
-                  id_raid: find_id
+                  id: find_id
               }
           }]
       }],
@@ -62,6 +42,7 @@ exports.displayRegister = function(req, res){
     });
 };
 
+// Register new Helper with post form
 exports.register = function(req, res){
 
     let id = Math.random().toString(36).substr(2, 6); // generate id helper
@@ -93,14 +74,14 @@ exports.register = function(req, res){
                 last_name: registerUserLn,
                 first_name: registerUserFn
             }).then(function () {
-                // TODO: create assignment with poste(s) and helper in assignment table
+                // Create assignment with poste(s) and helper in assignment table
                 registerRun.forEach(function(id_activity){
                     models.assignment.create({ // create assignment with the new helper and poste(s)
                         id_helper: id,
                         id_helper_post: id_activity
                     });
                 });
-                // TODO: redirect to helper_register with validMessage (organizer manage your inscription)
+                // Redirect to helper_register with validMessage (organizer manage your inscription)
                 res.render(pages_path + "helper_register.ejs", {
                     pageTitle: "Inscription Bénévole"
                 });
@@ -119,7 +100,6 @@ exports.displayHome = function(req, res){
         }
     }).then(function (assignment_found) {
         if (assignment_found !== null) { // id of helper exist
-
             if (assignment_found.attributed == 0){
                 res.render(pages_path + "helper_register.ejs", {
                     pageTitle: "Inscription Bénévole",

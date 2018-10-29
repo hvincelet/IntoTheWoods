@@ -46,16 +46,6 @@ let checkAuth = function (req, res, next) {
     next();
 };
 
-/*{
-    login: "",
-    first_name: "",
-    last_name: "",
-    initials: "",
-    picture: first_name[0]+last_name[0],
-    idCurrentRaid: 1 //for tests
-    raid_list: [] // {id, name, edition}
-}*/
-
 const organizer = require('./routes/organizer');
 const raid = require('./routes/raid');
 const map = require('./routes/map');
