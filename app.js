@@ -133,15 +133,6 @@ app.route('/team/:raid_id/invitehelpers')
 app.route('/termsandpolicy')
     .get(misc.cgu);
 
-// routes dedicated to the team' pages
-app.route('/manageteam') // manage helper and organizer of raid
-    .get(organizer.manageTeam);
-app.route('/manageteam/helper') // manage helper of raid
-    .get(organizer.manageHelper)
-    .post(organizer.assignHelper);
-app.route('/manageteam/organizer') // manage organizer of raid
-    .get(organizer.manageOrganizer);
-
 //bad url route
 app.use(function (req, resp, next) {
     resp.render("pages/404.ejs", {

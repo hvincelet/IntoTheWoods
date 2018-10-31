@@ -66,7 +66,7 @@ exports.idVerification = function (req, res) {
                 last_name: organizer_found.dataValues.last_name,
                 initials: organizer_found.dataValues.first_name.charAt(0).concat(organizer_found.dataValues.last_name.charAt(0)).toUpperCase(),
                 picture: organizer_found.dataValues.picture,
-                raid_list: [], // {id, name, edition}
+                raid_list: [],
                 idCurrentRaid: -1
             };
 
@@ -176,83 +176,6 @@ exports.validate = function (req, res) {
     })
 }
 
-exports.manageTeam = function(req, res) {
-    const user = connected_user(req.sessionID);
-    res.render(pages_path + "template.ejs", {
-        pageTitle: "Equipe et organisateurs",
-        page: "manage_team/team",
-        user: user
-      });
-}
-
-exports.manageHelper = function(req, res) {
-
-    const user = connected_user(req.sessionID);
-
-    let data_helper = [];
-
-    let assignment_model = models.assignment;
-    let helper_model = models.helper;
-    let helper_post_model = models.helper_post;
-
-    helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
-    assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
-
-    helper_model.findAll({
-        include: [{
-            model: assignment_model,
-            attributes: ['id_helper','id_helper_post','attributed'],
-            include: [{
-                model: helper_post_model,
-                attributes: ['id','description']
-            }],
-        }],
-        attributes: ['login','email','last_name','first_name']
-    }).then(function(assignment_found){
-        if(assignment_found !== null){
-            assignment_found.forEach(function(tuple){
-                let create_user = 0;
-                data_helper.forEach(function(object){
-                    if(object['user'] == tuple.dataValues.login){
-                        create_user = 1;
-                    }
-                });
-                if(create_user == 0){
-                    data_helper.push(
-                        {
-                            'user':tuple.dataValues.login,
-                            'data':{
-                                'email':tuple.dataValues.email,
-                                'last_name':tuple.dataValues.last_name,
-                                'first_name':tuple.dataValues.first_name,
-                                'assignment':[]
-                            }
-                        }
-                    );
-                }
-                data_helper.forEach(function(object){
-                    if(object['user'] == tuple.dataValues.login){
-                        object['data']['assignment'].push(
-                            {
-                                'id':tuple.dataValues.assignment.dataValues.helper_post.dataValues.id,
-                                'description':tuple.dataValues.assignment.dataValues.helper_post.dataValues.description,
-                                'attributed':tuple.dataValues.assignment.dataValues.attributed
-                            }
-                        );
-                    }
-                });
-            });
-            res.render(pages_path + "template.ejs", {
-                pageTitle: "Gérer les bénévoles",
-                page: "manage_team/helper",
-                user: user,
-                data: data_helper
-            });
-        }
-    });
-
-};
-
 exports.assignHelper = function(req, res) {
 
     let data_helper = req.body.registerHelper.split(':');
@@ -351,7 +274,40 @@ exports.assignHelper = function(req, res) {
     */
 };
 
-exports.manageOrganizer = function(req, res) {
+exports.shareRaidToOthersOrganizers = function(req, res) {
     const user = connected_user(req.sessionID);
-    console.log("Not yet implemented");
-}
+    if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
+        return res.redirect('/dashboard');
+    }
+
+    let organizer_list_to_invite = ["hvincele@enssat.fr", "someone@domain-name.com"];
+    organizer_list_to_invite.foreach(function(organizer_email){
+        if(organizer_email != user.login){
+            models.organizer.findOne({
+                where: {email: organizer_email}
+            }).then(function(organizer){
+                if(organizer){
+                    // Add organizer to raid team with id_raid = raid.id
+                    // sender.sendMail(organizer_email, );
+                }else{
+                    // Invite user to contact organizer for register himself
+                }
+            });
+        }
+    });
+};
+
+exports.inviteHelper = function(req, res) {
+    const user = connected_user(req.sessionID);
+    if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
+        return res.redirect('/dashboard');
+    }
+
+    let helper_list_to_invite = ["hvincele@enssat.fr", "someone@domain-name.com"];
+    const current_user_email = connected_user(req.sessionID).login;
+    helper_list_to_invite.foreach(function(helper_email){
+        if(helper_email != user.login){
+            //sender.sendMail(helper_email, );
+        }
+    });
+};
