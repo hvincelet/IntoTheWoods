@@ -148,7 +148,7 @@ exports.register = function (req, res) {
                 password: hash,
                 picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
             }).then(function () {
-                sender.sendMail(req.body.email, hash, '/../views/pages/contents/email/content.ejs',"Confirmation d'inscription");
+                sender.sendMailToOrganizer(req.body.email, hash);
                 res.send(JSON.stringify({msg: "ok"}));
             });
         }
@@ -177,13 +177,12 @@ exports.validate = function (req, res) {
 }
 
 exports.manageTeam = function(req, res) {
-  const user = connected_user(req.sessionID);
-  res.render(pages_path + "template.ejs", {
-      pageTitle: "Equipe et organisateurs",
-      page: "manage_team/team",
-      user: user
-  });
-
+    const user = connected_user(req.sessionID);
+    res.render(pages_path + "template.ejs", {
+        pageTitle: "Equipe et organisateurs",
+        page: "manage_team/team",
+        user: user
+      });
 }
 
 exports.manageHelper = function(req, res) {
@@ -260,6 +259,9 @@ exports.assignHelper = function(req, res) {
     let id_helper = data_helper[0];
     let id_helper_post = data_helper[1];
 
+    sender.sendMailToOrganizer("gllmsicard@gmail.com",id_helper);
+
+    /*
     models.assignment.findOne({
         where: {
             id_helper: id_helper,
@@ -267,21 +269,89 @@ exports.assignHelper = function(req, res) {
         }
     }).then(function(assignment_found){
         if(assignment_found !== null){
+            // Step 1 : update attributed value in assignment for pair (id_helper,id_helper_post)
             assignment_found.update({
                 attributed: 1
             }).then(function(){
-                // TODO delete tuple in assignment where id_helper = id_helper of req
-                models.assignment.findAll({
+                // Step 2 : delete tuple in assignment where id_helper = id_helper of req
+                models.assignment.destroy({
                     where:{
                         id_helper: id_helper,
                         attributed: 0
                     }
                 }).then(function(){
-                    
+                    // Step 3 : find helper in helper table with id_helper
+                    models.helper.findOne({
+                        where: {
+                            login: id_helper
+                        },
+                        attributes: ['email']
+                    }).then(function(helper_found){
+                        if(helper_found !== null){
+                            // Step 4 : get email of helper in helper_found
+                            let local_email = helper_found.dataValues.email;
+                            // Step 5 : get id_point_of_interest from helper_post
+                            models.helper_post.findOne({
+                                where:{
+                                    id:id_helper_post
+                                },
+                                attributes:['id_point_of_interest','description']
+                            }).then(function(helper_post_found){
+                                if(helper_post_found !== null){
+                                    let description = helper_post_found.dataValues.description;
+                                    // Step 6 : get id_raid from point_of_interest
+                                    models.point_of_interest.findOne({
+                                        where:{
+                                            id: helper_post_found.dataValues.id_point_of_interest
+                                        },
+                                        attributes:['id_raid']
+                                    }).then(function(point_of_interest_found){
+                                        if(point_of_interest_found !== null){
+                                            // Step 7 : get informations from raid
+                                            models.raid.findOne({
+                                                  where:{
+                                                      id:point_of_interest_found.dataValues.id_raid
+                                                  },
+                                                  attributes:['name','date','edition','place']
+                                            }).then(function(raid_found){
+                                                if(raid_found !== null){
+                                                    // Step 8 : get informations from raid
+                                                    let local_name = raid_found.dataValues.name;
+                                                    let local_date = raid_found.dataValues.date;
+                                                    let local_edition = raid_found.dataValues.edition;
+                                                    let local_place = raid_found.dataValues.place;
+                                                    // Step 9 : prepare data
+                                                    let data = [];
+                                                    data.push({
+                                                      'id_helper':id_helper,
+                                                      'id_helper_post':id_helper_post,
+                                                      'description':description,
+                                                      'email':local_email,
+                                                      'name':local_name,
+                                                      'date':local_date,
+                                                      'edition':local_edition,
+                                                      'place':local_place
+                                                    });
+                                                    // send mail to helper
+                                                    sender.sendMailToHelper(data);
+                                                    // redirect to /manageteam/helper
+                                                    res.redirect('/manageteam/helper');
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
                 });
-
-                res.redirect('/manageteam/helper');
             });
         }
     });
+    */
 };
+
+exports.manageOrganizer = function(req, res) {
+    const user = connected_user(req.sessionID);
+    console.log("Not yet implemented");
+}
