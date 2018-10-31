@@ -38,7 +38,7 @@ exports.sendMailToOrganizer = function(email, password_hash){
     });
 };
 
-exports.sendMailToHelper = function(data){
+exports.sendMailToHelper = function(id_helper,id_helper_post,description,local_email,local_name,local_date,local_edition,local_place){
 
     let transporter = nodemailer.createTransport({
         service: config.service,
@@ -48,23 +48,22 @@ exports.sendMailToHelper = function(data){
         }
     });
 
-    let email = data.email;
     let ejsTemplate = fs.readFileSync(__dirname + '/../views/pages/contents/email/mailing_helper.ejs','utf-8');
     let content = ejs.render(ejsTemplate, {
-        id_helper: data.id_helper,
-        id_helper_post: data.id_helper_post,
-        description: data.description,
-        name: data.name,
-        date: data.date,
-        edition: data.edition,
-        place: data.place
+        id_helper: id_helper,
+        id_helper_post: id_helper_post,
+        description: description,
+        name: local_name,
+        date: local_date,
+        edition: local_edition,
+        place: local_place
     },{
         vars: ["id_helper","id_helper_post","description","name","date","edition","place"]
     });
 
     let mailOptions = {
         from: "Into the Woods",
-        to: email,
+        to: local_email,
         subject: "Validation de votre bénévolat",
         html: content
     };

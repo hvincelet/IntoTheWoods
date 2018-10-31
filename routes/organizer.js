@@ -255,9 +255,6 @@ exports.assignHelper = function(req, res) {
     let id_helper = data_helper[0];
     let id_helper_post = data_helper[1];
 
-    sender.sendMailToOrganizer("gllmsicard@gmail.com",id_helper);
-
-    /*
     models.assignment.findOne({
         where: {
             id_helper: id_helper,
@@ -316,21 +313,9 @@ exports.assignHelper = function(req, res) {
                                                     let local_date = raid_found.dataValues.date;
                                                     let local_edition = raid_found.dataValues.edition;
                                                     let local_place = raid_found.dataValues.place;
-                                                    // Step 9 : prepare data
-                                                    let data = [];
-                                                    data.push({
-                                                      'id_helper':id_helper,
-                                                      'id_helper_post':id_helper_post,
-                                                      'description':description,
-                                                      'email':local_email,
-                                                      'name':local_name,
-                                                      'date':local_date,
-                                                      'edition':local_edition,
-                                                      'place':local_place
-                                                    });
-                                                    // send mail to helper
-                                                    sender.sendMailToHelper(data);
-                                                    // redirect to /manageteam/helper
+                                                    // Step 9 : send mail to helper
+                                                    sender.sendMailToHelper(id_helper,id_helper_post,description,local_email,local_name,local_date,local_edition,local_place);
+                                                    // Step 10 : redirect to /manageteam/helper
                                                     res.redirect('/manageteam/helper');
                                                 }
                                             });
@@ -344,7 +329,6 @@ exports.assignHelper = function(req, res) {
             });
         }
     });
-    */
 };
 
 exports.manageOrganizer = function(req, res) {
