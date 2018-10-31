@@ -21,9 +21,8 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     attributed: {
-      type: DataTypes.INTEGER(1),
-      allowNull: false,
-      defaultValue: '0'
+      type: DataTypes.STRING(45),
+      allowNull: true
     }
   }, {
     tableName: 'assignment'

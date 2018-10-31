@@ -21,11 +21,10 @@ module.exports = function(sequelize, DataTypes) {
     },
     active: {
       type: DataTypes.INTEGER(1),
-      allowNull: true,
-      defaultValue: '0'
+      allowNull: true
     },
     picture: {
-      type: DataTypes.STRING(45),
+      type: DataTypes.TEXT,
       allowNull: true
     }
   }, {
