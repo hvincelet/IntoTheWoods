@@ -2,27 +2,53 @@
 /*       Instantiate the map      */
 /**********************************/
 
+// init view
+let view = new ol.View({
+    center: ol.proj.fromLonLat([point_of_interest.lng,point_of_interest.lat]),
+    zoom: 14
+});
+
+// init raster tile
 let raster = new ol.layer.Tile({
     source: new ol.source.OSM()
 });
 
+// init source
 let source = new ol.source.Vector();
 
+// create map
 let map = new ol.Map({
     target: 'map',
     layers: [raster],
-    view: new ol.View({
-        center: ol.proj.fromLonLat([-3.4624261999999817, 48.729673]),
-        zoom: 16
-    })
+    view: view
 });
 
-loadPathToPost();
+// geolocation init
+let geo = new ol.Geolocation({
+    trackingOptions: {
+        enableHighAccuracy: true
+    }
+});
 
-function loadPathToPost(){
+// geolocation tracking init
+let my_lon = 0;
+let my_lat = 0;
+let local_lon_lat = 0
 
-    let lat1 = 48.7268687;
-    let lng1 = -3.4599370999999337;
+// geolocation tracking action
+geo.setTracking(true);
+
+// geolocation change position
+geo.on('change',function(){
+    local_lon_lat = geo.getPosition();
+    my_lon = local_lon_lat[0];
+    my_lat = local_lon_lat[1];
+    console.log("(my_lat, my_lon) : ("+my_lat+", "+my_lon+")");
+
+    map.setView(new ol.View({
+        center: ol.proj.fromLonLat([my_lon,my_lat]),
+        zoom: map.getView().getZoom()
+    }));
 
     let graph = 'Pieton';
     let routePreference = 'shortest';
@@ -30,8 +56,8 @@ function loadPathToPost(){
     try {
         Gp.Services.route({
             startPoint: {
-                x: lng1,
-                y: lat1
+                x: my_lon,
+                y: my_lat
             },
             endPoint: {
               x: point_of_interest.lng,
@@ -65,4 +91,10 @@ function loadPathToPost(){
     } catch (e) {
       console.log(e);
     }
-}
+})
+
+// geolocation error
+geo.on('error', function(error) {
+    var info = document.getElementById('info');
+    info.innerHTML = error.message;
+});

@@ -106,10 +106,6 @@ exports.displayHome = function(req, res){
                     errorMessage: "Cet identifiant n'a pas encore été attribué à un poste..."
                 });
             } else {
-                // TODO : page to see the map with the path to go to helper post
-                console.log(assignment_found.id_helper);
-                console.log(assignment_found.id_helper_post);
-
                 models.helper.findOne({
                     where: {
                         login: assignment_found.id_helper
@@ -128,6 +124,7 @@ exports.displayHome = function(req, res){
                                     }
                                 }).then(function(point_of_interest_found){
                                     if (point_of_interest_found !== null){
+                                        // page to see the map with the path to go to helper post
                                         res.render(pages_path + "helper_home.ejs", {
                                             pageTitle: "Parcours Bénévole",
                                             assignment: assignment_found,
@@ -142,7 +139,6 @@ exports.displayHome = function(req, res){
                     }
                 })
             }
-
         } else { // id of helper does not exist
             res.render(pages_path + "helper_register.ejs", {
                 pageTitle: "Inscription Bénévole",
