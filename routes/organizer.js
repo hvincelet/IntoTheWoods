@@ -84,7 +84,7 @@ exports.idVerification = function (req, res) {
                         //date > date_of_the_day - one_month
                     }
                 }],
-                attributes: ['id', 'name', 'edition', 'date', 'place']
+                attributes: ['id', 'name', 'edition', 'date', 'place', 'lat', 'lng']
             }).then(function(raids_found){
                 if(raids_found){
                     raids_found.forEach(function(tuple){
@@ -93,7 +93,9 @@ exports.idVerification = function (req, res) {
                             name: tuple.dataValues.name,
                             edition: tuple.dataValues.edition,
                             date: tuple.dataValues.date,
-                            place: tuple.dataValues.place
+                            place: tuple.dataValues.place,
+                            lat: tuple.dataValues.lat,
+                            lng: tuple.dataValues.lng
                         });
                     });
                 }
@@ -175,7 +177,7 @@ exports.validate = function(req, res) {
     })
 };
 
-exports.displayRaid = function(req, res) {
+/*exports.displayRaid = function(req, res) {
     const user = connected_user(req.sessionID);
     if(!user.raid_list.find(function(raid){return raid.id == req.params.id})){
         return res.redirect('/dashboard');
@@ -255,7 +257,7 @@ exports.displayRaid = function(req, res) {
                                 }
                             }]
                         }]
-                    }]*/
+                    }]
                 }]
             }]
         }).then(function(assignments_found){
@@ -270,7 +272,7 @@ exports.displayRaid = function(req, res) {
                         }
                     });
                 });
-            });*/
+            });
 
             let courses_linked_with_the_current_raid = [];
 
@@ -303,13 +305,13 @@ exports.displayRaid = function(req, res) {
                     helpers: helpers_linked_with_the_current_raid, // [{email, first_name, last_name, posts_asked:[{helper_post_id, description}]}]
                     courses: courses_linked_with_the_current_raid,
                     raid_id: req.params.raid_id
-                });*/
+                });
             })
 
         });
 
     });
-};
+};*/
 
 exports.shareRaidToOthersOrganizers = function(req, res) {
     const user = connected_user(req.sessionID);

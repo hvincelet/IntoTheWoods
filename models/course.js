@@ -24,6 +24,10 @@ module.exports = function(sequelize, DataTypes) {
         key: 'id'
       }
     },
+    id_track: {
+      type: DataTypes.INTEGER(10).UNSIGNED,
+      allowNull: true
+    },
     id_raid: {
       type: DataTypes.INTEGER(10).UNSIGNED,
       allowNull: false,

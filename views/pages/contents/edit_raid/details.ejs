@@ -45,7 +45,7 @@
                 <div class="card">
                     <div class="card-header d-flex align-items-center">
                         <h4>Organisateurs</h4>
-                        <button style="margin-left: 1em;" type="button" class="btn btn-info btn-rounded btn-sm" onclick="location.href='mailto:orgamail@mail.com,orgamail2@mail.com?subject=[Into The Woods] Organisation <%=raid.name%> - <%=raid.edition%>';">Contacter tous les organisateurs</button>
+                        <button style="margin-left: 1em;" type="button" class="btn btn-info btn-rounded btn-sm" onclick="location.href='mailto:<% organizers.forEach(function (organizer) { %><%=organizer.email%>,<% });%>?subject=[Into The Woods] Organisation <%=raid.name%> - <%=raid.edition%>';">Contacter tous les organisateurs</button>
                     </div>
                     <div class="card-body">
                         <div class="table-editable">
@@ -59,11 +59,13 @@
                                     <th class="text-center">Contacter</th>
                                     <th class="text-center">Supprimer</th>
                                 </tr>
+                                <% organizers.forEach(function (organizer) { %>
                                 <tr>
-                                    <td class="pt-3-half" contenteditable="false" width="60%">Orga name</td>
-                                    <td width="20%"><span class="table-remove"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='mailto:orgamail@mail.com?subject=[Into The Woods] Organisation <%=raid.name%> - <%=raid.edition%>';">Contacter</button></span></td>
-                                    <td width="20%"><span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button></span></td>
+                                    <td class="pt-3-half" contenteditable="false" width="60%"><%=organizer.first_name%> <%=organizer.last_name%></td>
+                                    <td width="20%"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='mailto:<%=organizer.email%>?subject=[Into The Woods] Organisation <%=raid.name%> - <%=raid.edition%>';">Contacter</button></td>
+                                    <td width="20%"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0" data-toggle="modal" data-target="#removeModal" data-type="Organizers" data-username="<%=organizer.first_name%> <%=organizer.last_name%>" data-usermail="<%=organizer.email%>">Supprimer</button></td>
                                 </tr>
+                                <% }); %>
                             </table>
                         </div>
                     </div>
@@ -82,7 +84,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-editable">
-                            <button type="button" class="btn btn-primary btn-rounded" style="margin-bottom: 1em;">Ajouter des helpers</button>
+                            <button type="button" class="btn btn-primary btn-rounded" style="margin-bottom: 1em;" data-toggle="modal" data-target="#modal-helpers">Ajouter des helpers</button>
                             <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
                                 <tr>
                                     <th class="text-center">Nom</th>
@@ -90,12 +92,14 @@
                                     <th class="text-center">Contacter</th>
                                     <th class="text-center">Supprimer</th>
                                 </tr>
+                                <% helpers.forEach(function (helper) { %>
                                 <tr>
-                                    <td class="pt-3-half" contenteditable="false" width="40%">Helper name</td>
-                                    <td class="pt-3-half" contenteditable="false" width="20%">Poste</td>
-                                    <td width="20%"><span class="table-remove"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='mailto:helpermail@mail.com?subject=[Into The Woods] Bénévolat <%=raid.name%> - <%=raid.edition%>';">Contacter</button></span></td>
-                                    <td width="20%"><span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button></span></td>
+                                    <td class="pt-3-half" contenteditable="false" width="40%"><%= helper.first_name %> <%=helper.last_name %></td>
+                                    <td class="pt-3-half" contenteditable="false" width="20%"><ul class="list-unstyled"><% helper.posts.forEach(function (post){%><li><%=post%></li><%}); %></ul></td>
+                                    <td width="20%"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='mailto:<%= helper.email %>?subject=[Into The Woods] Bénévolat <%=raid.name%> - <%=raid.edition%>';">Contacter</button></td>
+                                    <td width="20%"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0" data-toggle="modal" data-target="#removeModal" data-type="Helpers" data-username="<%=helper.first_name%> <%=helper.last_name%>" data-usermail="<%=helper.email%>">Supprimer</button></td>
                                 </tr>
+                                <% }); %>
                             </table>
                         </div>
                     </div>
@@ -104,3 +108,113 @@
         </div>
     </div>
 </section>
+<!-- Add Helpers modal -->
+<div class="modal fade" id="modal-helpers" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Ajout de nouveaux helpers</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-editable">
+                    <span class="table-addHelperTable float-right mb-3 mr-2"><a href="#!" class="text-success"><i class="fa fa-plus fa-2x" aria-hidden="true"></i></a></span>
+                    <table id="addHelperTable"
+                           class="table table-bordered table-responsive-md table-striped text-center">
+                        <tr>
+                            <th class="text-center">Adresse e-mail</th>
+                            <th class="text-center">Suppression</th>
+                        </tr>
+                        <tr class="duplicate">
+                            <td class="pt-3-half sport_name" contenteditable="true"></td>
+                            <td width="5%">
+                                <span class="table-remove">
+                                    <button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button>
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                    <table id="hidden-addHelperTable" style="display: none;">
+                        <!-- Default added row -->
+                        <tr class="hide duplicate">
+                            <td class="pt-3-half sport_name" contenteditable="true"></td>
+                            <td width="5%">
+                                <span class="table-remove">
+                                    <button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button>
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary cancel-addHelperTable" data-dismiss="modal">Annuler</button>
+                <button type="button" id="submit-addHelperTable" class="btn btn-primary">Invitez les helpers</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Remove confirmation modal -->
+<div class="modal fade" id="removeModal" tabindex="-1" role="dialog" aria-labelledby="confirmDialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDialog">Confirmation suppression</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <span class="userName"></span> (<span class="userMail"></span>) de la liste des <span class="userType"></span> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="button" id="confirmRemove-button" class="btn btn-danger">Confirmer la suppression</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- JS for add Helpers table -->
+<script type="text/javascript">
+    var $ADD_HELPER_TABLE = $('#addHelperTable');
+    var $HIDDEN_ADD_HELPER_TABLE = $('#hidden-addHelperTable');
+
+    $('.table-addHelperTable').click(function () {
+        var $clone = $HIDDEN_ADD_HELPER_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
+        $ADD_HELPER_TABLE.append($clone);
+    });
+
+    $('.table-remove').click(function () {
+        $(this).parents('tr').detach();
+    });
+
+    $('.cancel-addHelperTable').click(function () {
+        $ADD_HELPER_TABLE.find('tr.duplicate').detach();
+        var $clone = $HIDDEN_ADD_HELPER_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
+        $ADD_HELPER_TABLE.append($clone);
+    });
+</script>
+<!-- JS for confirm dialog -->
+<script type="text/javascript">
+    let $REMOVE_MODAL = $('#removeModal');
+    $REMOVE_MODAL.on('show.bs.modal', function (event) {
+        let deleteButton = $(event.relatedTarget);
+        let type = deleteButton.data('type');
+        let userName = deleteButton.data('username');
+        let userMail = deleteButton.data('usermail');
+        let modal = $(this);
+        modal.find('span.userName').text(userName);
+        modal.find('span.userMail').text(userMail);
+        modal.find('span.userType').text(type);
+    });
+
+    $('#confirmRemove-button').click(function () {
+        let userMail = $('.modal-body').find('span.userMail').text();
+        let userType = $('.modal-body').find('span.userType').text();
+        // AJAX to delete user by this mail into type (Ex: delete user1@mail.com into organizer)
+    });
+
+
+</script>

@@ -19,7 +19,7 @@
             <li><a href="/" <% if (page == "accueil"){%> class="active" <%}%> > <i class="icon-home"></i>Accueil</a></li>
             <li><a href="/createraid/start" <% if (page.includes("create_raid")){%> class="active" <%}%> > <i class="icon-form"></i>Organiser un Raid</a>
                 <% if (page.includes("create_raid")){%>
-                    <ul class="list-unstyled ">
+                    <ul class="list-unstyled">
                         <li><a href="#" <% if (page.includes("create_raid/start")){%> style="border-left: 2px solid #379392;" <%}%>>Initialisation</a></li>
                         <li><a href="#" <% if (page.includes("create_raid/description")){%> style="border-left: 2px solid #379392;" <%}%>>Description</a></li>
                         <li><a href="#" <% if (page.includes("create_raid/sports")){%> style="border-left: 2px solid #379392;" <%}%>>Sélection des sports</a></li>
@@ -28,12 +28,12 @@
                 <%}%>
             </li>
             <% if(typeof user.raid_list !== "undefined" && user.raid_list.length > 0) { %>
-                <li><a href="#manageraid" aria-expanded="false" data-toggle="collapse"> <i class="icon-list"></i>Gérer mes Raids</a>
-                    <ul id="manageraid" class="collapse list-unstyled ">
-                        <% user.raid_list.forEach(function(raid){ %>
-                            <li><a href="/editraid/<%=raid.id%>"><%=raid.name%> - Édition <%=raid.edition%></a></li>
+                <li><a href="#manageraid" aria-expanded="<% if (page.includes("edit_raid")){%>true<%}else{%>false<%}%>" data-toggle="collapse"> <i class="icon-list"></i>Gérer mes Raids</a>
+                    <ul id="manageraid" class="<% if (!page.includes("edit_raid")){%>collapse<%}%> list-unstyled ">
+                        <% user.raid_list.forEach(function(one_raid){ %>
+                            <li><a href="/editraid/<%=one_raid.id%>" <% if (page.includes("edit_raid/details") && one_raid.id === raid.id){%> style="border-left: 2px solid #379392;" <%}%>><%=one_raid.name%> - Édition <%=one_raid.edition%></a></li>
                         <% }); %>
-                        <li><a href="/editraid">Autres Raids</a></li>
+                        <li><a href="/editraid" <% if (page.includes("edit_raid/all")){%> style="border-left: 2px solid #379392;" <%}%>>Autres Raids</a></li>
                     </ul>
                 </li>
             <% } %>

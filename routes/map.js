@@ -41,6 +41,7 @@ exports.displayMap = function (req, res) {
                             lonlat: [point_of_interest.lng, point_of_interest.lat]
                         });
                     });
+
                     res.render(pages_path + "template.ejs", {
                         pageTitle: "Gestion des Raids",
                         page: "edit_raid/map",

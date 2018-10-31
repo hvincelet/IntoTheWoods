@@ -3,7 +3,6 @@ const models = require('../models');
 
 const Nominatim = require('nominatim-geocoder');
 const geocoder = new Nominatim();
-const Sequelize = require('sequelize');
 
 
 exports.init = function(req, res){
@@ -165,12 +164,38 @@ exports.displayRaid = function (req, res) {
         });
         if(!found){
             res.redirect('/editraid')
-        }else{
+        }else{ // User is authenticated and allow to access this page
+            let organizers_linked_with_the_current_raid = [];
+            let helpers_linked_with_the_current_raid = [];
+             // get organizer (email, first_name, last_name)
+            organizers_linked_with_the_current_raid.push({
+                email: "graballa@enssat.fr",
+                first_name: 'Gwendal',
+                last_name: 'Raballand'
+            });
+            organizers_linked_with_the_current_raid.push({
+                email: "jderoux@enssat.fr",
+                first_name: 'Julien',
+                last_name: 'Deroux'
+            });
+
+            // Get helpers (email, first_name, last_name, posts)
+            helpers_linked_with_the_current_raid.push({
+               email: 'hvincele@enssat.fr',
+               first_name: 'Hugo',
+               last_name: 'Vincelet',
+               posts: ['Accueil', 'Buvette']
+            });
+
+            // Get Courses
+
             res.render(pages_path + "template.ejs", {
                 pageTitle: "Gestion d'un Raid",
                 page: "edit_raid/details",
                 user: user,
-                raid: found
+                raid: found,
+                organizers: organizers_linked_with_the_current_raid,
+                helpers: helpers_linked_with_the_current_raid
             });
         }
     }
