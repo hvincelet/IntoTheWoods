@@ -1,5 +1,6 @@
 const pages_path = "../views/pages/";
 const models = require('../models');
+const config = require('../config/config').development;
 
 exports.displayMap = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -70,7 +71,6 @@ exports.displayMap = function (req, res) {
             });
 
         });
-
     });
 
 };

@@ -2,7 +2,8 @@ const express = require('express');
 const favicon = require('serve-favicon');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
-const session = require('express-session');
+const session = require('express-session')
+const config = require('./config/config').development;
 
 const app = express();
 
@@ -25,24 +26,21 @@ app.use(session({
 
 
 global.connected_users = [];
-connected_users.push({
-    login: "derouxjulien@gmail.com",
-    first_name: "Julien",
-    last_name: "Deroux",
-    initials: "JD",
-    picture: null,
-    idCurrentRaid: -1, //for tests
-    raid_list: [{
-        id: 1,
-        place: "Pleumeur-Bodou, Lannion, Côtes-d'Armor, Bretagne, France métropolitaine, 22560, France",
-        lat: 48.7732657,
-        lng: -3.5187179
-
-    }]
-});
-
+if(config.no_login) {
+    connected_users.push({
+        login: "hugo.vincelet@gmail.com",
+        first_name: "Hugo",
+        last_name: "Vincelet",
+        initials: "HV",
+        picture: null,
+        idCurrentRaid: -1,
+        raid_list: [{id:1}, {id:2}, {id:3},{id:4},{id:5}]
+    });
+}
 global.connected_user = function(uuid){
-    return connected_users[0];
+    if(config.no_login) {
+        return connected_users[0];
+    }
     return connected_users.find(function(user){
         return user.uuid == uuid;
     });
@@ -53,12 +51,14 @@ global.raid = {
 }
 
 let checkAuth = function (req, res, next) {
-    // const user = connected_users.find(function(user){
-    //     return user.uuid == req.sessionID;
-    // });
-    // if (!user) {
-    //     return res.redirect('/login');
-    // }
+    if(!config.no_login) {
+        const user = connected_users.find(function(user){
+            return user.uuid == req.sessionID;
+        });
+        if (!user) {
+            return res.redirect('/login');
+        }
+    }
     next();
 };
 
