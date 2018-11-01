@@ -220,7 +220,7 @@ function storeDatasToDB() {
     };
     $.ajax({
         type: 'POST',
-        url: '/editraid/map',
+        url: '/editraid/' + raid.id + '/map',
         data: data,
         success: function (response) {
             updateFeaturesId(response)

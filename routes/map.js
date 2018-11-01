@@ -45,6 +45,28 @@ exports.displayMap = function (req, res) {
                         course.dataValues["sport_label"] = sport.name;
                     }
                 });
+                models.track_point.findAll({
+                    where: {
+                        id_track: course.dataValues.id
+                    }
+                }).then(function (track_points_found) {
+                    track_points_found.forEach(function (track_point) {
+                        trackPointsArray[course.dataValues.id].push(
+                            [track_point.dataValues.lng, track_point.dataValues.lat]
+                        );
+                    });
+                });
+            });
+            courseArray.sort(function(a, b){
+                return a.order_num - b.order_num;
+            });
+
+            let pointOfInterestArray = [];
+            points_of_interest_found.forEach(function(point_of_interest){
+                pointOfInterestArray.push({
+                    id: point_of_interest.dataValues.id,
+                    lonlat: [point_of_interest.dataValues.lng, point_of_interest.dataValues.lat]
+                });
             });
 
             let pointOfInterestArrayToLoad = [];
