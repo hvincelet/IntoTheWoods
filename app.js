@@ -2,9 +2,7 @@ const express = require('express');
 const favicon = require('serve-favicon');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
-const session = require('express-session')
-
-const jdenticon = require('jdenticon');
+const session = require('express-session');
 
 const app = express();
 
@@ -36,9 +34,9 @@ connected_users.push({
     idCurrentRaid: -1, //for tests
     raid_list: [{
         id: 1,
-        place: "Berrias-et-Casteljau, Largentière, Ardèche, Auvergne-Rhône-Alpes, France métropolitaine, 07460, France",
-        lat: 44.3731308,
-        lng: 4.2023947
+        place: "Pleumeur-Bodou, Lannion, Côtes-d'Armor, Bretagne, France métropolitaine, 22560, France",
+        lat: 48.7732657,
+        lng: -3.5187179
 
     }]
 });

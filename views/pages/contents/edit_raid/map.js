@@ -44,7 +44,6 @@ let overlay = new ol.Overlay({
         duration: 250
     }
 });
-
 let map = new ol.Map({
     target: 'map',
     layers: [raster, vector],
@@ -225,7 +224,7 @@ function storeDatasToDB() {
     let data = {
         pointOfInterestArray: pointOfInterestArrayToStore,
         courseArray: courseArrayToStore,
-        defaultCourseArrayID: orderedCourseArray[0].id
+        idRaid: raid.id
     };
     $.ajax({
         type: 'POST',
@@ -423,15 +422,17 @@ function showTopPanel() {
         resetInteraction();
         $('#add_point_of_interest_button').hide();
         $('#add_course_button').hide();
-        $('#edit_button_icon').text(' Éditer la carte')
+        $('#edit_button_icon').text('  Éditer la carte')
             .attr('class', 'fas fa-map-marked');
-        $('#edit_button').attr('class', 'btn btn-info');
+        $('#edit_button').attr('class', 'btn btn-info')
+            .attr('title', 'Ajouter, modifier et déplacer des éléments sur la carte');
         editing = false;
     } else {
         map.addInteraction(modify);
         $('#edit_button_icon').text('')
             .attr('class', 'fas fa-check');
-        $('#edit_button').attr('class', 'btn btn-success');
+        $('#edit_button').attr('class', 'btn btn-success')
+            .attr('title', 'Enregistrer les modifications');
         $('#add_point_of_interest_button').show("fast");
         $('#add_course_button').show("fast");
         editing = true;
