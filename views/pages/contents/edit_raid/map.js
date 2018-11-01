@@ -139,7 +139,6 @@ function resetInteraction() {
 /***************************************************************/
 /***                     Database access                     ***/
 /***************************************************************/
-
 /***************************************************************/
 
 function loadPointsOfInterest() {
@@ -163,17 +162,14 @@ function loadCourses() {
                     geometry: geom,
                 }
             );
-            let order_num = 0;
-            orderedCourseArray.forEach(function (orderedCourse) {
-                if (orderedCourse.id === courseId) {
-                    order_num = orderedCourse.order_num;
-                }
+            let orderedCourseFound = orderedCourseArray.find(function (orderedCourse) {
+                return orderedCourse.id === courseId;
             });
             feature.setId("course_" + courseId);
             feature.setStyle(
                 new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: courseColorArray[order_num - 1],
+                        color: courseColorArray[orderedCourseFound.order_num - 1],
                         width: 6
                     })
                 })
@@ -193,7 +189,6 @@ function storeDatasToDB() {
     const actions = features.map(feature => {
         return new Promise((resolve, reject) => {
 
-            // features.forEach(function (feature) {
             if (feature.getId().indexOf("point_of_interest") !== -1) {
                 pointOfInterestArrayToStore.push({
                     id: feature.getId().replace('point_of_interest_', ''),
@@ -297,7 +292,8 @@ closer.onclick = function () {
 function showPopup(feature, header) {
     content.innerHTML = '<h6>' + header + '</h6>' +
         '<div class="input-group-sm">' +
-        '<input id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' +
+        // '<input id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' +
+        '<textarea id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste"></textarea>' +
         '<div class="row">' +
         '<div class="col"><p>Nombre de bénévole :</p></div>' +
         '<div class="col-sm-4 input-group-sm"><input id="' + feature.getId() + '_nbHelper" type="number" value="1" class="form-control" min="1"></div>' +
@@ -462,7 +458,26 @@ function nextCourse() {
 //TODO Centré sur la france si pas de localisation
 //TODO bouton pour enregistrer les changements
 
+let helperPostArray = [];
+
 function createHelperPost(featureId) {
-    console.log($('#' + featureId + '_label').val());
-    console.log($('#' + featureId + '_nbHelper').val());
+    let description = $('#' + featureId + '_label').val();
+    let nbHelper = $('#' + featureId + '_nbHelper').val();
+
+    let helperPostFound = helperPostArray.find(function (helperPost) {
+        return helperPost.pointOfInterestId === featureId;
+    });
+
+    if (helperPostFound) {
+        helperPostFound.description = description;
+        helperPostFound.nbHelper = nbHelper;
+    } else {
+        helperPostArray.push({
+            pointOfInterestId: featureId,
+            description: description,
+            nbHelper: nbHelper
+        });
+    }
 }
+
+

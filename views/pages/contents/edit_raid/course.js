@@ -8,32 +8,32 @@ function addCourse() {
 }
 
 let number_of_points = 0;
+
 function setCourseFeature() {
-        // Get the array of features
+    // Get the array of features
     let allFeatures = vector.getSource().getFeatures();
 
-    // Go through this array and get coordinates of their geometry.
-    allFeatures.forEach(function (feature) {
-
-        if ((feature.getId() === undefined) && (feature.getGeometry().getCoordinates().length > 1)) {  // this is a newly created course
-            console.log("Newly created course");
-            feature.setId("new_course_" + orderedCourseArray[idCurrentEditedCourse].id);
-            feature.setStyle(
-                new ol.style.Style({
-                    stroke: new ol.style.Stroke({
-                        color: courseColorArray[idCurrentEditedCourse],
-                        width: 6
-                    })
-                })
-
-            );
-            nextCourse();
-            map.removeOverlay(helpTooltip);
-            number_of_points = 0
-        }
-
+    let courseFound = allFeatures.find(function (feature) {
+        return (feature.getId() === undefined) && (feature.getGeometry().getCoordinates().length > 1);
     });
-    if (++number_of_points === 1){
+
+    if (courseFound) {
+        console.log("Newly created course");
+        courseFound.setId("new_course_" + orderedCourseArray[idCurrentEditedCourse].id);
+        courseFound.setStyle(
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: courseColorArray[idCurrentEditedCourse],
+                    width: 6
+                })
+            })
+        );
+        nextCourse();
+        map.removeOverlay(helpTooltip);
+        number_of_points = 0
+    }
+
+    if (++number_of_points === 1) {
         updateHelpTooltipOverlay("Double-clic pour finir le tracé");
     }
 
