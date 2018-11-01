@@ -1,3 +1,9 @@
+<%
+var helpers_id = {}
+helpers.forEach(function (helper, index) {
+    helpers_id[helper.email] = 'helper'+index+'-post';
+});
+%>
 <div class="breadcrumb-holder">
     <div class="container-fluid">
         <ul class="breadcrumb">
@@ -45,7 +51,7 @@
                 <div class="card">
                     <div class="card-header d-flex align-items-center">
                         <h4>Organisateurs</h4>
-                        <button style="margin-left: 1em;" type="button" class="btn btn-info btn-rounded btn-sm" onclick="location.href='mailto:<% organizers.forEach(function (organizer) { %><%=organizer.email%>,<% });%>?subject=[Into The Woods] Organisation <%=raid.name%> - <%=raid.edition%>';">Contacter tous les organisateurs</button>
+                        <button style="margin-left: 1em;" type="button" class="btn btn-info btn-rounded btn-sm" data-toggle="modal" data-target="#mailModal" data-mail="<% organizers.forEach(function (organizer) { %><%=organizer.email%>,<% });%>" data-type="Organizers">Contacter tous les organisateurs</button>
                     </div>
                     <div class="card-body">
                         <div class="table-editable">
@@ -62,7 +68,7 @@
                                 <% organizers.forEach(function (organizer) { %>
                                 <tr>
                                     <td class="pt-3-half" contenteditable="false" width="60%"><%=organizer.first_name%> <%=organizer.last_name%></td>
-                                    <td width="20%"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='mailto:<%=organizer.email%>?subject=[Into The Woods] Organisation <%=raid.name%> - <%=raid.edition%>';">Contacter</button></td>
+                                    <td width="20%"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" data-toggle="modal" data-target="#mailModal" data-mail="<%=organizer.email%>" data-type="Organizers">Contacter</button></td>
                                     <td width="20%"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0" data-toggle="modal" data-target="#removeModal" data-type="Organizers" data-username="<%=organizer.first_name%> <%=organizer.last_name%>" data-usermail="<%=organizer.email%>">Supprimer</button></td>
                                 </tr>
                                 <% }); %>
@@ -95,8 +101,23 @@
                                 <% helpers.forEach(function (helper) { %>
                                 <tr>
                                     <td class="pt-3-half" contenteditable="false" width="40%"><%= helper.first_name %> <%=helper.last_name %></td>
-                                    <td class="pt-3-half" contenteditable="false" width="20%"><ul class="list-unstyled"><% helper.posts.forEach(function (post){%><li><%=post%></li><%}); %></ul></td>
-                                    <td width="20%"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='mailto:<%= helper.email %>?subject=[Into The Woods] Bénévolat <%=raid.name%> - <%=raid.edition%>';">Contacter</button></td>
+                                    <td class="pt-3-half" contenteditable="false" width="20%">
+                                        <div class="form-check" style="text-align: left;">
+                                            <% if(helper.posts.length === 1){ %>
+                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>" type="radio" name="<%=helpers_id[helper.email]%>" checked disabled>
+                                                <label for="<%=helpers_id[helper.email]%>"><%=helper.posts[0]%></label>
+                                            <% }else{
+                                                helper.posts.forEach(function(post, index){
+                                            %>
+                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>-<%=post%>" type="radio" value="<%=post%>" name="<%=helpers_id[helper.email]%>">
+                                                <label for="<%=helpers_id[helper.email]%>-<%=post%>" id="<%=helpers_id[helper.email]%>-<%=post%>-label"><%=post%></label>
+                                                <% if (index !== helper.posts.length - 1){ %>
+                                                    <br/>
+                                                <% } %>
+                                            <% }); } %>
+                                        </div>
+                                    </td>
+                                    <td width="20%"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" data-toggle="modal" data-target="#mailModal" data-mail="<%=helper.email%>" data-type="Helpers">Contacter</button></td>
                                     <td width="20%"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0" data-toggle="modal" data-target="#removeModal" data-type="Helpers" data-username="<%=helper.first_name%> <%=helper.last_name%>" data-usermail="<%=helper.email%>">Supprimer</button></td>
                                 </tr>
                                 <% }); %>
@@ -176,6 +197,51 @@
         </div>
     </div>
 </div>
+<!-- Send mail modal -->
+<div class="modal fade" id="mailModal" tabindex="-1" role="dialog" aria-labelledby="mailDialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mailDialog">Envoi d'un message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label for="recipient-name" class="col-form-label">Pour :</label>
+                        </div>
+                        <div class="col-md-10">
+                            <input type="text" class="form-control form-control-success" id="recipient-name">
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top: 1em;">
+                        <div class="col-md-2">
+                            <label for="recipient-subject" class="col-form-label">Objet :</label>
+                        </div>
+                        <div class="col-md-10">
+                            <input type="text" class="form-control form-control-success" id="recipient-subject">
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top: 1em;">
+                        <div class="col-md-2">
+                            <label for="message-text" class="col-form-label">Message :</label>
+                        </div>
+                        <div class="col-md-10">
+                            <textarea class="form-control form-control-success" id="message-text"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="button" id="sendMail-button" class="btn btn-primary">Envoyer le message</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- JS for add Helpers table -->
 <script type="text/javascript">
     var $ADD_HELPER_TABLE = $('#addHelperTable');
@@ -213,8 +279,51 @@
     $('#confirmRemove-button').click(function () {
         let userMail = $('.modal-body').find('span.userMail').text();
         let userType = $('.modal-body').find('span.userType').text();
+        console.log(userMail + "\n" + userType);
         // AJAX to delete user by this mail into type (Ex: delete user1@mail.com into organizer)
     });
+</script>
+<!-- JS for mail dialog -->
+<script type="text/javascript">
+    let $MAIL_MODAL = $('#mailModal');
+    $MAIL_MODAL.on('show.bs.modal', function (event) {
+        let contactButton = $(event.relatedTarget);
+        let mail = contactButton.data('mail');
+        let subject = contactButton.data('type');
+        let modal = $(this);
+        modal.find('#recipient-name').val(mail);
+        let subjectText = "[Into The Woods] ";
+        if(subject === "Organizers"){
+            subjectText += "Organisation "
+        }else if(subject === "Helpers"){
+            subjectText += "Bénévolat "
+        }
+        modal.find('#recipient-subject').val(subjectText + "<%=raid.name%> - Édition <%=raid.edition%>");
+    });
 
-
+    $('#sendMail-button').click(function () {
+        let mail = $('#recipient-name').text();
+        let subject = $('#recipient-subject').text();
+        let message = $('#message-text').text();
+        console.log(mail + "\n" + subject + "\n" + message);
+        // AJAX to delete user by this mail into type (Ex: delete user1@mail.com into organizer)
+    });
+</script>
+<!-- JS for line-throught on radio button non-checked -->
+<script type="text/javascript">
+    $(document).ready(function () {
+        <% helpers.forEach(function (helper) { %>
+            $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').change(function () {
+                let val = this.value;
+                $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').each(function () {
+                   let label = this.id+"-label";
+                   if(this.value !== val){
+                       $('#'+label).css('text-decoration', 'line-through');
+                   }else{
+                       $('#'+label).css('text-decoration', 'none');
+                   }
+                });
+            });
+        <% }); %>
+    });
 </script>

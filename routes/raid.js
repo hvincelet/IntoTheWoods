@@ -184,7 +184,13 @@ exports.displayRaid = function (req, res) {
                email: 'hvincele@enssat.fr',
                first_name: 'Hugo',
                last_name: 'Vincelet',
-               posts: ['Accueil', 'Buvette']
+               posts: ['Accueil', 'Buvette', 'Kayak', 'Circulation']
+            })
+            helpers_linked_with_the_current_raid.push({
+                email: 'gsicard@enssat.fr',
+                first_name: 'Guillaume',
+                last_name: 'Sicard',
+                posts: ['Circulation']
             });
 
             // Get Courses
