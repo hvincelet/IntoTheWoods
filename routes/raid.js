@@ -34,7 +34,6 @@ exports.createRaid = function (req, res) {
     }).then(function (raid_created) {
         let user = connected_user(req.sessionID);
         user.idCurrentRaid = raid_created.dataValues.id;
-        // console.log("user.idCurrentRaid = "+user.idCurrentRaid);
         models.team.create({
             id_raid: user.idCurrentRaid,
             id_organizer: user.login

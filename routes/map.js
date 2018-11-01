@@ -3,21 +3,20 @@ const models = require('../models');
 
 exports.displayMap = function (req, res) {
     const user = connected_user(req.sessionID);
-    if (!user.raid_list.find(function (raid) {
-        return raid.id == req.params.id
-    })) {
-        return res.redirect('/dashboard');
-    }
-
-    let raid = user.raid_list.find(function (raid) {
+    const raid = user.raid_list.find(function (raid) {
         return raid.id === parseInt(req.params.id);
     });
+
+    if (!raid) {
+        return res.redirect('/dashboard');
+    }
 
     models.course.findAll({
         where: {
             id_raid: raid.id
         }
     }).then(function (courses_found) {
+
         models.sport.findAll().then(function (all_sports) {
             courses_found.sort(function (a, b) {
                 return a.order_num - b.order_num;
@@ -50,7 +49,7 @@ exports.displayMap = function (req, res) {
             let pointOfInterestArrayToLoad = [];
             models.point_of_interest.findAll({ // loads the array of points-of-interest
                 where: {
-                    id_track: courses_found[0].id
+                    id_raid: raid.id
                 }
             }).then(function (points_of_interest_found) {
                 points_of_interest_found.forEach(function (point_of_interest) {
@@ -79,14 +78,13 @@ exports.displayMap = function (req, res) {
 exports.storeMapData = function (req, res) {
 
     let pointOfInterestUpdatedId = [];
-
     if (req.body.pointOfInterestArray !== undefined) {
 
         const actions = req.body.pointOfInterestArray.map(pointOfInterest => {
             return new Promise((resolve, reject) => {
                 if (pointOfInterest.id.indexOf("new") !== -1) {
                     models.point_of_interest.create({
-                        id_track: req.body.defaultCourseArrayID,
+                        id_raid: req.body.idRaid,
                         lat: pointOfInterest.lat,
                         lng: pointOfInterest.lng
                     }).then(function (pointOfInterestCreated) {

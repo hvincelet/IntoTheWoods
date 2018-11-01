@@ -41,7 +41,6 @@ let overlay = new ol.Overlay({
         duration: 250
     }
 });
-
 let map = new ol.Map({
     target: 'map',
     layers: [raster, vector],
@@ -183,18 +182,6 @@ let courseArrayToStore = [];
 function storeDatasToDB() {
     let features = vector.getSource().getFeatures();
 
-<<<<<<< HEAD
-    features.forEach(function (feature) {
-        if (feature.getId().indexOf("point_of_interest") !== -1) {
-            pointOfInterestArrayToStore.push({
-                id: feature.getId().replace('point_of_interest_', ''),
-                lng: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[0],
-                lat: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[1]
-            });
-        } else {
-            console.log("error: unrecognized feature");
-        }
-=======
     const actions = features.map(feature => {
         return new Promise((resolve, reject) => {
 
@@ -216,7 +203,6 @@ function storeDatasToDB() {
                 console.log("error: unrecognized feature");
                 return resolve();
             }
->>>>>>> Synchronization of feature ids between client and server + save the state of the map when clicking on validate editing
 
         });
     });
@@ -230,7 +216,7 @@ function storeDatasToDB() {
     let data = {
         pointOfInterestArray: pointOfInterestArrayToStore,
         courseArray: courseArrayToStore,
-        defaultCourseArrayID: orderedCourseArray[0].id
+        idRaid: raid.id
     };
     $.ajax({
         type: 'POST',
@@ -245,28 +231,6 @@ function storeDatasToDB() {
 
 }
 
-<<<<<<< HEAD
-function loadPointsOfInterest() {
-
-    pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
-        let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
-        let feature = new ol.Feature({
-                geometry: geom,
-            }
-        );
-        feature.setId("point_of_interest_" + pointOfInterest.id);
-        source.addFeature(feature);
-    });
-
-}
-
-//https://openlayers.org/en/latest/examples/select-features.html
-//selectInteraction.getFeatures();
-
-/**********************************/
-/*           Interaction          */
-/**********************************/
-=======
 function updateFeaturesId(data) {
     data.pointOfInterestUpdatedIdArray.map(pointOfInterestUpdatedId => {
         console.log("new_point_of_interest_" + pointOfInterestUpdatedId.clientId);
@@ -280,7 +244,6 @@ function updateFeaturesId(data) {
 /***                        Interaction                      ***/
 /***************************************************************/
 /***************************************************************/
->>>>>>> Synchronization of feature ids between client and server + save the state of the map when clicking on validate editing
 
 let selectElement = "singleselect";
 // lookup for selection objects
@@ -485,15 +448,17 @@ function showTopPanel() {
         resetInteraction();
         $('#add_point_of_interest_button').hide();
         $('#add_course_button').hide();
-        $('#edit_button_icon').text(' Éditer la carte');
-        $('#edit_button_icon').attr('class', 'fas fa-map-marked');
-        $('#edit_button').attr('class', 'btn btn-info');
+        $('#edit_button_icon').text('  Éditer la carte')
+            .attr('class', 'fas fa-map-marked');
+        $('#edit_button').attr('class', 'btn btn-info')
+            .attr('title', 'Ajouter, modifier et déplacer des éléments sur la carte');
         editing = false;
     } else {
         map.addInteraction(modify);
         $('#edit_button_icon').text('')
             .attr('class', 'fas fa-check');
-        $('#edit_button').attr('class', 'btn btn-success');
+        $('#edit_button').attr('class', 'btn btn-success')
+            .attr('title', 'Enregistrer les modifications');
         $('#add_point_of_interest_button').show("fast");
         $('#add_course_button').show("fast");
         editing = true;
