@@ -5,12 +5,12 @@ const crypto = require('crypto');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
 
-exports.displayHome = function(req, res) {
+exports.displayHome = function (req, res) {
     models.raid.findAll({
         attributes: ['id', 'name', 'date', 'edition', 'place']
-    }).then(function (raids_found){
+    }).then(function (raids_found) {
         let raids = [];
-        raids_found.forEach(function(raid){
+        raids_found.forEach(function (raid) {
             raids.push({
                 id: raid.dataValues.id,
                 name: raid.dataValues.name,
@@ -40,7 +40,7 @@ exports.dashboard = function (req, res) {
 
 exports.displayLogScreen = function (req, res) {
     const user = connected_user(req.sessionID);
-    if(user) {
+    if (user) {
         return res.redirect("/");
     }
     res.render(pages_path + "login.ejs", {
@@ -85,9 +85,9 @@ exports.idVerification = function (req, res) {
                     }
                 }],
                 attributes: ['id', 'name', 'edition', 'date', 'place', 'lat', 'lng']
-            }).then(function(raids_found){
-                if(raids_found){
-                    raids_found.forEach(function(tuple){
+            }).then(function (raids_found) {
+                if (raids_found) {
+                    raids_found.forEach(function (tuple) {
                         user.raid_list.push({
                             id: tuple.dataValues.id,
                             name: tuple.dataValues.name,
@@ -113,11 +113,11 @@ exports.idVerification = function (req, res) {
 
 exports.logout = function (req, res) {
     let connected_user_index;
-    const user = connected_users.find(function(user, index){
+    const user = connected_users.find(function (user, index) {
         connected_user_index = index;
         return user.uuid === req.sessionID;
     });
-    if(user){
+    if (user) {
         connected_users.splice(connected_user_index, 1);
     }
     res.redirect('/');
@@ -156,7 +156,7 @@ exports.register = function (req, res) {
 
 };
 
-exports.validate = function(req, res) {
+exports.validate = function (req, res) {
     models.organizer.findOne({
         where: {
             email: req.query.id,

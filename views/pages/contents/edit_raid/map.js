@@ -60,7 +60,7 @@ loadCourses();
 /**********************************/
 
 let modify = new ol.interaction.Modify({source: source});
-map.addInteraction(modify);
+// map.addInteraction(modify);
 
 let draw, snap; // global so we can remove them later
 let typeSelect;
@@ -75,8 +75,6 @@ function addInteractions() {
 
 
     createMeasureTooltip();
-
-
     var listener;
     draw.on('drawstart',
         function (evt) {
@@ -185,6 +183,7 @@ let courseArrayToStore = [];
 function storeDatasToDB() {
     let features = vector.getSource().getFeatures();
 
+<<<<<<< HEAD
     features.forEach(function (feature) {
         if (feature.getId().indexOf("point_of_interest") !== -1) {
             pointOfInterestArrayToStore.push({
@@ -195,8 +194,38 @@ function storeDatasToDB() {
         } else {
             console.log("error: unrecognized feature");
         }
+=======
+    const actions = features.map(feature => {
+        return new Promise((resolve, reject) => {
 
+            // features.forEach(function (feature) {
+            if (feature.getId().indexOf("point_of_interest") !== -1) {
+                pointOfInterestArrayToStore.push({
+                    id: feature.getId().replace('point_of_interest_', ''),
+                    lng: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[0],
+                    lat: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[1]
+                });
+                return resolve();
+            } else if (feature.getId().indexOf("course") !== -1) {
+                courseArrayToStore.push({
+                    id: feature.getId().replace('course_', ''),
+                    track_point_array: feature.getGeometry().getCoordinates()
+                });
+                return resolve();
+            } else {
+                console.log("error: unrecognized feature");
+                return resolve();
+            }
+>>>>>>> Synchronization of feature ids between client and server + save the state of the map when clicking on validate editing
+
+        });
     });
+
+    Promise.all(actions)
+        .then(result => {
+            pointOfInterestArrayToStore = [];
+            courseArrayToStore = [];
+        }).catch(err => console.log(err));
 
     let data = {
         pointOfInterestArray: pointOfInterestArrayToStore,
@@ -208,6 +237,7 @@ function storeDatasToDB() {
         url: '/editraid/map',
         data: data,
         success: function (response) {
+            updateFeaturesId(response)
         },
         error: function (response) {
         }
@@ -215,6 +245,7 @@ function storeDatasToDB() {
 
 }
 
+<<<<<<< HEAD
 function loadPointsOfInterest() {
 
     pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
@@ -235,6 +266,21 @@ function loadPointsOfInterest() {
 /**********************************/
 /*           Interaction          */
 /**********************************/
+=======
+function updateFeaturesId(data) {
+    data.pointOfInterestUpdatedIdArray.map(pointOfInterestUpdatedId => {
+        console.log("new_point_of_interest_" + pointOfInterestUpdatedId.clientId);
+        let feature = vector.getSource().getFeatureById("new_point_of_interest_" + pointOfInterestUpdatedId.clientId);
+        feature.setId("point_of_interest_" + pointOfInterestUpdatedId.serverId);
+    });
+}
+
+/***************************************************************/
+/***************************************************************/
+/***                        Interaction                      ***/
+/***************************************************************/
+/***************************************************************/
+>>>>>>> Synchronization of feature ids between client and server + save the state of the map when clicking on validate editing
 
 let selectElement = "singleselect";
 // lookup for selection objects
@@ -313,11 +359,15 @@ closer.onclick = function () {
 
 function showPopup(feature, header) {
     content.innerHTML = '<h6>' + header + '</h6>' +
-        '<div class="input-group input-group-sm">' +
-        '<input type="text" class="form-control" placeholder="intitulé du poste">' +
+        '<div class="input-group-sm">' +
+        '<input id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' +
+        '<div class="row">' +
+        '<div class="col"><p>Nombre de bénévole :</p></div>' +
+        '<div class="col-sm-4 input-group-sm"><input id="' + feature.getId() + '_nbHelper" type="number" value="1" class="form-control" min="1"></div>' +
+        '</div>' +
         '</div>' +
         '<button id="type" class="btn btn-xs btn-danger" onclick="removePointOfInterest(\'' + feature.getId() + '\')">supprimer</button>' +
-        '<button id="type" class="btn btn-xs btn-default" onclick="createHelperPost()">enregistrer</button>';
+        '<button id="type" class="btn btn-xs btn-default" onclick="createHelperPost(\'' + feature.getId() + '\')">enregistrer</button>';
     overlay.setPosition(feature.getGeometry().getCoordinates());
 }
 
@@ -429,6 +479,8 @@ let editing = false;
 
 function showTopPanel() {
     if (editing) {
+        storeDatasToDB();
+        map.removeInteraction(modify);
         map.removeOverlay(helpTooltip);
         resetInteraction();
         $('#add_point_of_interest_button').hide();
@@ -438,8 +490,9 @@ function showTopPanel() {
         $('#edit_button').attr('class', 'btn btn-info');
         editing = false;
     } else {
-        $('#edit_button_icon').text('');
-        $('#edit_button_icon').attr('class', 'fas fa-check');
+        map.addInteraction(modify);
+        $('#edit_button_icon').text('')
+            .attr('class', 'fas fa-check');
         $('#edit_button').attr('class', 'btn btn-success');
         $('#add_point_of_interest_button').show("fast");
         $('#add_course_button').show("fast");
@@ -479,6 +532,7 @@ function updateSelectedCourse() {
 //TODO Centré sur la france si pas de localisation
 //TODO bouton pour enregistrer les changements
 
-function createHelperPost(){
-
+function createHelperPost(featureId) {
+    console.log($('#' + featureId + '_label').val());
+    console.log($('#' + featureId + '_nbHelper').val());
 }
