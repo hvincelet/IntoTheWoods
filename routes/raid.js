@@ -110,11 +110,14 @@ exports.saveSportsRanking = function (req, res) {
                 user.raid_list.push({
                     id: user.idCurrentRaid,
                     name: unique_raid_found.dataValues.name,
-                    edition: unique_raid_found.dataValues.edition
+                    date: unique_raid_found.dataValues.date,
+                    edition: unique_raid_found.dataValues.edition,
+                    place: unique_raid_found.dataValues.place,
+                    lat: unique_raid_found.dataValues.lat,
+                    lng: unique_raid_found.dataValues.lng
                 });
-                const raid_to_redirect = user.idCurrentRaid;
+                res.redirect('/editraid/' + user.idCurrentRaid + '/map');
                 user.idCurrentRaid = -1;
-                res.redirect('/editraid/' + raid_to_redirect + '/map');
             });
         });
 
@@ -208,7 +211,8 @@ exports.displayAllRaids = function (req, res) {
 
 exports.displayRaid = function(req, res) {
     const user = connected_user(req.sessionID);
-    if(!user.raid_list.find(function(raid){return raid.id == req.params.id})){
+    const raid = user.raid_list.find(function(raid){return raid.id == req.params.id});
+    if(!raid){
         return res.redirect('/dashboard');
     }
 
@@ -308,6 +312,7 @@ exports.displayRaid = function(req, res) {
             let sport_model = models.sport;
 
             sport_model.belongsTo(course_model, {foreignKey: 'id'});
+            const Sequelize = require('sequelize');
             sport_model.findAll({
                 attributes: ['name'],
                 include: [{
@@ -325,15 +330,15 @@ exports.displayRaid = function(req, res) {
                         name: course.dataValues.name
                     });
                 });
-                /*res.render(pages_path + "template.ejs", {
-                    pageTitle: "Équipe et organisateurs",
-                    page: "",
+                res.render(pages_path + "template.ejs", {
+                    pageTitle: "Gestion d'un Raid",
+                    page: "edit_raid/details",
                     user: user,
                     organizers: organizers_linked_with_the_current_raid, // [{email, first_name, last_name}]
-                    helpers: helpers_linked_with_the_current_raid, // [{email, first_name, last_name, posts_asked:[{helper_post_id, description}]}]
+                    helpers: data_helper, // [{email, first_name, last_name, posts_asked:[{helper_post_id, description}]}]
                     courses: courses_linked_with_the_current_raid,
-                    raid_id: req.params.raid_id
-                });*/
+                    raid: raid
+                });
             });
         });
 
