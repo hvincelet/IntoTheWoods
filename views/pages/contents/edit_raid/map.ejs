@@ -2,8 +2,7 @@
     <div class="container-fluid">
         <ul class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Accueil</a></li>
-            <li class="breadcrumb-item"><a href="/editraid">Gérer mes raids</a></li>
-            <li class="breadcrumb-item"><a href="/editraid/<%= raid.id %>"><%= raid.name %> - Édition <%= raid.edition %></a></li>
+            <li class="breadcrumb-item active">Gérer mes raids</li>
             <li class="breadcrumb-item active">Edition des parcours</li>
         </ul>
     </div>
@@ -53,7 +52,6 @@
     .ol-popup-closer:after {
         content: "✖";
     }
-
     .tooltip {
         position: relative;
         background: rgba(0, 0, 0, 0.5);
@@ -87,37 +85,21 @@
     /*.tooltip-static:before {*/
         /*border-top-color: #ffcc33;*/
     /*}*/
-
     #map {
         position: relative;
     }
-
-
     #panel-left {
         top: 17px;
         left: 70px;
         position: absolute;
         z-index:1;
     }
-
     #panel-right {
         top: 17px;
         right: 20px;
         position: absolute;
         z-index:1;
     }
-
-    /*#panel-right-2 {*/
-        /*top: 54px;*/
-        /*right: 20px;*/
-        /*position: absolute;*/
-        /*z-index: 2;*/
-        /*background-color: antiquewhite;*/
-        /*opacity: 0.8;*/
-        /*width: 214px;*/
-        /*font-size: 1.2em;*/
-    /*}*/
-
 </style>
 
 <section class="forms">
@@ -132,20 +114,6 @@
                             <button id="edit_button" class="btn btn-info" title="Ajouter, modifier et déplacer des éléments sur la carte" onclick="showTopPanel()"><i id="edit_button_icon" class="fas fa-map-marked">  Éditer la carte</i></button>
                             <button id="add_point_of_interest_button" class="btn btn-default" style="display: none" onclick="addPointOfInterest()"><i class="fas fa-dot-circle"></i> Ajouter un point d'intérêt</button>
                             <button id="add_course_button" class="btn btn-default" style="display: none" onclick="addCourse()"><i class="fas fa-route"></i> Tracer un parcours</button>
-                            <div id="panel-right" class="btn-group btn-group" role="group" aria-label="group" style="display: none">
-                                <button id="previous_button" class="btn btn-default" onclick="previousCourse()"><i class="fas fa-angle-left"></i></button>
-                                <button id="current_course" class="btn btn-default" style="width:160px; color:white"><i></i></button>
-                                <button id="next_button" class="btn btn-default" onclick="nextCourse()"><i class="fas fa-angle-right"></i></button>
-                            </div>
-
-                            <!--<div id="panel-right-2">-->
-                                <!--<p class="text-lg-center">test</p>-->
-                            <!--</div>-->
-
-                        <!--</div>-->
-                        <div id="popup" class="ol-popup">
-                            <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-                            <div id="popup-content"></div>
                         </div>
 
                         <div id="panel-right" class="btn-group btn-group" role="group" aria-label="group" style="display: none">

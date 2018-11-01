@@ -47,25 +47,22 @@ exports.displayMap = function (req, res) {
                 });
                 models.track_point.findAll({
                     where: {
-                        id_track: course.dataValues.id
+                        id_track: course.id
                     }
                 }).then(function (track_points_found) {
+
                     track_points_found.forEach(function (track_point) {
-                        trackPointsArray[course.dataValues.id].push(
-                            [track_point.dataValues.lng, track_point.dataValues.lat]
+                        courseArrayToLoad[course.id].push(
+                            [track_point.lng, track_point.lat]
                         );
                     });
-                });
-            });
-            courseArray.sort(function(a, b){
-                return a.order_num - b.order_num;
-            });
 
-            let pointOfInterestArray = [];
-            points_of_interest_found.forEach(function(point_of_interest){
-                pointOfInterestArray.push({
-                    id: point_of_interest.dataValues.id,
-                    lonlat: [point_of_interest.dataValues.lng, point_of_interest.dataValues.lat]
+                });
+
+                all_sports.forEach(function (sport) {
+                    if (course.id_sport === sport.id) {
+                        course.dataValues["sport_label"] = sport.name;
+                    }
                 });
             });
 
