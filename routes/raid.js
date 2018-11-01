@@ -35,7 +35,7 @@ exports.createRaid = function (req, res) {
     }).then(function (raid_created) {
         let user = connected_user(req.sessionID);
         user.idCurrentRaid = raid_created.dataValues.id;
-        console.log("user.idCurrentRaid = "+user.idCurrentRaid);
+        // console.log("user.idCurrentRaid = "+user.idCurrentRaid);
         models.team.create({
             id_raid: user.idCurrentRaid,
             id_organizer: user.login
@@ -114,7 +114,6 @@ exports.saveSportsRanking = function (req, res) {
                     name: unique_raid_found.dataValues.name,
                     edition: unique_raid_found.dataValues.edition
                 });
-                console.log(user.raid_list);
                 res.redirect('/editraid/map/' + user.idCurrentRaid);
             });
         });

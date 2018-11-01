@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session')
 
+const jdenticon = require('jdenticon');
+
 const app = express();
 
 app.use(favicon(__dirname + '/views/img/favicon.png'));
@@ -25,32 +27,38 @@ app.use(session({
 
 
 global.connected_users = [];
+connected_users.push({
+    login: "derouxjulien@gmail.com",
+    first_name: "Julien",
+    last_name: "Deroux",
+    initials: "JD",
+    picture: null,
+    idCurrentRaid: -1, //for tests
+    raid_list: [{
+        id: 1,
+        place: "Berrias-et-Casteljau, Largentière, Ardèche, Auvergne-Rhône-Alpes, France métropolitaine, 07460, France",
+        lat: 44.3731308,
+        lng: 4.2023947
+
+    }]
+});
 
 global.connected_user = function(uuid){
+    return connected_users[0];
     return connected_users.find(function(user){
         return user.uuid == uuid;
     });
 };
 
 let checkAuth = function (req, res, next) {
-    const user = connected_users.find(function(user){
-        return user.uuid == req.sessionID;
-    });
-    if (!user) {
-        return res.redirect('/login');
-    }
+    // const user = connected_users.find(function(user){
+    //     return user.uuid == req.sessionID;
+    // });
+    // if (!user) {
+    //     return res.redirect('/login');
+    // }
     next();
 };
-
-/*{
-    login: "",
-    first_name: "",
-    last_name: "",
-    initials: "",
-    picture: first_name[0]+last_name[0],
-    idCurrentRaid: 1 //for tests
-    raid_list: [] // {id, name, edition}
-}*/
 
 const organizer = require('./routes/organizer');
 const raid = require('./routes/raid');
@@ -103,7 +111,7 @@ app.route('/editraid')
 
 app.route('/editraid/map/:id')
     .get(checkAuth, map.displayMap)
-    .post(checkAuth, map.storeMapDatas);
+    .post(checkAuth, map.storeMapData);
 
 app.route('/termsandpolicy')
     .get(misc.cgu);
