@@ -1,3 +1,15 @@
+function loadPointsOfInterest() {
+    pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
+        let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
+        let feature = new ol.Feature({
+                geometry: geom,
+            }
+        );
+        feature.setId("point_of_interest_" + pointOfInterest.id);
+        source.addFeature(feature);
+    });
+}
+
 function addPointOfInterest() {
     $('#panel-right').fadeOut();
     currentFeatureEditing = "point_of_interest";

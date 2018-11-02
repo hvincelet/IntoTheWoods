@@ -1,3 +1,30 @@
+function loadCourses() {
+    let courseId = 0;
+    courseArrayToLoad.forEach(function (course) {
+        if (course !== null && course.length > 1) {
+            let geom = new ol.geom.LineString(course);
+            let feature = new ol.Feature({
+                    geometry: geom,
+                }
+            );
+            let orderedCourseFound = orderedCourseArray.find(function (orderedCourse) {
+                return orderedCourse.id === courseId;
+            });
+            feature.setId("course_" + courseId);
+            feature.setStyle(
+                new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: courseColorArray[orderedCourseFound.order_num - 1],
+                        width: 6
+                    })
+                })
+            );
+            source.addFeature(feature);
+        }
+        courseId++;
+    });
+}
+
 function addCourse() {
     updateSelectedCourse();
     $('#panel-right').fadeIn();
@@ -44,6 +71,7 @@ let courseColorArray = ["#5c6bc0", "#ef5350", "#ffa726", "#66bb6a", "#7e57c2", "
 function updateSelectedCourse() {
     $('#current_course').css('background-color', courseColorArray[idCurrentEditedCourse])
         .text(orderedCourseArray[idCurrentEditedCourse].sport_label);
+    $('#course_info_label').text(orderedCourseArray[idCurrentEditedCourse].label).fadeIn().delay(6000).fadeOut("slow");
 }
 
 //TODO vérifier qu'il n'y existe pas déjà un tracé pour le parcours à créer

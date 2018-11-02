@@ -3,7 +3,6 @@ const models = require('../models');
 
 const Nominatim = require('nominatim-geocoder');
 const geocoder = new Nominatim();
-const Sequelize = require('sequelize');
 
 
 exports.init = function(req, res){

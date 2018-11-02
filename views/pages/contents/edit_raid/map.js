@@ -139,51 +139,14 @@ function resetInteraction() {
 /***************************************************************/
 /***                     Database access                     ***/
 /***************************************************************/
+
 /***************************************************************/
-
-function loadPointsOfInterest() {
-    pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
-        let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
-        let feature = new ol.Feature({
-                geometry: geom,
-            }
-        );
-        feature.setId("point_of_interest_" + pointOfInterest.id);
-        source.addFeature(feature);
-    });
-}
-
-function loadCourses() {
-    let courseId = 0;
-    courseArrayToLoad.forEach(function (course) {
-        if (course !== null && course.length > 1) {
-            let geom = new ol.geom.LineString(course);
-            let feature = new ol.Feature({
-                    geometry: geom,
-                }
-            );
-            let orderedCourseFound = orderedCourseArray.find(function (orderedCourse) {
-                return orderedCourse.id === courseId;
-            });
-            feature.setId("course_" + courseId);
-            feature.setStyle(
-                new ol.style.Style({
-                    stroke: new ol.style.Stroke({
-                        color: courseColorArray[orderedCourseFound.order_num - 1],
-                        width: 6
-                    })
-                })
-            );
-            source.addFeature(feature);
-        }
-        courseId++;
-    });
-}
 
 let pointOfInterestArrayToStore = [];
 let courseArrayToStore = [];
+let helperPostArrayToStore = [];
 
-function storeDatasToDB() {
+function storeDataToDB() {
     let features = vector.getSource().getFeatures();
 
     const actions = features.map(feature => {
@@ -214,11 +177,13 @@ function storeDatasToDB() {
         .then(result => {
             pointOfInterestArrayToStore = [];
             courseArrayToStore = [];
+            helperPostArrayToStore = [];
         }).catch(err => console.log(err));
 
     let data = {
         pointOfInterestArray: pointOfInterestArrayToStore,
         courseArray: courseArrayToStore,
+        helperPostArray: helperPostArrayToStore,
         idRaid: raid.id
     };
     $.ajax({
@@ -290,18 +255,35 @@ closer.onclick = function () {
 };
 
 function showPopup(feature, header) {
+    let description = "";
+
+    let helperPost = helperPostArray.find(function (helperPost) {
+        return parseInt(feature.getId().replace("point_of_interest_", "")) === helperPost.id_point_of_interest;
+    });
+    if (helperPost !== undefined) {
+        description = helperPost.description;
+    } else {
+        helperPost = helperPostArrayToStore.find(function (helperPost) {
+            return feature.getId() === helperPost.id_point_of_interest;
+        });
+        if (helperPost !== undefined) {
+            description = helperPost.description;
+        }
+    }
+
     content.innerHTML = '<h6>' + header + '</h6>' +
         '<div class="input-group-sm">' +
-        // '<input id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' +
-        '<textarea id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste"></textarea>' +
+        '<input id="' + feature.getId() + '_label" type="text" class="form-control row-margin" placeholder="intitulé du poste" value=\"' + description + '\">' +
+        // '<textarea id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' + description + '</textarea>' +
         '<div class="row">' +
         '<div class="col"><p>Nombre de bénévole :</p></div>' +
         '<div class="col-sm-4 input-group-sm"><input id="' + feature.getId() + '_nbHelper" type="number" value="1" class="form-control" min="1"></div>' +
         '</div>' +
         '</div>' +
         '<button id="type" class="btn btn-xs btn-danger" onclick="removePointOfInterest(\'' + feature.getId() + '\')">supprimer</button>' +
-        '<button id="type" class="btn btn-xs btn-default" onclick="createHelperPost(\'' + feature.getId() + '\')">enregistrer</button>';
+        '<button id="type" class="btn btn-xs btn-default" onclick="editHelperPost(\'' + feature.getId() + '\')">enregistrer</button>';
     overlay.setPosition(feature.getGeometry().getCoordinates());
+
 }
 
 /***************************************************************/
@@ -401,7 +383,6 @@ function createMeasureTooltip() {
     map.addOverlay(measureTooltip);
 }
 
-
 /***************************************************************/
 /***************************************************************/
 /***                         Top Panel                       ***/
@@ -412,7 +393,7 @@ let editing = false;
 
 function showTopPanel() {
     if (editing) {
-        storeDatasToDB();
+        storeDataToDB();
         map.removeInteraction(modify);
         map.removeOverlay(helpTooltip);
         resetInteraction();
@@ -456,28 +437,26 @@ function nextCourse() {
 }
 
 //TODO Centré sur la france si pas de localisation
-//TODO bouton pour enregistrer les changements
 
-let helperPostArray = [];
-
-function createHelperPost(featureId) {
+function editHelperPost(featureId) {
     let description = $('#' + featureId + '_label').val();
     let nbHelper = $('#' + featureId + '_nbHelper').val();
 
-    let helperPostFound = helperPostArray.find(function (helperPost) {
-        return helperPost.pointOfInterestId === featureId;
+    let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
+        return helperPost.id_point_of_interest === featureId;
     });
 
     if (helperPostFound) {
         helperPostFound.description = description;
-        helperPostFound.nbHelper = nbHelper;
+        helperPostFound.nb_helper = nbHelper;
     } else {
-        helperPostArray.push({
-            pointOfInterestId: featureId,
+        helperPostArrayToStore.push({
+            id_point_of_interest: featureId,
             description: description,
-            nbHelper: nbHelper
+            nb_helper: nbHelper
         });
     }
+    overlay.setPosition(undefined);
 }
 
 

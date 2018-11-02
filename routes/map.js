@@ -5,6 +5,7 @@ const sports = models.sport;
 const courses = models.course;
 const track_points = models.track_point;
 const point_of_interests = models.point_of_interest;
+const helper_posts = models.helper_post;
 
 exports.displayMap = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -21,62 +22,80 @@ exports.displayMap = function (req, res) {
             id_raid: raid.id
         }
     }).then(function (courses_found) {
-
         sports.findAll().then(function (all_sports) {
             courses_found.sort(function (a, b) {
                 return a.order_num - b.order_num;
             });
+
             let courseArrayToLoad = [];
-            courses_found.forEach(function (course) {
-                courseArrayToLoad[course.id] = [];
-
-                track_points.findAll({
-                    where: {
-                        id_track: course.id
-                    }
-                }).then(function (track_points_found) {
-
-                    track_points_found.forEach(function (track_point) {
-                        courseArrayToLoad[course.id].push(
-                            [track_point.lng, track_point.lat]
-                        );
+            const course_actions = courses_found.map(course => {
+                return new Promise((resolve, reject) => {
+                    courseArrayToLoad[course.id] = [];
+                    track_points.findAll({
+                        where: {
+                            id_track: course.id
+                        }
+                    }).then(function (track_points_found) {
+                        track_points_found.forEach(function (track_point) {
+                            courseArrayToLoad[course.id].push(
+                                [track_point.lng, track_point.lat]
+                            );
+                        });
+                        let sportFound = all_sports.find(function (sport) {
+                            return sport.id === course.id_sport;
+                        });
+                        course.dataValues["sport_label"] = sportFound.name;
+                        return resolve();
                     });
-
-                });
-
-                let sportFound = all_sports.find(function (sport) {
-                    return sport.id === course.id_sport;
-                });
-                course.dataValues["sport_label"] = sportFound.name;
-            });
-
-            let pointOfInterestArrayToLoad = [];
-            point_of_interests.findAll({ // loads the array of points-of-interest
-                where: {
-                    id_raid: raid.id
-                }
-            }).then(function (points_of_interest_found) {
-                points_of_interest_found.forEach(function (point_of_interest) {
-                    pointOfInterestArrayToLoad.push({
-                        id: point_of_interest.id,
-                        lonlat: [point_of_interest.lng, point_of_interest.lat]
-                    });
-                });
-                res.render(pages_path + "template.ejs", {
-                    pageTitle: "Gestion des Raids",
-                    page: "edit_raid/map",
-                    user: user,
-                    raid: raid,
-                    orderedCourseArray: courses_found,
-                    pointOfInterestArrayToLoad: pointOfInterestArrayToLoad,
-                    courseArrayToLoad: courseArrayToLoad
                 });
             });
 
+            Promise.all(course_actions)
+                .then(result => {
+                    let pointOfInterestArrayToLoad = [];
+                    let helperPostArray = [];
+                    point_of_interests.findAll({ // loads the array of points-of-interest
+                        where: {
+                            id_raid: raid.id
+                        }
+                    }).then(function (points_of_interest_found) {
+                        const point_of_interest_actions = points_of_interest_found.map(point_of_interest => {
+                            return new Promise((resolve, reject) => {
+                                pointOfInterestArrayToLoad.push({
+                                    id: point_of_interest.id,
+                                    lonlat: [point_of_interest.lng, point_of_interest.lat]
+                                });
+                                helper_posts.findOne({
+                                    where: {
+                                        id_point_of_interest: point_of_interest.id
+                                    }
+                                }).then(function (helper_post_found) {
+                                    if (helper_post_found !== null) {
+                                        helperPostArray.push(helper_post_found.dataValues);
+                                    }
+                                    return resolve();
+                                })
+
+                            });
+                        });
+
+                        Promise.all(point_of_interest_actions)
+                            .then(result => {
+                                res.render(pages_path + "template.ejs", {
+                                    pageTitle: "Gestion des Raids",
+                                    page: "edit_raid/map",
+                                    user: user,
+                                    raid: raid,
+                                    orderedCourseArray: courses_found,
+                                    pointOfInterestArrayToLoad: pointOfInterestArrayToLoad,
+                                    courseArrayToLoad: courseArrayToLoad,
+                                    helperPostArray: helperPostArray
+                                });
+                            });
+                    }).catch(err => console.log(err));
+                });
         });
-
     });
-
 };
 
 exports.storeMapData = function (req, res) {
@@ -140,7 +159,7 @@ exports.storeMapData = function (req, res) {
                     id_track: course.id
                 }
             }).then(function () {
-                course.track_point_array.forEach(function (track_point) {
+                course.track_point_array.map(track_point => {
                     track_points.create({
                         id_track: course.id,
                         lat: track_point[1],
