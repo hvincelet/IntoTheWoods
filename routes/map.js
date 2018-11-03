@@ -1,6 +1,5 @@
 const pages_path = "../views/pages/";
 const models = require('../models');
-const config = require('../config/config').development;
 
 exports.displayMap = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -26,25 +25,6 @@ exports.displayMap = function (req, res) {
             courses_found.forEach(function (course) {
                 courseArrayToLoad[course.id] = [];
 
-                models.track_point.findAll({
-                    where: {
-                        id_track: course.id
-                    }
-                }).then(function (track_points_found) {
-
-                    track_points_found.forEach(function (track_point) {
-                        courseArrayToLoad[course.id].push(
-                            [track_point.lng, track_point.lat]
-                        );
-                    });
-
-                });
-
-                all_sports.forEach(function (sport) {
-                    if (course.id_sport === sport.id) {
-                        course.dataValues["sport_label"] = sport.name;
-                    }
-                });
                 models.track_point.findAll({
                     where: {
                         id_track: course.id
@@ -90,6 +70,7 @@ exports.displayMap = function (req, res) {
             });
 
         });
+
     });
 
 };

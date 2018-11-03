@@ -10,6 +10,7 @@ let source = new ol.source.Vector();
 
 let vector = new ol.layer.Vector({
     source: source,
+
     style: new ol.style.Style({
         fill: new ol.style.Fill({
             color: 'rgba(255, 255, 255, 0.2)'
@@ -70,6 +71,7 @@ function addInteractions() {
         source: source,
         type: typeSelect
     });
+
     map.addInteraction(draw);
 
 
@@ -220,7 +222,7 @@ function storeDatasToDB() {
     };
     $.ajax({
         type: 'POST',
-        url: '/editraid/' + raid.id + '/map',
+        url: '/editraid/' + raid.id + '/map/',
         data: data,
         success: function (response) {
             updateFeaturesId(response)
