@@ -102,8 +102,7 @@ exports.storeMapData = function (req, res) {
 
     let pointOfInterestUpdatedId = [];
     if (req.body.pointOfInterestArray !== undefined) {
-
-        const actions = req.body.pointOfInterestArray.map(pointOfInterest => {
+        const store_point_of_interest = req.body.pointOfInterestArray.map(pointOfInterest => {
             return new Promise((resolve, reject) => {
                 if (pointOfInterest.id.indexOf("new") !== -1) {
                     point_of_interests.create({
@@ -140,8 +139,31 @@ exports.storeMapData = function (req, res) {
             });
         });
 
-        Promise.all(actions)
+        Promise.all(store_point_of_interest)
             .then(result => {
+                if (req.body.helperPostArray !== undefined) {
+                    req.body.helperPostArray.map(helper_post => {
+
+                        if (helper_post.id_point_of_interest.indexOf("new") === -1) {
+                            helper_posts.create({
+                                id_point_of_interest: helper_post.id_point_of_interest,
+                                description: helper_post.description
+                            })
+                        } else {
+
+                            let point_of_interest_updated_id_found = pointOfInterestUpdatedId.find(function (pointOfInterestUpdated) {
+                                return pointOfInterestUpdated.clientId === helper_post.id_point_of_interest.replace('new_', '');
+                            });
+
+                            console.log(point_of_interest_updated_id_found);
+                            helper_posts.create({
+                                id_point_of_interest: point_of_interest_updated_id_found.serverId,
+                                description: helper_post.description
+                            })
+                        }
+                    });
+                }
+
                 res.send({
                     pointOfInterestUpdatedIdArray: pointOfInterestUpdatedId
                 })

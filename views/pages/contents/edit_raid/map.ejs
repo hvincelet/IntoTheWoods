@@ -98,7 +98,7 @@
         border-left: 6px solid transparent;
         content: "";
         position: absolute;
-        bottom: 29px;
+        bottom: 50px;
         margin-left: -7px;
         left: 50%;
     }
@@ -120,7 +120,7 @@
 
     #panel-right {
         top: 17px;
-        right: 20px;
+        right: 10px;
         position: absolute;
         z-index:1;
     }
@@ -129,6 +129,16 @@
         position: relative;
         top: 5px;
     }
+
+    #course-button-group {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    label {
+        line-height: 0px;
+    }
+
 
 </style>
 
@@ -146,15 +156,17 @@
                             <button id="add_course_button" class="btn btn-default" style="display: none" onclick="addCourse()"><i class="fas fa-route"></i> Tracer un parcours</button>
                         </div>
 
-
                         <div id="panel-right" style="display: none">
-                            <div class="btn-group btn-group" role="group" aria-label="group" >
+                            <div id="course-button-group" class="btn-group" role="group" aria-label="group" >
                                 <button id="previous_button" class="btn btn-default" onclick="previousCourse()"><i class="fas fa-angle-left"></i></button>
                                 <button id="current_course" class="btn btn-default font-weight-bold" style="width:160px; color:white"></button>
                                 <button id="next_button" class="btn btn-default" onclick="nextCourse()"><i class="fas fa-angle-right"></i></button>
                             </div>
                             <div id="course-info">
-                                <label id="course_info_label" class="tooltip test tooltip-static-reversed"></label>
+                                <div id="course_info_tooltip" class="tooltip test tooltip-static-reversed">
+                                    <label id="course-info-num" class="text-center font-weight-bold "></label></br>
+                                    <label id="course-info-label"></label>
+                                </div>
                             </div>
                         </div>
 

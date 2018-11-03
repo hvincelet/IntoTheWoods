@@ -113,7 +113,6 @@ function addInteractions() {
             measureTooltipElement.style.backgroundColor = courseColorArray[idCurrentEditedCourse];
             measureTooltipElement.style.borderTopColor = courseColorArray[idCurrentEditedCourse];
 
-
             measureTooltip.setOffset([0, -7]);
             // unset sketch
             sketch = null;
@@ -257,14 +256,14 @@ closer.onclick = function () {
 function showPopup(feature, header) {
     let description = "";
 
-    let helperPost = helperPostArray.find(function (helperPost) {
-        return parseInt(feature.getId().replace("point_of_interest_", "")) === helperPost.id_point_of_interest;
+    let helperPost = helperPostArrayToStore.find(function (helperPost) {
+        return feature.getId().replace("point_of_interest_", "") === helperPost.id_point_of_interest;
     });
     if (helperPost !== undefined) {
         description = helperPost.description;
     } else {
-        helperPost = helperPostArrayToStore.find(function (helperPost) {
-            return feature.getId() === helperPost.id_point_of_interest;
+        helperPost = helperPostArray.find(function (helperPost) {
+            return parseInt(feature.getId().replace("point_of_interest_", "")) === helperPost.id_point_of_interest;
         });
         if (helperPost !== undefined) {
             description = helperPost.description;
@@ -276,12 +275,14 @@ function showPopup(feature, header) {
         '<input id="' + feature.getId() + '_label" type="text" class="form-control row-margin" placeholder="intitulé du poste" value=\"' + description + '\">' +
         // '<textarea id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' + description + '</textarea>' +
         '<div class="row">' +
-        '<div class="col"><p>Nombre de bénévole :</p></div>' +
+        '<div class="col"><label>Nombre de bénévole :</label></div>' +
         '<div class="col-sm-4 input-group-sm"><input id="' + feature.getId() + '_nbHelper" type="number" value="1" class="form-control" min="1"></div>' +
         '</div>' +
         '</div>' +
+        '<div>' +
         '<button id="type" class="btn btn-xs btn-danger" onclick="removePointOfInterest(\'' + feature.getId() + '\')">supprimer</button>' +
-        '<button id="type" class="btn btn-xs btn-default" onclick="editHelperPost(\'' + feature.getId() + '\')">enregistrer</button>';
+        '<button id="type" class="btn btn-xs btn-default" onclick="editHelperPost(\'' + feature.getId() + '\')">enregistrer</button>' +
+        '</div>';
     overlay.setPosition(feature.getGeometry().getCoordinates());
 
 }
@@ -443,7 +444,7 @@ function editHelperPost(featureId) {
     let nbHelper = $('#' + featureId + '_nbHelper').val();
 
     let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
-        return helperPost.id_point_of_interest === featureId;
+        return helperPost.id_point_of_interest === featureId.replace("point_of_interest_", "");
     });
 
     if (helperPostFound) {
@@ -451,12 +452,10 @@ function editHelperPost(featureId) {
         helperPostFound.nb_helper = nbHelper;
     } else {
         helperPostArrayToStore.push({
-            id_point_of_interest: featureId,
+            id_point_of_interest: featureId.replace("point_of_interest_", ""),
             description: description,
             nb_helper: nbHelper
         });
     }
     overlay.setPosition(undefined);
 }
-
-

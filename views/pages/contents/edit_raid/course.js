@@ -71,7 +71,10 @@ let courseColorArray = ["#5c6bc0", "#ef5350", "#ffa726", "#66bb6a", "#7e57c2", "
 function updateSelectedCourse() {
     $('#current_course').css('background-color', courseColorArray[idCurrentEditedCourse])
         .text(orderedCourseArray[idCurrentEditedCourse].sport_label);
-    $('#course_info_label').text(orderedCourseArray[idCurrentEditedCourse].label).fadeIn().delay(6000).fadeOut("slow");
+
+    $('#course-info-num').text(orderedCourseArray[idCurrentEditedCourse].order_num + "° épreuve");
+    $('#course-info-label').text(orderedCourseArray[idCurrentEditedCourse].label);
+    $('#course_info_tooltip').stop(true).fadeIn().delay(4000).fadeOut("slow");
 }
 
 //TODO vérifier qu'il n'y existe pas déjà un tracé pour le parcours à créer
