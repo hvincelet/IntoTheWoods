@@ -88,13 +88,7 @@ app.route('/register')
     .post(organizer.register);
 
 app.route('/validate')
-    .get(organizer.validate);
-
-app.route('/helper')
-    .post(helper.register);
-
-app.route('/helper/:id')
-    .get(helper.displayHome);
+    .get(organizer.validate); // /validate?id={email}&hash={password_hash}
 
 //routes dedicated to the raids' pages
 app.route('/dashboard')
@@ -127,8 +121,15 @@ app.route('/editraid/:id/map')
 app.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
+
+//routes dedicated to the helpers
 app.route('/team/:raid_id/invitehelpers')
-    .post(checkAuth, organizer.inviteHelper);
+    .post(checkAuth, helper.inviteHelper);
+
+app.route('/helper/register')
+    .get(helper.displayRegister) // /helper/register?raid={raid_id}
+    .post(helper.register);
+    
 
 app.route('/termsandpolicy')
     .get(misc.cgu);

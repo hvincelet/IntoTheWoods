@@ -1,6 +1,8 @@
-/**********************************/
-/*       Instantiate the map      */
-/**********************************/
+/***************************************************************/
+/***************************************************************/
+/***                    Map Instantiation                    ***/
+/***************************************************************/
+/***************************************************************/
 
 let raster = new ol.layer.Tile({
     source: new ol.source.OSM()
@@ -55,9 +57,13 @@ let map = new ol.Map({
 loadPointsOfInterest();
 loadCourses();
 
-/**********************************/
-/*  Fn dedicated to PoI edition   */
-/**********************************/
+/***************************************************************/
+/***************************************************************/
+/***                      Draw & Modify                      ***/
+/***************************************************************/
+/***************************************************************/
+
+let currentFeatureEditing = "none";
 
 let modify = new ol.interaction.Modify({source: source});
 // map.addInteraction(modify);
@@ -123,10 +129,10 @@ function addInteractions() {
 snap = new ol.interaction.Snap({source: source});
 map.addInteraction(snap);
 
-function addPointOfInterest() {
-    $('#panel-right').fadeOut();
-    typeSelect = "Point";
-    addInteractions();
+function resetInteraction() {
+    $('#panel-right').hide();
+    currentFeatureEditing = "none";
+    map.removeInteraction(draw);
 }
 
 /***************************************************************/
@@ -134,60 +140,18 @@ function addPointOfInterest() {
 /***                     Database access                     ***/
 /***************************************************************/
 
-    console.log(courseArray); // besoin du nom du sport
-
-function loadPointsOfInterest() {
-    pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
-        let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
-        let feature = new ol.Feature({
-                geometry: geom,
-            }
-        );
-        feature.setId("point_of_interest_" + pointOfInterest.id);
-        source.addFeature(feature);
-    });
-}
-
-function loadCourses() {
-    let courseId = 0;
-    courseArrayToLoad.forEach(function (course) {
-        if (course !== null && course.length > 1) {
-            let geom = new ol.geom.LineString(course);
-            let feature = new ol.Feature({
-                    geometry: geom,
-                }
-            );
-            let order_num = 0;
-            orderedCourseArray.forEach(function (orderedCourse) {
-                if (orderedCourse.id === courseId) {
-                    order_num = orderedCourse.order_num;
-                }
-            });
-            feature.setId("course_" + courseId);
-            feature.setStyle(
-                new ol.style.Style({
-                    stroke: new ol.style.Stroke({
-                        color: courseColorArray[order_num - 1],
-                        width: 6
-                    })
-                })
-            );
-            source.addFeature(feature);
-        }
-        courseId++;
-    });
-}
+/***************************************************************/
 
 let pointOfInterestArrayToStore = [];
 let courseArrayToStore = [];
+let helperPostArrayToStore = [];
 
-function storeDatasToDB() {
+function storeDataToDB() {
     let features = vector.getSource().getFeatures();
 
     const actions = features.map(feature => {
         return new Promise((resolve, reject) => {
 
-            // features.forEach(function (feature) {
             if (feature.getId().indexOf("point_of_interest") !== -1) {
                 pointOfInterestArrayToStore.push({
                     id: feature.getId().replace('point_of_interest_', ''),
@@ -213,16 +177,18 @@ function storeDatasToDB() {
         .then(result => {
             pointOfInterestArrayToStore = [];
             courseArrayToStore = [];
+            helperPostArrayToStore = [];
         }).catch(err => console.log(err));
 
     let data = {
         pointOfInterestArray: pointOfInterestArrayToStore,
         courseArray: courseArrayToStore,
+        helperPostArray: helperPostArrayToStore,
         idRaid: raid.id
     };
     $.ajax({
         type: 'POST',
-        url: '/editraid/' + raid.id + '/map/',
+        url: '/editraid/' + raid.id + '/map',
         data: data,
         success: function (response) {
             updateFeaturesId(response)
@@ -230,7 +196,6 @@ function storeDatasToDB() {
         error: function (response) {
         }
     });
-
 }
 
 function updateFeaturesId(data) {
@@ -277,45 +242,12 @@ map.on('click', function (event) {
     }
 });
 
-let temp_id_num = 1;
+/***************************************************************/
+/***************************************************************/
+/***                           Popup                         ***/
+/***************************************************************/
+/***************************************************************/
 
-function getFeatureIDFromCoordinates(coordinates) {
-    // Get the array of features
-    let allFeatures = vector.getSource().getFeatures();
-
-    // Go through this array and get coordinates of their geometry.
-    allFeatures.forEach(function (feature) {
-
-        if ((ol.proj.toLonLat(feature.getGeometry().getCoordinates())[0] === coordinates[0]) &&
-            (ol.proj.toLonLat(feature.getGeometry().getCoordinates())[1] === coordinates[1])) {
-
-            if (feature.getId() === undefined) { // this is a newly created feature
-                console.log("Newly created feature");
-                feature.setId("new_point_of_interest_" + temp_id_num++);
-                showPopup(feature, "Créer le point d'intérêt");
-            } else {
-                console.log("Id of the selected feature : " + feature.getId());
-                showPopup(feature, "Editer le point d'intérêt");
-            }
-
-        }
-
-    });
-    return undefined;
-}
-
-
-// TODO : popup à la création d'un point d'intérêt
-
-
-/**********************************/
-/*             Popup              */
-/**********************************/
-
-/**
- * Add a click handler to hide the popup.
- * @return {boolean} Don't follow the href.
- */
 closer.onclick = function () {
     overlay.setPosition(undefined);
     closer.blur();
@@ -323,17 +255,35 @@ closer.onclick = function () {
 };
 
 function showPopup(feature, header) {
+    let description = "";
+
+    let helperPost = helperPostArray.find(function (helperPost) {
+        return parseInt(feature.getId().replace("point_of_interest_", "")) === helperPost.id_point_of_interest;
+    });
+    if (helperPost !== undefined) {
+        description = helperPost.description;
+    } else {
+        helperPost = helperPostArrayToStore.find(function (helperPost) {
+            return feature.getId() === helperPost.id_point_of_interest;
+        });
+        if (helperPost !== undefined) {
+            description = helperPost.description;
+        }
+    }
+
     content.innerHTML = '<h6>' + header + '</h6>' +
         '<div class="input-group-sm">' +
-        '<input id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' +
+        '<input id="' + feature.getId() + '_label" type="text" class="form-control row-margin" placeholder="intitulé du poste" value=\"' + description + '\">' +
+        // '<textarea id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' + description + '</textarea>' +
         '<div class="row">' +
         '<div class="col"><p>Nombre de bénévole :</p></div>' +
         '<div class="col-sm-4 input-group-sm"><input id="' + feature.getId() + '_nbHelper" type="number" value="1" class="form-control" min="1"></div>' +
         '</div>' +
         '</div>' +
         '<button id="type" class="btn btn-xs btn-danger" onclick="removePointOfInterest(\'' + feature.getId() + '\')">supprimer</button>' +
-        '<button id="type" class="btn btn-xs btn-default" onclick="createHelperPost(\'' + feature.getId() + '\')">enregistrer</button>';
+        '<button id="type" class="btn btn-xs btn-default" onclick="editHelperPost(\'' + feature.getId() + '\')">enregistrer</button>';
     overlay.setPosition(feature.getGeometry().getCoordinates());
+
 }
 
 /***************************************************************/
@@ -433,7 +383,6 @@ function createMeasureTooltip() {
     map.addOverlay(measureTooltip);
 }
 
-
 /***************************************************************/
 /***************************************************************/
 /***                         Top Panel                       ***/
@@ -444,7 +393,7 @@ let editing = false;
 
 function showTopPanel() {
     if (editing) {
-        storeDatasToDB();
+        storeDataToDB();
         map.removeInteraction(modify);
         map.removeOverlay(helpTooltip);
         resetInteraction();
@@ -465,7 +414,6 @@ function showTopPanel() {
         $('#add_course_button').show("fast");
         editing = true;
     }
-
 }
 
 let idCurrentEditedCourse = 0;
@@ -488,18 +436,25 @@ function nextCourse() {
     updateSelectedCourse();
 }
 
-let courseColorArray = ["#5c6bc0", "#ef5350", "#ffa726", "#66bb6a", "#7e57c2"];
-function updateSelectedCourse() {
-    $('#current_course').css('background-color', courseColorArray[idCurrentEditedCourse]);
-    $('#current_course').text(courseArray[idCurrentEditedCourse].sport_label);
-}
-//TODO measurement: https://openlayers.org/en/latest/examples/measure.html
 //TODO Centré sur la france si pas de localisation
-//TODO bouton pour enregistrer les changements
-//TODO Centré sur la france si pas de localisation
-//TODO bouton pour enregistrer les changements
 
-function createHelperPost(featureId) {
-    console.log($('#' + featureId + '_label').val());
-    console.log($('#' + featureId + '_nbHelper').val());
+function editHelperPost(featureId) {
+    let description = $('#' + featureId + '_label').val();
+    let nbHelper = $('#' + featureId + '_nbHelper').val();
+
+    let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
+        return helperPost.id_point_of_interest === featureId;
+    });
+
+    if (helperPostFound) {
+        helperPostFound.description = description;
+        helperPostFound.nb_helper = nbHelper;
+    } else {
+        helperPostArrayToStore.push({
+            id_point_of_interest: featureId,
+            description: description,
+            nb_helper: nbHelper
+        });
+    }
+    overlay.setPosition(undefined);
 }

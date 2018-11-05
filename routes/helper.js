@@ -2,10 +2,25 @@ const jdenticon = require('jdenticon');
 const pages_path = "../views/pages/";
 const models = require('../models');
 
+exports.inviteHelper = function(req, res) {
+    const user = connected_user(req.sessionID);
+    if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
+        return res.redirect('/dashboard');
+    }
+
+    let helper_list_to_invite = [];
+    const current_user_email = connected_user(req.sessionID).login;
+    helper_list_to_invite.foreach(function(helper_email){
+        if(helper_email != user.login){
+            //sender.sendMail(helper_email, );
+        }
+    });
+};
+
 // Register new Helper default page
 exports.displayRegister = function(req, res){
 
-    let find_id = 1; // temporary
+    let raid_id = req.query.raid;
     let get_post_clean = [];
 
     let raid_model = models.raid;
@@ -22,7 +37,7 @@ exports.displayRegister = function(req, res){
           include: [{
               model: raid_model,
               where: {
-                  id: find_id
+                  id: raid_id
               }
           }]
       }],
