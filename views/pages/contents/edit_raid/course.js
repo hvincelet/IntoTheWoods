@@ -1,6 +1,6 @@
-function loadCourses() {
+function loadCourses(vectorArray) {
     let courseId = 0;
-    courseArrayToLoad.forEach(function (course) {
+    vectorArray.map(course => {
         if (course !== null && course.length > 1) {
             let geom = new ol.geom.LineString(course);
             let feature = new ol.Feature({
@@ -19,6 +19,19 @@ function loadCourses() {
                     })
                 })
             );
+
+            createMeasureTooltip();
+            measureTooltip.setPosition(course[course.length - 1]);
+            measureTooltipElement.innerHTML += " de " + orderedCourseFound.sport_label;
+            measureTooltipElement.className = 'tooltip tooltip-static';
+            measureTooltipElement.style.backgroundColor = courseColorArray[orderedCourseFound.order_num - 1];
+            // measureTooltipElement.style.borderTopColor = courseColorArray[orderedCourseFound.order_num - 1];
+
+            // .setPseudo("before",{"border-top-color":"purple"});
+            // div.pseudoStyle("before","border-top-color","purple");
+            measureTooltip.setOffset([0, -7]);
+            measureTooltipElement = null;
+
             source.addFeature(feature);
         }
         courseId++;

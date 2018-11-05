@@ -100,7 +100,7 @@ exports.displayMap = function (req, res) {
 
 exports.storeMapData = function (req, res) {
 
-    let pointOfInterestUpdatedId = [];
+    let pointOfInterestServerIdArray = [];
     if (req.body.pointOfInterestArray !== undefined) {
         const store_point_of_interest = req.body.pointOfInterestArray.map(pointOfInterest => {
             return new Promise((resolve, reject) => {
@@ -110,7 +110,7 @@ exports.storeMapData = function (req, res) {
                         lat: pointOfInterest.lat,
                         lng: pointOfInterest.lng
                     }).then(function (pointOfInterestCreated) {
-                        pointOfInterestUpdatedId.push({
+                        pointOfInterestServerIdArray.push({
                             clientId: pointOfInterest.id.replace('new_', ''),
                             serverId: pointOfInterestCreated.dataValues.id
                         });
@@ -151,7 +151,7 @@ exports.storeMapData = function (req, res) {
                             })
                         } else {
 
-                            let point_of_interest_updated_id_found = pointOfInterestUpdatedId.find(function (pointOfInterestUpdated) {
+                            let point_of_interest_updated_id_found = pointOfInterestServerIdArray.find(function (pointOfInterestUpdated) {
                                 return pointOfInterestUpdated.clientId === helper_post.id_point_of_interest.replace('new_', '');
                             });
 
@@ -163,9 +163,8 @@ exports.storeMapData = function (req, res) {
                         }
                     });
                 }
-
                 res.send({
-                    pointOfInterestUpdatedIdArray: pointOfInterestUpdatedId
+                    pointOfInterestServerIdArray: pointOfInterestServerIdArray
                 })
             }).catch(err => console.log(err));
     }

@@ -1,5 +1,5 @@
-function loadPointsOfInterest() {
-    pointOfInterestArrayToLoad.forEach(function (pointOfInterest) {
+function loadPointsOfInterest(pointArray) {
+    pointArray.map(pointOfInterest => {
         let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
         let feature = new ol.Feature({
                 geometry: geom,
@@ -12,7 +12,7 @@ function loadPointsOfInterest() {
 
 function addPointOfInterest() {
     $('#panel-right').fadeOut();
-    currentFeatureEditing = "point_of_interest";
+    currentFeatureEditing = 'point_of_interest';
     typeSelect = "Point";
     addInteractions();
     map.removeOverlay(helpTooltip);
@@ -32,6 +32,7 @@ function removePointOfInterest(featureId) {
 }
 
 let lastPointOfInterestCreatedID = 0;
+
 function setPointOfInterestFromCoordinates(coordinates) {
     // Get the array of features
     let allFeatures = vector.getSource().getFeatures();
@@ -52,4 +53,11 @@ function setPointOfInterestFromCoordinates(coordinates) {
         }
         map.removeOverlay(helpTooltip);
     }
+}
+
+function updatePointOfInterestId(serverId) {
+    serverId.map(pointOfInterestServerId => {
+        let feature = vector.getSource().getFeatureById("new_point_of_interest_" + pointOfInterestServerId.clientId);
+        feature.setId("point_of_interest_" + pointOfInterestServerId.serverId);
+    });
 }

@@ -54,9 +54,6 @@ let map = new ol.Map({
     })
 });
 
-loadPointsOfInterest();
-loadCourses();
-
 /***************************************************************/
 /***************************************************************/
 /***                      Draw & Modify                      ***/
@@ -80,20 +77,19 @@ function addInteractions() {
 
     map.addInteraction(draw);
 
-
     createMeasureTooltip();
-    var listener;
+    let listener;
     draw.on('drawstart',
         function (evt) {
             // set sketch
             sketch = evt.feature;
 
             /** @type {module:ol/coordinate~Coordinate|undefined} */
-            var tooltipCoord = evt.coordinate;
+            let tooltipCoord = evt.coordinate;
 
             listener = sketch.getGeometry().on('change', function (evt) {
-                var geom = evt.target;
-                var output;
+                let geom = evt.target;
+                let output;
                 if (geom instanceof ol.geom.Polygon) {
                     output = formatArea(geom);
                     tooltipCoord = geom.getInteriorPoint().getCoordinates();
@@ -111,7 +107,11 @@ function addInteractions() {
             measureTooltipElement.innerHTML += " de " + orderedCourseArray[idCurrentEditedCourse].sport_label;
             measureTooltipElement.className = 'tooltip tooltip-static';
             measureTooltipElement.style.backgroundColor = courseColorArray[idCurrentEditedCourse];
-            measureTooltipElement.style.borderTopColor = courseColorArray[idCurrentEditedCourse];
+            // measureTooltipElement.style.borderTopColor = courseColorArray[idCurrentEditedCourse];
+            // measureTooltipElement.css("border-top-color", "#ffcc33");
+
+
+            // $('div').append("<style>.tooltip-static:before {border-top-color: #ffcc33}</style>");
 
             measureTooltip.setOffset([0, -7]);
             // unset sketch
@@ -198,11 +198,7 @@ function storeDataToDB() {
 }
 
 function updateFeaturesId(data) {
-    data.pointOfInterestUpdatedIdArray.map(pointOfInterestUpdatedId => {
-        console.log("new_point_of_interest_" + pointOfInterestUpdatedId.clientId);
-        let feature = vector.getSource().getFeatureById("new_point_of_interest_" + pointOfInterestUpdatedId.clientId);
-        feature.setId("point_of_interest_" + pointOfInterestUpdatedId.serverId);
-    });
+    updatePointOfInterestId(data.pointOfInterestServerIdArray);
 }
 
 /***************************************************************/
@@ -211,29 +207,13 @@ function updateFeaturesId(data) {
 /***************************************************************/
 /***************************************************************/
 
-let selectElement = "singleselect";
-// lookup for selection objects
-let selection = {};
-// feature property to act as identifier
-let idProp = 'iso_a3';
-
 map.on('click', function (event) {
     let selectedFeatures = map.getFeaturesAtPixel(event.pixel);
     if (selectedFeatures) {
-
-        let feature = selectedFeatures[0];
-        let fid = feature.get(idProp);
-
-        if (selectElement.value === 'singleselect') {
-            selection = {};
-        }
-        // add selected feature to lookup
-        selection[fid] = feature;
-
         if (currentFeatureEditing === "course") {
             setCourseFeature();
         } else {
-            setPointOfInterestFromCoordinates(ol.proj.toLonLat(selection[fid].getGeometry().getCoordinates()));
+            setPointOfInterestFromCoordinates(ol.proj.toLonLat(selectedFeatures[0].getGeometry().getCoordinates()));
         }
     } else {
         overlay.setPosition(undefined);
@@ -459,3 +439,6 @@ function editHelperPost(featureId) {
     }
     overlay.setPosition(undefined);
 }
+
+loadPointsOfInterest(pointOfInterestArrayToLoad);
+loadCourses(courseArrayToLoad);
