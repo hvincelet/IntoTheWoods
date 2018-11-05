@@ -179,6 +179,8 @@ function storeDataToDB() {
             helperPostArrayToStore = [];
         }).catch(err => console.log(err));
 
+    console.log(helperPostArrayToStore);
+
     let data = {
         pointOfInterestArray: pointOfInterestArrayToStore,
         courseArray: courseArrayToStore,
@@ -187,7 +189,7 @@ function storeDataToDB() {
     };
     $.ajax({
         type: 'POST',
-        url: '/editraid/map/' + raid.id,
+        url: '/editraid/' + raid.id + '/map',
         data: data,
         success: function (response) {
             updateFeaturesId(response)
@@ -235,18 +237,21 @@ closer.onclick = function () {
 
 function showPopup(feature, header) {
     let description = "";
+    let nbHelper = 1;
 
     let helperPost = helperPostArrayToStore.find(function (helperPost) {
         return feature.getId().replace("point_of_interest_", "") === helperPost.id_point_of_interest;
     });
     if (helperPost !== undefined) {
         description = helperPost.description;
+        nbHelper = helperPost.nb_helper;
     } else {
         helperPost = helperPostArray.find(function (helperPost) {
             return parseInt(feature.getId().replace("point_of_interest_", "")) === helperPost.id_point_of_interest;
         });
         if (helperPost !== undefined) {
             description = helperPost.description;
+            nbHelper = helperPost.nb_helper;
         }
     }
 
@@ -256,7 +261,7 @@ function showPopup(feature, header) {
         // '<textarea id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' + description + '</textarea>' +
         '<div class="row">' +
         '<div class="col"><label>Nombre de bénévole :</label></div>' +
-        '<div class="col-sm-4 input-group-sm"><input id="' + feature.getId() + '_nbHelper" type="number" value="1" class="form-control" min="1"></div>' +
+        '<div class="col-sm-4 input-group-sm"><input id="' + feature.getId() + '_nbHelper" type="number" value=\"' + nbHelper + '\" class="form-control" min="1"></div>' +
         '</div>' +
         '</div>' +
         '<div>' +

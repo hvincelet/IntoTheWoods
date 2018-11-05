@@ -147,7 +147,8 @@ exports.storeMapData = function (req, res) {
                         if (helper_post.id_point_of_interest.indexOf("new") === -1) {
                             helper_posts.create({
                                 id_point_of_interest: helper_post.id_point_of_interest,
-                                description: helper_post.description
+                                description: helper_post.description,
+                                nb_helper: helper_post.nb_helper
                             })
                         } else {
 

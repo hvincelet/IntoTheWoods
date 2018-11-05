@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
 const config = require('./config/config').development;
-console.log(config);
 const app = express();
 
 app.use(favicon(__dirname + '/views/img/favicon.png'));

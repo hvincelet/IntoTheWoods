@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`course` (
   `label` VARCHAR(45) NULL,
   `id_sport` INT UNSIGNED NOT NULL,
   `id_raid` INT UNSIGNED NOT NULL,
+  `distance` VARCHAR(15) NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `id_sport`
     FOREIGN KEY (`id_sport`)
@@ -202,6 +203,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`helper_post` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `id_point_of_interest` INT UNSIGNED NOT NULL,
   `description` VARCHAR(1024) NULL,
+  `nb_helper` INT UNSIGNED DEFAULT 1,
   PRIMARY KEY (`id`),
   CONSTRAINT `id_point_of_interest`
     FOREIGN KEY (`id_point_of_interest`)
