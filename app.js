@@ -28,35 +28,30 @@ intothewoods.use(session({
 }));
 
 global.connected_users = [];
-if (config.no_login) {
+if(config.no_login) {
     connected_users.push({
-        login: "derouxjulien@gmail.com",
-        first_name: "Julien",
-        last_name: "Deroux",
-        initials: "JD",
+        login: "hugo.vincelet@gmail.com",
+        first_name: "Hugo",
+        last_name: "Vincelet",
+        initials: "HV",
         picture: null,
-        idCurrentRaid: -1, //for tests
-        raid_list: [{
-            id: 1,
-            place: "Pleumeur-Bodou, Lannion, Côtes-d'Armor, Bretagne, France métropolitaine, 22560, France",
-            lat: 48.7732657,
-            lng: -3.5187179
-        }]
+        idCurrentRaid: -1,
+        raid_list: [{id:1}, {id:2}, {id:3},{id:4},{id:5}]
     });
 }
 
-global.connected_user = function (uuid) {
-    if (config.no_login) {
+global.connected_user = function(uuid){
+    if(config.no_login) {
         return connected_users[0];
     }
-    return connected_users.find(function (user) {
+    return connected_users.find(function(user){
         return user.uuid == uuid;
     });
 };
 
 let checkAuth = function (req, res, next) {
-    if (!config.no_login) {
-        const user = connected_users.find(function (user) {
+    if(!config.no_login) {
+        const user = connected_users.find(function(user){
             return user.uuid == req.sessionID;
         });
         if (!user) {
@@ -175,10 +170,19 @@ intothewoods.route('/helper/:id/home')
 intothewoods.route('/helper/check_in')
     .post(helper.performCheckin);
 
-// Routes dedicated to participant
+//Routes dedicated to the participants
 intothewoods.route('/participant/register')
     .get(participant.displayRegister)
     .post(participant.register);
+
+intothewoods.route('/participant/:id/home')
+    .get(participant.displayHome);
+
+
+
+
+app.route('/termsandpolicy')
+    .get(misc.cgu);
 
 
 //bad url route
