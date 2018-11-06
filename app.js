@@ -3,7 +3,7 @@ const favicon = require('serve-favicon');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
-
+const config = require('./config/config').development;
 const app = express();
 
 app.use(favicon(__dirname + '/views/img/favicon.png'));
@@ -25,19 +25,41 @@ app.use(session({
 
 
 global.connected_users = [];
+if(config.no_login) {
+    connected_users.push({
+        login: "derouxjulien@gmail.com",
+        first_name: "Julien",
+        last_name: "Deroux",
+        initials: "JD",
+        picture: null,
+        idCurrentRaid: -1, //for tests
+        raid_list: [{
+            id: 1,
+            place: "Pleumeur-Bodou, Lannion, Côtes-d'Armor, Bretagne, France métropolitaine, 22560, France",
+            lat: 48.7732657,
+            lng: -3.5187179
+
+        }]
+    });
+}
 
 global.connected_user = function(uuid){
+    if(config.no_login) {
+        return connected_users[0];
+    }
     return connected_users.find(function(user){
         return user.uuid == uuid;
     });
 };
 
 let checkAuth = function (req, res, next) {
-    const user = connected_users.find(function(user){
-        return user.uuid == req.sessionID;
-    });
-    if (!user) {
-        return res.redirect('/login');
+    if(!config.no_login) {
+        const user = connected_users.find(function(user){
+            return user.uuid == req.sessionID;
+        });
+        if (!user) {
+            return res.redirect('/login');
+        }
     }
     next();
 };
@@ -46,6 +68,7 @@ const organizer = require('./routes/organizer');
 const raid = require('./routes/raid');
 const map = require('./routes/map');
 const misc = require('./routes/misc');
+const helper = require('./routes/helper');
 
 /**********************************/
 /*             Routes             */
@@ -67,7 +90,7 @@ app.route('/register')
     .post(organizer.register);
 
 app.route('/validate')
-    .get(organizer.validate);
+    .get(organizer.validate); // /validate?id={email}&hash={password_hash}
 
 //routes dedicated to the raids' pages
 app.route('/dashboard')
@@ -95,13 +118,20 @@ app.route('/editraid/:id')
 
 app.route('/editraid/:id/map')
     .get(checkAuth, map.displayMap)
-    .post(checkAuth, map.storeMapDatas);
+    .post(checkAuth, map.storeMapData);
 
 app.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
+
+//routes dedicated to the helpers
 app.route('/team/:raid_id/invitehelpers')
-    .post(checkAuth, organizer.inviteHelper);
+    .post(checkAuth, helper.inviteHelper);
+
+app.route('/helper/register')
+    .get(helper.displayRegister) // /helper/register?raid={raid_id}
+    .post(helper.register);
+
 
 app.route('/termsandpolicy')
     .get(misc.cgu);
