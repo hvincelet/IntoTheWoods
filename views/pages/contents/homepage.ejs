@@ -1,7 +1,8 @@
 Page d'accueil
 <%if (user === undefined) { %>
-	<br><a href="/login">Se connecter</a><br>
-	<a href="/register">S'inscrire</a>
+	<br><a href="/login">Se connecter</a>
+	<br><a href="/register">S'inscrire</a>
+	<br><a href="/participant/register">Je veux participer !</a>
 <% } else { %>
 	<br><a href="/dashboard"><%= user.first_name + ' ' + user.last_name %></a><br>
 	<a href="/logout">Se déconnecter</a>

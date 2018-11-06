@@ -63,6 +63,7 @@ const raid = require('./routes/raid');
 const map = require('./routes/map');
 const misc = require('./routes/misc');
 const helper = require('./routes/helper');
+const participant = require('./routes/participant');
 
 /**********************************/
 /*             Routes             */
@@ -128,6 +129,17 @@ app.route('/helper/register')
 
 app.route('/helper/:id/home')
     .get(helper.displayHome);
+
+
+//Routes dedicated to the participants
+app.route('/participant/register')
+    .get(participant.displayRegister)
+    .post(participant.register);
+
+app.route('/participant/:id/home')
+    .get(participant.displayHome);
+
+
 
 
 app.route('/termsandpolicy')
