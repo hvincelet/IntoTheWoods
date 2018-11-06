@@ -23,6 +23,7 @@
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "jdenticon": "^2.1.0",
+    "mysql": "^2.16.0",
     "mysql2": "^1.6.1",
     "nodemailer": "^4.6.8",
     "nominatim-geocoder": "^0.1.4",

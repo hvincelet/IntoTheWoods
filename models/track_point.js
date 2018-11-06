@@ -2,6 +2,12 @@
 
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('track_point', {
+    id: {
+      type: DataTypes.INTEGER(10).UNSIGNED,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    },
     id_track: {
       type: DataTypes.INTEGER(10).UNSIGNED,
       allowNull: false,
