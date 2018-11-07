@@ -27,18 +27,20 @@ app.use(session({
 global.connected_users = [];
 if(config.no_login) {
     connected_users.push({
-        login: "derouxjulien@gmail.com",
-        first_name: "Julien",
-        last_name: "Deroux",
-        initials: "JD",
+        login: "graballa@enssat.fr",
+        first_name: "Gwendal",
+        last_name: "Raballand",
+        initials: "GR",
         picture: null,
         idCurrentRaid: -1, //for tests
         raid_list: [{
+            name: "Pleumeur Raid",
+            edition: 1,
+            date: "2019-03-15",
             id: 1,
             place: "Pleumeur-Bodou, Lannion, Côtes-d'Armor, Bretagne, France métropolitaine, 22560, France",
             lat: 48.7732657,
             lng: -3.5187179
-
         }]
     });
 }

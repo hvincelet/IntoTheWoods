@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`assignment` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-INSERT INTO `sport` (`name`, `area_type`) VALUES ('Canoë', 'Eau'), ('Kayak', 'Eau'), ('Rafting', 'Eau'), ('Course à pied', 'Sol'), ('Trail', 'Sol'), ('Course d\'orientation', 'Sol'), ('Run & Bike', 'Sol'), ('Swimrun', 'Eau'), ('Escalade', 'Parois rocheuse'), ('VTT', 'Sol'), ('Trekking', 'Sol'), ('Ski de fond', 'Neige'), ('Ski alpin', 'Neige'), ('Ski slalom', 'Neige'), ('Saut à ski', 'Neige');
+INSERT INTO `sport` (`name`, `area_type`) VALUES ('Canoë', 'Eau'), ('Kayak', 'Eau'), ('Natation', 'Eau'), ('Rafting', 'Eau'), ('Course à pied', 'Sol'), ('Trail', 'Sol'), ('Course d\'orientation', 'Sol'), ('Run & Bike', 'Sol'), ('Swimrun', 'Eau'), ('Escalade', 'Parois rocheuse'), ('VTT', 'Sol'), ('Trekking', 'Sol'), ('Ski de fond', 'Neige'), ('Ski alpin', 'Neige'), ('Ski slalom', 'Neige'), ('Saut à ski', 'Neige');
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
