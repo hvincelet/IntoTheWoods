@@ -409,7 +409,7 @@ helpers.map( (helper, index) => {
 
         $.ajax({
             type: 'POST',
-            url: '/team/<%= raid.id %>/inviteorganizers',
+            url: '/team/<%= raid.id %>/invitehelpers',
             data: data,
             success: function () {
                 $MESSAGE_MODAL_TITLE.html("Helpers invité·e·s");
