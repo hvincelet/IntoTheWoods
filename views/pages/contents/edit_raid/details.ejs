@@ -32,7 +32,11 @@ helpers.map( (helper, index) => {
                             <tr>
                                 <td class="pt-3-half" contenteditable="false" width="40%"><%= raid.place %></td>
                                 <td class="pt-3-half" contenteditable="false" width="20%"><%= raid.date %></td>
-                                <td class="pt-3-half" contenteditable="false" width="20%">steps...</td>
+                                <td class="pt-3-half" contenteditable="false" width="20%">
+                                    <ul style="list-style: none;"><% courses.map(course => { %>
+                                        <li><%= course %></li>
+                                    <% }); %></ul>
+                                </td>
                                 <td class="pt-3-half" contenteditable="false" width="20%">
                                     <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='/editraid/<%=raid.id%>/map';">Éditer la carte</button>
                                 </td>
