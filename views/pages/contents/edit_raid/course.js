@@ -1,40 +1,46 @@
-function loadCourses(vectorArray) {
-    let courseId = 0;
-    vectorArray.map(course => {
-        if (course !== null && course.length > 1) {
-            let geom = new ol.geom.LineString(course);
+let courseArrayToStore = [];
+
+let distance;
+
+function loadCourses(courseArray) {
+    courseArray.map(course => {
+
+        if (course.track_point_array.length > 1) {
+            let geom = new ol.geom.LineString(course.track_point_array);
             let feature = new ol.Feature({
                     geometry: geom,
                 }
             );
-            let orderedCourseFound = orderedCourseArray.find(function (orderedCourse) {
-                return orderedCourse.id === courseId;
-            });
-            feature.setId("course_" + courseId);
+
+            feature.setId("course_" + course.id);
             feature.setStyle(
                 new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: courseColorArray[orderedCourseFound.order_num - 1],
+                        color: courseColorArray[course.order_num - 1],
                         width: 6
                     })
                 })
             );
 
             createMeasureTooltip();
-            measureTooltip.setPosition(course[course.length - 1]);
-            measureTooltipElement.innerHTML += " de " + orderedCourseFound.sport_label;
+            measureTooltip.setPosition(course.track_point_array[course.track_point_array.length - 1]);
+            measureTooltipElement.innerHTML += course.distance + " de " + course.sport_label;
             measureTooltipElement.className = 'tooltip tooltip-static';
-            measureTooltipElement.style.backgroundColor = courseColorArray[orderedCourseFound.order_num - 1];
-            // measureTooltipElement.style.borderTopColor = courseColorArray[orderedCourseFound.order_num - 1];
-
-            // .setPseudo("before",{"border-top-color":"purple"});
-            // div.pseudoStyle("before","border-top-color","purple");
+            measureTooltipElement.style.backgroundColor = courseColorArray[course.order_num - 1];
             measureTooltip.setOffset([0, -7]);
             measureTooltipElement = null;
 
             source.addFeature(feature);
         }
-        courseId++;
+
+        courseArrayToStore.push({
+            id: course.id,
+            order_num: course.order_num,
+            label: course.label,
+            sport_label: course.sport_label,
+            distance: course.distance
+        });
+
     });
 }
 
@@ -53,14 +59,14 @@ function setCourseFeature() {
     // Get the array of features
     let allFeatures = vector.getSource().getFeatures();
 
-    let courseFound = allFeatures.find(function (feature) {
+    let courseFeatureFound = allFeatures.find(function (feature) {
         return (feature.getId() === undefined) && (feature.getGeometry().getCoordinates().length > 1);
     });
 
-    if (courseFound) {
+    if (courseFeatureFound) {
         console.log("Newly created course");
-        courseFound.setId("new_course_" + orderedCourseArray[idCurrentEditedCourse].id);
-        courseFound.setStyle(
+        courseFeatureFound.setId("course_" + courseArrayToStore[idCurrentEditedCourse].id);
+        courseFeatureFound.setStyle(
             new ol.style.Style({
                 stroke: new ol.style.Stroke({
                     color: courseColorArray[idCurrentEditedCourse],
@@ -68,25 +74,30 @@ function setCourseFeature() {
                 })
             })
         );
+
+        let courseFound = courseArrayToStore.find(function(course){
+            return course.id === courseArrayToStore[idCurrentEditedCourse].id;
+        });
+        courseFound['distance'] = distance;
+
         nextCourse();
         map.removeOverlay(helpTooltip);
-        number_of_points = 0
+        number_of_points = 0;
     }
 
     if (++number_of_points === 1) {
         updateHelpTooltipOverlay("Double-clic pour finir le tracé");
     }
-
 }
 
 let courseColorArray = ["#5c6bc0", "#ef5350", "#ffa726", "#66bb6a", "#7e57c2", "#26c6da", "#ec407a"]; // https://material.io/tools/color #400 color range
 
 function updateSelectedCourse() {
     $('#current_course').css('background-color', courseColorArray[idCurrentEditedCourse])
-        .text(orderedCourseArray[idCurrentEditedCourse].sport_label);
+        .text(courseArrayToStore[idCurrentEditedCourse].sport_label);
 
-    $('#course-info-num').text(orderedCourseArray[idCurrentEditedCourse].order_num + "° épreuve");
-    $('#course-info-label').text(orderedCourseArray[idCurrentEditedCourse].label);
+    $('#course-info-num').text(courseArrayToStore[idCurrentEditedCourse].order_num + "° épreuve");
+    $('#course-info-label').text(courseArrayToStore[idCurrentEditedCourse].label);
     $('#course_info_tooltip').stop(true).fadeIn().delay(4000).fadeOut("slow");
 }
 
