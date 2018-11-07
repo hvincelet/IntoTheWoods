@@ -92,11 +92,7 @@ exports.displaySportsTable = function (req, res) {
 
 exports.saveSportsRanking = function (req, res) {
     let user = connected_user(req.sessionID);
-    if(user.idCurrentRaid === -1){
-        return res.redirect('/dashboard');
-    }
-    JSON.parse(req.body.sports_list).forEach(function (sport_row) {
-
+    JSON.parse(req.body.sports_list).map(sport_row => {
         models.course.create({
             order_num: sport_row.order,
             label: sport_row.name,
@@ -116,8 +112,7 @@ exports.saveSportsRanking = function (req, res) {
                     lat: unique_raid_found.dataValues.lat,
                     lng: unique_raid_found.dataValues.lng
                 });
-                res.redirect('/editraid/' + user.idCurrentRaid + '/map');
-                user.idCurrentRaid = -1;
+                return res.redirect('/editraid/' + user.idCurrentRaid + '/map');
             });
         });
 
