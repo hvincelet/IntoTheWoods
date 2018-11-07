@@ -92,30 +92,35 @@ exports.displaySportsTable = function (req, res) {
 
 exports.saveSportsRanking = function (req, res) {
     let user = connected_user(req.sessionID);
-    JSON.parse(req.body.sports_list).map(sport_row => {
-        models.course.create({
-            order_num: sport_row.order,
-            label: sport_row.name,
-            id_sport: sport_row.sport,
-            id_raid: user.idCurrentRaid
-        }).then(function () {
-            models.raid.findOne({
-                attributes: ['id', 'name', 'date', 'edition', 'place','lat','lng'],
-                where: {id: user.idCurrentRaid}
-            }).then(function(unique_raid_found){
-                user.raid_list.push({
-                    id: user.idCurrentRaid,
-                    name: unique_raid_found.dataValues.name,
-                    date: unique_raid_found.dataValues.date,
-                    edition: unique_raid_found.dataValues.edition,
-                    place: unique_raid_found.dataValues.place,
-                    lat: unique_raid_found.dataValues.lat,
-                    lng: unique_raid_found.dataValues.lng
-                });
-                return res.redirect('/editraid/' + user.idCurrentRaid + '/map');
-            });
+    const save_sports_actions = JSON.parse(req.body.sports_list).map(sport_row => {
+        return new Promise(resolve => {
+            console.log(sport_row);
+            models.course.create({
+                order_num: sport_row.order,
+                label: sport_row.name,
+                id_sport: sport_row.sport,
+                id_raid: user.idCurrentRaid
+            }).then(function () { return resolve(); });
         });
+    });
 
+    Promise.all(save_sports_actions).then(result => {
+        console.log("in");
+        models.raid.findOne({
+            attributes: ['id', 'name', 'date', 'edition', 'place','lat','lng'],
+            where: {id: user.idCurrentRaid}
+        }).then(function(unique_raid_found){
+            user.raid_list.push({
+                id: user.idCurrentRaid,
+                name: unique_raid_found.dataValues.name,
+                date: unique_raid_found.dataValues.date,
+                edition: unique_raid_found.dataValues.edition,
+                place: unique_raid_found.dataValues.place,
+                lat: unique_raid_found.dataValues.lat,
+                lng: unique_raid_found.dataValues.lng
+            });
+            return res.redirect('/editraid/' + user.idCurrentRaid + '/map');
+        });
     });
 };
 
@@ -151,58 +156,6 @@ exports.displayAllRaids = function (req, res) {
         res.redirect('/dashboard');
     }
 };
-
-/*exports.displayRaid = function (req, res) {
-    const user = connected_user(req.sessionID);
-    if(user.raid_list.length === 0) {
-        res.redirect('/dashboard');
-    }else{
-        let found = user.raid_list.find(function (raid) {
-            return raid.id === parseInt(req.params.id);
-        });
-        if(!found){
-            res.redirect('/editraid')
-        }else{ // User is authenticated and allow to access this page
-            let organizers_linked_with_the_current_raid = [];
-            let helpers_linked_with_the_current_raid = [];
-             // get organizer (email, first_name, last_name)
-            organizers_linked_with_the_current_raid.push({
-                email: "graballa@enssat.fr",
-                first_name: 'Gwendal',
-                last_name: 'Raballand'
-            });
-            organizers_linked_with_the_current_raid.push({
-                email: "jderoux@enssat.fr",
-                first_name: 'Julien',
-                last_name: 'Deroux'
-            });
-
-            // Get helpers (email, first_name, last_name, posts)
-            helpers_linked_with_the_current_raid.push({
-               email: 'hvincele@enssat.fr',
-               first_name: 'Hugo',
-               last_name: 'Vincelet',
-               posts: ['Accueil', 'Buvette', 'Kayak', 'Circulation']
-            })
-            helpers_linked_with_the_current_raid.push({
-                email: 'gsicard@enssat.fr',
-                first_name: 'Guillaume',
-                last_name: 'Sicard',
-                posts: ['Circulation']
-            });
-
-            // Get Courses
-
-            res.render(pages_path + "template.ejs", {
-                pageTitle: "Gestion d'un Raid",
-                page: "edit_raid/details",
-                user: user,
-                raid: found,
-                organizers: organizers_linked_with_the_current_raid,
-                helpers: helpers_linked_with_the_current_raid
-            });
-        }
-    }*/
 
 exports.displayRaid = function(req, res) {
     const user = connected_user(req.sessionID);
@@ -319,11 +272,12 @@ exports.displayRaid = function(req, res) {
                     }
                 }]
             }).then(function(course_name_and_order_found){
-                course_name_and_order_found.forEach(function(course){
-                    courses_linked_with_the_current_raid.push({
+                course_name_and_order_found.map(course => {
+                    /*courses_linked_with_the_current_raid.push({
                         order: course.dataValues.course.order_num,
                         name: course.dataValues.name
-                    });
+                    });*/
+                    courses_linked_with_the_current_raid[course.dataValues.course.order_num] = course.dataValues.name;
                 });
                 res.render(pages_path + "template.ejs", {
                     pageTitle: "Gestion d'un Raid",
