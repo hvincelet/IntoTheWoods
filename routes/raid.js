@@ -249,9 +249,11 @@ exports.displayRaid = function(req, res) {
         let assignment_model = models.assignment;
         let helper_model = models.helper;
         let helper_post_model = models.helper_post;
+        let point_of_interest_model = models.point_of_interest;
 
         helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
         assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
+        helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
         helper_model.findAll({
             include: [{
@@ -259,7 +261,13 @@ exports.displayRaid = function(req, res) {
                 attributes: ['id_helper','id_helper_post','attributed'],
                 include: [{
                     model: helper_post_model,
-                    attributes: ['id','description']
+                    attributes: ['id','description'],
+                    include:[{
+                        model: point_of_interest_model,
+                        where: {
+                            id_raid: req.params.id
+                        }
+                    }]
                 }],
             }],
             attributes: ['login','email','last_name','first_name']
@@ -326,8 +334,9 @@ exports.displayRaid = function(req, res) {
                         name: course.dataValues.name
                     });
                 });
+                console.log(data_helper);
                 console.log(data_helper[0].data.assignment);
-                res.render(pages_path + "template.ejs", {
+                /*res.render(pages_path + "template.ejs", {
                     pageTitle: "Gestion d'un Raid",
                     page: "edit_raid/details",
                     user: user,
@@ -335,7 +344,7 @@ exports.displayRaid = function(req, res) {
                     helpers: data_helper, // [{email, first_name, last_name, posts_asked:[{helper_post_id, description}]}]
                     courses: courses_linked_with_the_current_raid,
                     raid: raid
-                });
+                });*/
             });
         });
 

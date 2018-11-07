@@ -146,6 +146,7 @@ exports.register = function (req, res) {
                 first_name: req.body.firstname,
                 last_name: req.body.lastname,
                 password: hash,
+                active: false,
                 picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
             }).then(function () {
                 sender.sendMailToOrganizer(req.body.email, hash);
@@ -182,25 +183,31 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
         return res.redirect('/dashboard');
     }
 
-    let organizer_list_to_invite = ["hvincele@enssat.fr"];
-    organizer_list_to_invite.foreach(function(organizer_email){
-        if(organizer_email != user.login){
-            models.organizer.findOne({
-                where: {email: organizer_email}
-            }).then(function(organizer){
-                if(organizer){
-                    // Add organizer to raid team with id_raid = raid.id
-                    // sender.sendMail(organizer_email, );
-                    models.team.create({
+    if(req.body.mail != user.login){
+        models.organizer.findOne({
+            where: {email: req.body.mail}
+        }).then(function(organizer){
+            if(organizer){
+                models.team.findOne({
+                    where: {
                         id_raid: req.params.raid_id,
-                        id_organizer: organizer_email
-                    }).then(function(orga_inserted_in_team){
-                        console.log(orga_inserted_in_team);
-                    });
-                }else{
-                    // Invite user to contact organizer for register himself
-                }
-            });
-        }
-    });
+                        id_organizer: req.body.mail
+                    }
+                }).then(function(organizer_in_team){
+                    if(!organizer_in_team){
+                        models.team.create({
+                            id_raid: req.params.raid_id,
+                            id_organizer: req.body.mail
+                        }).then(function(orga_inserted_in_team){
+                            // sender.sendMailToNoticeNewOrganizer(req.body.mail, );
+                        });
+                    }else{
+                        // Organizer already in team
+                    }
+                })
+            }else{
+                // sender.sendMailToInviteNewOrganizerToRegister(req.body.mail, );
+            }
+        });
+    }
 };
