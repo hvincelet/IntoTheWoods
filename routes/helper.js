@@ -7,8 +7,8 @@ exports.inviteHelper = function(req, res) {
     if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
         return res.redirect('/dashboard');
     }
-    //const helper_emails = req.body.mails;
-    const helper_emails = ['hvincele@enssat.fr'];
+    const helper_emails = req.body.mails;
+    //const helper_emails = ['hvincele@enssat.fr'];
     helper_emails.forEach(function(helper_email){
         if(helper_email != user.login){
             let assignment_model = models.assignment;

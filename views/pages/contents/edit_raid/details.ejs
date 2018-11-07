@@ -398,14 +398,11 @@ helpers.map( (helper, index) => {
                 mails.push(mail);
             }
         });
-        let data = {
-            mails: mails
-        };
         $('#modal-helpers').modal('hide');
         $.ajax({
             type: 'POST',
             url: '/team/<%= raid.id %>/invitehelpers',
-            data: data,
+            data: mails,
             success: function () {
                 $MESSAGE_MODAL_TITLE.html("Helpers invité·e·s");
                 $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
