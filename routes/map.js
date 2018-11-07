@@ -27,24 +27,23 @@ exports.displayMap = function (req, res) {
                 return a.order_num - b.order_num;
             });
 
-            let courseArrayToLoad = [];
             const course_actions = courses_found.map(course => {
                 return new Promise((resolve, reject) => {
-                    courseArrayToLoad[course.id] = [];
+                    course.dataValues['track_point_array'] = [];
                     track_points.findAll({
                         where: {
                             id_track: course.id
                         }
                     }).then(function (track_points_found) {
                         track_points_found.forEach(function (track_point) {
-                            courseArrayToLoad[course.id].push(
+                            course.dataValues['track_point_array'].push(
                                 [track_point.lng, track_point.lat]
                             );
                         });
                         let sportFound = all_sports.find(function (sport) {
                             return sport.id === course.id_sport;
                         });
-                        course.dataValues["sport_label"] = sportFound.name;
+                        course.dataValues['sport_label'] = sportFound.name;
                         return resolve();
                     });
                 });
@@ -86,9 +85,8 @@ exports.displayMap = function (req, res) {
                                     page: "edit_raid/map",
                                     user: user,
                                     raid: raid,
-                                    orderedCourseArray: courses_found,
                                     pointOfInterestArrayToLoad: pointOfInterestArrayToLoad,
-                                    courseArrayToLoad: courseArrayToLoad,
+                                    courseArrayToLoad: courses_found,
                                     helperPostArray: helperPostArray
                                 });
                             });
@@ -104,14 +102,14 @@ exports.storeMapData = function (req, res) {
     if (req.body.pointOfInterestArray !== undefined) {
         const store_point_of_interest = req.body.pointOfInterestArray.map(pointOfInterest => {
             return new Promise((resolve, reject) => {
-                if (pointOfInterest.id.indexOf("new") !== -1) {
+                if (pointOfInterest.is_new === 'true') {
                     point_of_interests.create({
                         id_raid: req.body.idRaid,
                         lat: pointOfInterest.lat,
                         lng: pointOfInterest.lng
                     }).then(function (pointOfInterestCreated) {
                         pointOfInterestServerIdArray.push({
-                            clientId: pointOfInterest.id.replace('new_', ''),
+                            clientId: pointOfInterest.id,
                             serverId: pointOfInterestCreated.dataValues.id
                         });
                         return resolve();
@@ -171,11 +169,7 @@ exports.storeMapData = function (req, res) {
     }
 
     if (req.body.courseArray !== undefined) {
-
         req.body.courseArray.map(course => {
-            if (course.id.indexOf("new") !== -1) {
-                course.id = course.id.replace('new_', ''); // temporary
-            }
             track_points.destroy({ // temporary
                 where: {
                     id_track: course.id
@@ -188,8 +182,13 @@ exports.storeMapData = function (req, res) {
                         lng: track_point[0]
                     })
                 });
+
+                courses.update(
+                    {distance: course.distance},
+                    {where: {id: course.id}}
+                )
+
             }).catch(err => console.log(err));
         });
-
     }
 };
