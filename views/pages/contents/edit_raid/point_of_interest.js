@@ -72,5 +72,21 @@ function updatePointOfInterestId(serverId) {
     serverId.map(pointOfInterestServerId => {
         let feature = vector.getSource().getFeatureById("point_of_interest_" + pointOfInterestServerId.clientId);
         feature.setId("point_of_interest_" + pointOfInterestServerId.serverId);
+
+        let pointOfInterestFound = pointOfInterestArrayToStore.find(function (pointOfInterest) {
+            return pointOfInterest.id === pointOfInterestServerId.clientId;
+        });
+
+        pointOfInterestFound.id = pointOfInterestServerId.serverId;
+        pointOfInterestFound.is_new = false;
+
+        let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
+            return helperPost.id_point_of_interest === pointOfInterestServerId.clientId;
+        });
+        if (helperPostFound !== undefined) {
+            helperPostFound.id_point_of_interest = pointOfInterestServerId.serverId;
+            helperPostFound.is_new = false;
+        }
+
     });
 }

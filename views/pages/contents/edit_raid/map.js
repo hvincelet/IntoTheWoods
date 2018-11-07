@@ -63,7 +63,6 @@ let map = new ol.Map({
 let currentFeatureEditing = "none";
 
 let modify = new ol.interaction.Modify({source: source});
-// map.addInteraction(modify);
 
 let draw, snap; // global so we can remove them later
 let typeSelect;
@@ -134,8 +133,6 @@ function resetInteraction() {
 /***                     Database access                     ***/
 /***************************************************************/
 /***************************************************************/
-
-let helperPostArrayToStore = [];
 
 function storeDataToDB() {
     const source = vector.getSource();
@@ -224,19 +221,11 @@ function showPopup(feature, header) {
     let nbHelper = 1;
 
     let helperPost = helperPostArrayToStore.find(function (helperPost) {
-        return feature.getId().replace("point_of_interest_", "") === helperPost.id_point_of_interest;
+        return parseInt(feature.getId().replace("point_of_interest_", "")) === helperPost.id_point_of_interest;
     });
     if (helperPost !== undefined) {
         description = helperPost.description;
         nbHelper = helperPost.nb_helper;
-    } else {
-        helperPost = helperPostArray.find(function (helperPost) {
-            return parseInt(feature.getId().replace("point_of_interest_", "")) === helperPost.id_point_of_interest;
-        });
-        if (helperPost !== undefined) {
-            description = helperPost.description;
-            nbHelper = helperPost.nb_helper;
-        }
     }
 
     content.innerHTML = '<h6>' + header + '</h6>' +
@@ -408,26 +397,6 @@ function nextCourse() {
 
 //TODO Centré sur la france si pas de localisation
 
-function editHelperPost(featureId) {
-    let description = $('#' + featureId + '_label').val();
-    let nbHelper = $('#' + featureId + '_nbHelper').val();
-
-    let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
-        return helperPost.id_point_of_interest === featureId.replace("point_of_interest_", "");
-    });
-
-    if (helperPostFound) {
-        helperPostFound.description = description;
-        helperPostFound.nb_helper = nbHelper;
-    } else {
-        helperPostArrayToStore.push({
-            id_point_of_interest: featureId.replace("point_of_interest_", ""),
-            description: description,
-            nb_helper: nbHelper
-        });
-    }
-    overlay.setPosition(undefined);
-}
-
 loadPointsOfInterest(pointOfInterestArrayToLoad);
 loadCourses(courseArrayToLoad);
+loadHelperPost(helperPostArrayToLoad);
