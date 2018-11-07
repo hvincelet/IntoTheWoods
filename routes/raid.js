@@ -34,7 +34,6 @@ exports.createRaid = function (req, res) {
     }).then(function (raid_created) {
         let user = connected_user(req.sessionID);
         user.idCurrentRaid = raid_created.dataValues.id;
-        console.log("user.idCurrentRaid = "+user.idCurrentRaid);
         models.team.create({
             id_raid: user.idCurrentRaid,
             id_organizer: user.login
@@ -93,11 +92,7 @@ exports.displaySportsTable = function (req, res) {
 
 exports.saveSportsRanking = function (req, res) {
     let user = connected_user(req.sessionID);
-    if(user.idCurrentRaid === -1){
-        return res.redirect('/dashboard');
-    }
-    JSON.parse(req.body.sports_list).forEach(function (sport_row) {
-
+    JSON.parse(req.body.sports_list).map(sport_row => {
         models.course.create({
             order_num: sport_row.order,
             label: sport_row.name,
@@ -105,15 +100,18 @@ exports.saveSportsRanking = function (req, res) {
             id_raid: user.idCurrentRaid
         }).then(function () {
             models.raid.findOne({
-                attributes: ['id', 'name', 'edition'],
+                attributes: ['id', 'name', 'date', 'edition', 'place','lat','lng'],
                 where: {id: user.idCurrentRaid}
             }).then(function(unique_raid_found){
                 user.raid_list.push({
                     id: user.idCurrentRaid,
                     name: unique_raid_found.dataValues.name,
-                    edition: unique_raid_found.dataValues.edition
+                    date: unique_raid_found.dataValues.date,
+                    edition: unique_raid_found.dataValues.edition,
+                    place: unique_raid_found.dataValues.place,
+                    lat: unique_raid_found.dataValues.lat,
+                    lng: unique_raid_found.dataValues.lng
                 });
-                console.log(user.raid_list);
                 return res.redirect('/editraid/' + user.idCurrentRaid + '/map');
             });
         });
@@ -154,7 +152,7 @@ exports.displayAllRaids = function (req, res) {
     }
 };
 
-exports.displayRaid = function (req, res) {
+/*exports.displayRaid = function (req, res) {
     const user = connected_user(req.sessionID);
     if(user.raid_list.length === 0) {
         res.redirect('/dashboard');
@@ -204,5 +202,140 @@ exports.displayRaid = function (req, res) {
                 helpers: helpers_linked_with_the_current_raid
             });
         }
+    }*/
+
+exports.displayRaid = function(req, res) {
+    const user = connected_user(req.sessionID);
+    const raid = user.raid_list.find(function(raid){return raid.id == req.params.id});
+    if(!raid){
+        return res.redirect('/dashboard');
     }
+
+    /************************/
+    /*    Organizer infos   */
+    /************************/
+
+    let team_model = models.team;
+    let organizer_model = models.organizer;
+
+    team_model.belongsTo(organizer_model, {foreignKey: 'id_organizer'});
+    team_model.findAll({ // Get all organizers assigned to the current raid
+        include: [{
+            model: organizer_model,
+            attributes: ['email','last_name','first_name']
+        }],
+        attributes: ['id_organizer'],
+        where: {
+            id_raid: req.params.id
+        }
+    }).then(function(organizers_found){
+
+        let organizers_linked_with_the_current_raid = [];
+        organizers_found.forEach(function(organizer){
+            organizers_linked_with_the_current_raid.push({
+                email: organizer.dataValues.organizer.dataValues.email,
+                first_name: organizer.dataValues.organizer.dataValues.first_name,
+                last_name: organizer.dataValues.organizer.dataValues.last_name
+            });
+        });
+
+        /*********************/
+        /*    Helper infos   */
+        /*********************/
+
+        let data_helper = [];
+
+        let assignment_model = models.assignment;
+        let helper_model = models.helper;
+        let helper_post_model = models.helper_post;
+
+        helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
+        assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
+
+        helper_model.findAll({
+            include: [{
+                model: assignment_model,
+                attributes: ['id_helper','id_helper_post','attributed'],
+                include: [{
+                    model: helper_post_model,
+                    attributes: ['id','description']
+                }],
+            }],
+            attributes: ['login','email','last_name','first_name']
+        }).then(function(assignment_found){
+            assignment_found.forEach(function(tuple){
+                let create_user = 0;
+                data_helper.forEach(function(object){
+                    if(object['user'] == tuple.dataValues.login){
+                        create_user = 1;
+                    }
+                });
+                if(create_user == 0){
+                    data_helper.push(
+                        {
+                            'user':tuple.dataValues.login,
+                            'data':{
+                                'email':tuple.dataValues.email,
+                                'last_name':tuple.dataValues.last_name,
+                                'first_name':tuple.dataValues.first_name,
+                                'assignment':[]
+                            }
+                        }
+                    );
+                }
+                data_helper.forEach(function(object){
+                    if(object['user'] == tuple.dataValues.login){
+                        object['data']['assignment'].push(
+                            {
+                                'id':tuple.dataValues.assignment.dataValues.helper_post.dataValues.id,
+                                'description':tuple.dataValues.assignment.dataValues.helper_post.dataValues.description,
+                                'attributed':tuple.dataValues.assignment.dataValues.attributed
+                            }
+                        );
+                    }
+                });
+            });
+
+
+            /*********************/
+            /*    Course infos   */
+            /*********************/
+
+            let courses_linked_with_the_current_raid = [];
+
+            let course_model = models.course;
+            let sport_model = models.sport;
+
+            sport_model.belongsTo(course_model, {foreignKey: 'id'});
+            const Sequelize = require('sequelize');
+            sport_model.findAll({
+                attributes: ['name'],
+                include: [{
+                    model: course_model,
+                    attributes: ['order_num'],
+                    where: {
+                        id_sport: Sequelize.col('sport.id'),
+                        id_raid: req.params.id
+                    }
+                }]
+            }).then(function(course_name_and_order_found){
+                course_name_and_order_found.forEach(function(course){
+                    courses_linked_with_the_current_raid.push({
+                        order: course.dataValues.course.order_num,
+                        name: course.dataValues.name
+                    });
+                });
+                res.render(pages_path + "template.ejs", {
+                    pageTitle: "Gestion d'un Raid",
+                    page: "edit_raid/details",
+                    user: user,
+                    organizers: organizers_linked_with_the_current_raid, // [{email, first_name, last_name}]
+                    helpers: data_helper, // [{email, first_name, last_name, posts_asked:[{helper_post_id, description}]}]
+                    courses: courses_linked_with_the_current_raid,
+                    raid: raid
+                });
+            });
+        });
+
+    });
 };
