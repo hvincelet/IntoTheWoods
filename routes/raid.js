@@ -254,13 +254,11 @@ exports.displayRaid = function(req, res) {
                             attributed: attributed,
                             assignment: []
                         };
-                        assignments_by_id_helper.forEach(function (assignment_by_id_helper) {
-                            if(assignment_by_id_helper.dataValues.helper_post !== null){
-                                helper.assignment.push({
-                                    id: assignment_by_id_helper.dataValues.id_helper_post,
-                                    description: assignment_by_id_helper.dataValues.helper_post.dataValues.description
-                                });
-                            }
+                        assignments_by_id_helper.forEach(function(assignment_by_id_helper){
+                            helper.assignment.push({
+                                id: assignment_by_id_helper.dataValues.id_helper_post,
+                                description: assignment_by_id_helper.dataValues.helper_post.dataValues.description
+                            });
                         });
                         data_helper.push(helper);
                         return resolve();
