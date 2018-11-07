@@ -7,17 +7,44 @@ exports.inviteHelper = function(req, res) {
     if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
         return res.redirect('/dashboard');
     }
-
-    let helper_list_to_invite = [];
-    const current_user_email = connected_user(req.sessionID).login;
-    helper_list_to_invite.foreach(function(helper_email){
+    const helper_emails = req.body.mails;
+    //const helper_emails = ['hvincele@enssat.fr'];
+    helper_emails.forEach(function(helper_email){
         if(helper_email != user.login){
-            //sender.sendMail(helper_email, );
+            let assignment_model = models.assignment;
+            let helper_model = models.helper;
+            let helper_post_model = models.helper_post;
+            let point_of_interest_model = models.point_of_interest;
+
+            helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
+            assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
+            helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
+
+            helper_model.findOne({
+                where: {
+                    email: helper_email
+                },
+                include: [{
+                    model: assignment_model,
+                    include: [{
+                        model: helper_post_model,
+                        include:[{
+                            model: point_of_interest_model,
+                            where: {
+                                id_raid: req.params.id
+                            }
+                        }]
+                    }]
+                }]
+            }).then(function(helper_found){
+                if(!helper_found){
+                    //sender.sendMailToHelperToInviteThem(helper_email, );
+                }
+            });
         }
     });
 };
 
-// Register new Helper default page
 exports.displayRegister = function(req, res){
 
     let raid_id = req.query.raid;
@@ -41,65 +68,71 @@ exports.displayRegister = function(req, res){
               }
           }]
       }],
-      attributes: ['id','description']
-    }).then(function(helper_post_found){
-        if(helper_post_found !== null){
-            helper_post_found.forEach(function(tuple){
-                if(tuple.dataValues.point_of_interest != null){
-                    get_post_clean.push({'id':tuple.dataValues.id,'description':tuple.dataValues.description});
-                }
-            });
-            res.render(pages_path + "helper_register.ejs", {
-                pageTitle: "Inscription Bénévole",
-                activity: get_post_clean
+      attributes: ['id','description','nb_helper']
+    }).then(function(helper_posts_found){
+        if(helper_posts_found !== null){
+            helper_posts_found.forEach(function(helper_post, index, helper_posts_array){
+                models.assignment.findAndCountAll({
+                    where: {
+                        id_helper_post: helper_post.dataValues.id,
+                        attributed: 1
+                    }
+                }).then(function(all_assignement){
+                    if(helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0){
+                        get_post_clean.push({'id':helper_post.dataValues.id,'description':helper_post.dataValues.description});
+                    }
+                    if(index == helper_posts_array.length -1){
+                        res.render(pages_path + "helper_register.ejs", {
+                            pageTitle: "Inscription Bénévole",
+                            activity: get_post_clean
+                        });
+                    }
+                });
             });
         }
     });
 };
 
-// Register new Helper with post form
 exports.register = function(req, res){
 
-    let id = Math.random().toString(36).substr(2, 6); // generate id helper
-    let registerEmail = req.body.registerEmail;
-    let registerUserLn = req.body.registerUserLn;
-    let registerUserFn = req.body.registerUserFn;
-    let registerRun = req.body.registerRun;
+    let id_helper = Math.random().toString(36).substr(2, 6);
+    const registerEmail = req.body.registerEmail;
+    const registerUserLn = req.body.registerUserLn;
+    const registerUserFn = req.body.registerUserFn;
+    const helperPostsWished = req.body.registerRun;
 
     models.helper.findOne({
         where: {
-            login: id
+            login: id_helper
         }
     }).then(function (helper_found) {
-        if (helper_found !== null) { // helper with id generated already exist
+        if (helper_found !== null) {
             while(helper_found !== null) {
-                id = Math.random().toString(36).substr(2, 6);
+                id_helper = Math.random().toString(36).substr(2, 6);
                 models.helper.findOne({
                     where: {
-                        login:id
+                        login: id_helper
                     }
                 }).then(function(test_helper) {
                     helper_found = test_helper;
                 });
             }
-        } else { // helper with id generated does not exist
-            models.helper.create({ // registration of the new helper
-                login: id,
+        } else {
+            models.helper.create({
+                login: id_helper,
                 email: registerEmail,
                 last_name: registerUserLn,
                 first_name: registerUserFn
             }).then(function () {
-                // Create assignment with poste(s) and helper in assignment table
-                registerRun.forEach(function(id_activity){
-                    models.assignment.create({ // create assignment with the new helper and poste(s)
-                        id_helper: id,
-                        id_helper_post: id_activity
+                // TODO : sort helperPostsWished 
+                helperPostsWished.forEach(function(id_activity){
+                    models.assignment.create({
+                        id_helper: id_helper,
+                        id_helper_post: id_activity,
+                        attributed: false
                     });
                 });
-                // Redirect to helper_register with validMessage (organizer manage your inscription)
-                res.render(pages_path + "helper_register.ejs", {
-                    pageTitle: "Inscription Bénévole"
-                });
+                res.redirect("/helper/" + id_helper + "/home");
             });
         }
     });
@@ -118,7 +151,7 @@ exports.displayHome = function(req, res){
             if (assignment_found.attributed == 0){
                 res.render(pages_path + "helper_register.ejs", {
                     pageTitle: "Inscription Bénévole",
-                    errorMessage: "Cet identifiant n'a pas encore été attribué à un poste..."
+                    errorMessage: "Vous n'avez pas encore été attribué à un poste."
                 });
             } else {
                 // TODO : page to see the map with the path to go to helper post
@@ -161,7 +194,7 @@ exports.displayHome = function(req, res){
         } else { // id of helper does not exist
             res.render(pages_path + "helper_register.ejs", {
                 pageTitle: "Inscription Bénévole",
-                errorMessage: "Cet identifiant n'existe pas ..."
+                errorMessage: "Cet identifiant n'existe pas."
             });
         }
     });

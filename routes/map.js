@@ -22,6 +22,7 @@ exports.displayMap = function (req, res) {
             id_raid: raid.id
         }
     }).then(function (courses_found) {
+        console.log(courses_found);
         sports.findAll().then(function (all_sports) {
             courses_found.sort(function (a, b) {
                 return a.order_num - b.order_num;

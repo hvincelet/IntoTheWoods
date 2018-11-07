@@ -1,6 +1,6 @@
 <%
 var helpers_id = {}
-helpers.forEach(function (helper, index) {
+helpers.map( (helper, index) => {
     helpers_id[helper.email] = 'helper'+index+'-post';
 });
 %>
@@ -55,9 +55,10 @@ helpers.forEach(function (helper, index) {
                     </div>
                     <div class="card-body">
                         <div class="table-editable">
+                            <div id="invite_organizer_result"></div>
                             <form class="form-inline" style="margin-bottom: 1em !important;">
-                                <input style="margin-right: 0.5em;" type="email" placeholder="Saisir l'adresse e-mail d'un organisateur" class="form-control form-control-success col-sm-4 ">
-                                <button type="button" class="btn btn-primary btn-rounded">Ajouter un organisateur</button>
+                                <input style="margin-right: 0.5em;" id="mail_organizer" type="email" placeholder="Saisir l'adresse e-mail d'un organisateur" class="form-control form-control-success col-sm-4 ">
+                                <button type="button" class="btn btn-primary btn-rounded" onclick="inviteOrganizer()">Ajouter un organisateur</button>
                             </form>
                             <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
                                 <tr>
@@ -65,9 +66,9 @@ helpers.forEach(function (helper, index) {
                                     <th class="text-center">Contacter</th>
                                     <th class="text-center">Supprimer</th>
                                 </tr>
-                                <% organizers.forEach(function (organizer) { %>
+                                <% organizers.map(organizer => { %>
                                 <tr>
-                                    <td class="pt-3-half" contenteditable="false" width="60%"><%=organizer.first_name%> <%=organizer.last_name%></td>
+                                    <td class="pt-3-half" contenteditable="false" width="60%"><%=organizer.first_name%> <%=organizer.last_name%> <%= organizer.index%></td>
                                     <td width="20%"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" data-toggle="modal" data-target="#mailModal" data-mail="<%=organizer.email%>" data-type="Organizers">Contacter</button></td>
                                     <td width="20%"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0" data-toggle="modal" data-target="#removeModal" data-type="Organizers" data-username="<%=organizer.first_name%> <%=organizer.last_name%>" data-usermail="<%=organizer.email%>">Supprimer</button></td>
                                 </tr>
@@ -149,7 +150,7 @@ helpers.forEach(function (helper, index) {
                             <th class="text-center">Suppression</th>
                         </tr>
                         <tr class="duplicate">
-                            <td class="pt-3-half sport_name" contenteditable="true"></td>
+                            <td class="pt-3-half helper_mail" contenteditable="true"></td>
                             <td width="5%">
                                 <span class="table-remove">
                                     <button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button>
@@ -160,7 +161,7 @@ helpers.forEach(function (helper, index) {
                     <table id="hidden-addHelperTable" style="display: none;">
                         <!-- Default added row -->
                         <tr class="hide duplicate">
-                            <td class="pt-3-half sport_name" contenteditable="true"></td>
+                            <td class="pt-3-half helper_mail" contenteditable="true"></td>
                             <td width="5%">
                                 <span class="table-remove">
                                     <button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button>
@@ -172,7 +173,7 @@ helpers.forEach(function (helper, index) {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary cancel-addHelperTable" data-dismiss="modal">Annuler</button>
-                <button type="button" id="submit-addHelperTable" class="btn btn-primary">Invitez les helpers</button>
+                <button type="button" id="submit-addHelperTable" class="btn btn-primary" onclick="inviteHelpers()">Invitez les helpers</button>
             </div>
         </div>
     </div>
@@ -193,6 +194,25 @@ helpers.forEach(function (helper, index) {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
                 <button type="button" id="confirmRemove-button" class="btn btn-danger">Confirmer la suppression</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Message modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageDialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageDialog">Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-3 text-center align-middle my-auto" id="messageIconDialog"></div>
+                    <div class="col-lg-9 align-middle my-auto" id="messageContentDialog"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -246,16 +266,13 @@ helpers.forEach(function (helper, index) {
 <script type="text/javascript">
     var $ADD_HELPER_TABLE = $('#addHelperTable');
     var $HIDDEN_ADD_HELPER_TABLE = $('#hidden-addHelperTable');
-
     $('.table-addHelperTable').click(function () {
         var $clone = $HIDDEN_ADD_HELPER_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
         $ADD_HELPER_TABLE.append($clone);
     });
-
     $('.table-remove').click(function () {
         $(this).parents('tr').detach();
     });
-
     $('.cancel-addHelperTable').click(function () {
         $ADD_HELPER_TABLE.find('tr.duplicate').detach();
         var $clone = $HIDDEN_ADD_HELPER_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
@@ -275,7 +292,6 @@ helpers.forEach(function (helper, index) {
         modal.find('span.userMail').text(userMail);
         modal.find('span.userType').text(type);
     });
-
     $('#confirmRemove-button').click(function () {
         let userMail = $('.modal-body').find('span.userMail').text();
         let userType = $('.modal-body').find('span.userType').text();
@@ -300,7 +316,6 @@ helpers.forEach(function (helper, index) {
         }
         modal.find('#recipient-subject').val(subjectText + "<%=raid.name%> - Édition <%=raid.edition%>");
     });
-
     $('#sendMail-button').click(function () {
         let mail = $('#recipient-name').text();
         let subject = $('#recipient-subject').text();
@@ -326,4 +341,85 @@ helpers.forEach(function (helper, index) {
             });
         <% }); %>
     });
+</script>
+<!-- JS for invite organizer and helpers -->
+<script type="text/javascript">
+    function validateEmail(email) {
+        var expr = /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+        return expr.test(email);
+    }
+    function inviteOrganizer() {
+        let mail = $('#mail_organizer').val();
+        let $MESSAGE_MODAL = $('#messageModal');
+        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+        if (validateEmail(mail)){
+            let data = {
+                mail: mail
+            };
+            $.ajax({
+                type: 'POST',
+                url: '/team/<%= raid.id %>/inviteorganizers',
+                data: data,
+                success: function () {
+                    $('#mail_organizer').val("");
+                    $MESSAGE_MODAL_TITLE.html("Organisateur invité·e !");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("L'organisateur a bien été invité.");
+                    $MESSAGE_MODAL.modal('show');
+                },
+                error: function (response) {
+                    let msg = JSON.parse(response).msg;
+                    $MESSAGE_MODAL_TITLE.html("Erreur...");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer...");
+                    $MESSAGE_MODAL.modal('show');
+                }
+            });
+        }else{
+            if(mail.length > 0){
+                $MESSAGE_MODAL_TITLE.html("Erreur...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Merci de saisir une adresse e-mail valide...");
+                $MESSAGE_MODAL.modal('show');
+            }
+        }
+    }
+    function inviteHelpers(){
+        let $MESSAGE_MODAL = $('#messageModal');
+        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+        let mails = [];
+        $('#addHelperTable').find('tr').each(function () {
+            let mail = $(this).find('td.helper_mail').html();
+            if(validateEmail(mail)){
+                mails.push(mail);
+            }
+        });
+        $('#modal-helpers').modal('hide');
+        $.ajax({
+            type: 'POST',
+            url: '/team/<%= raid.id %>/invitehelpers',
+            data: mails,
+            success: function () {
+                $MESSAGE_MODAL_TITLE.html("Helpers invité·e·s");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Ces helpers ont bien été invité·e·s :<ul>");
+                mails.map( mail => {
+                    $MESSAGE_MODAL_CONTENT.append("<li>" + mail + "</li>");
+                });
+                $MESSAGE_MODAL_CONTENT.append("</ul>");
+                $MESSAGE_MODAL.modal('show');
+            },
+            error: function (response) {
+                let msg = JSON.parse(response).msg;
+                $MESSAGE_MODAL_TITLE.html("Erreur...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter les helpers...");
+                $MESSAGE_MODAL.modal('show');
+            }
+        });
+    }
 </script>
