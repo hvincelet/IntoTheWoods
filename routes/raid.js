@@ -254,13 +254,11 @@ exports.displayRaid = function(req, res) {
                             attributed: attributed,
                             assignment: []
                         };
-                        assignments_by_id_helper.forEach(function (assignment_by_id_helper) {
-                            if(assignment_by_id_helper.dataValues.helper_post !== null){
-                                helper.assignment.push({
-                                    id: assignment_by_id_helper.dataValues.id_helper_post,
-                                    description: assignment_by_id_helper.dataValues.helper_post.dataValues.description
-                                });
-                            }
+                        assignments_by_id_helper.forEach(function(assignment_by_id_helper){
+                            helper.assignment.push({
+                                id: assignment_by_id_helper.dataValues.id_helper_post,
+                                description: assignment_by_id_helper.dataValues.helper_post.dataValues.description
+                            });
                         });
                         data_helper.push(helper);
                         return resolve();
@@ -280,23 +278,23 @@ exports.displayRaid = function(req, res) {
                 let course_model = models.course;
                 let sport_model = models.sport;
 
-                sport_model.belongsTo(course_model, {foreignKey: 'id'});
-                const Sequelize = require('sequelize');
-                sport_model.findAll({
-                    attributes: ['name'],
+                course_model.belongsTo(sport_model, {foreignKey: 'id_sport'});
+
+                course_model.findAll({
+                    attributes: ['order_num'],
                     include: [{
-                        model: course_model,
-                        attributes: ['order_num'],
-                        where: {
-                            id_sport: Sequelize.col('sport.id'),
-                            id_raid: req.params.id
-                        }
-                    }]
-                }).then(function (course_name_and_order_found) {
-                    course_name_and_order_found.map(course => {
+                        model: sport_model,
+                        attributes: ['name']
+                    }],
+                    where: {
+                        id_raid: req.params.id
+                    }
+                }).then(function(course_name_and_order_found){
+
+                    course_name_and_order_found.map(function(course){
                         courses_linked_with_the_current_raid.push({
-                            order: course.dataValues.course.order_num,
-                            name: course.dataValues.name
+                            order: course.dataValues.order_num,
+                            name: course.dataValues.sport.dataValues.name
                         });
                     });
 
