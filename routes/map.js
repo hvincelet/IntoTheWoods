@@ -53,7 +53,7 @@ exports.displayMap = function (req, res) {
             Promise.all(course_actions)
                 .then(result => {
                     let pointOfInterestArrayToLoad = [];
-                    let helperPostArray = [];
+                    let helperPostArrayToLoad = [];
                     point_of_interests.findAll({ // loads the array of points-of-interest
                         where: {
                             id_raid: raid.id
@@ -71,7 +71,7 @@ exports.displayMap = function (req, res) {
                                     }
                                 }).then(function (helper_post_found) {
                                     if (helper_post_found !== null) {
-                                        helperPostArray.push(helper_post_found.dataValues);
+                                        helperPostArrayToLoad.push(helper_post_found.dataValues);
                                     }
                                     return resolve();
                                 })
@@ -88,7 +88,7 @@ exports.displayMap = function (req, res) {
                                     raid: raid,
                                     pointOfInterestArrayToLoad: pointOfInterestArrayToLoad,
                                     courseArrayToLoad: courses_found,
-                                    helperPostArray: helperPostArray
+                                    helperPostArrayToLoad: helperPostArrayToLoad
                                 });
                             });
                     }).catch(err => console.log(err));
@@ -101,7 +101,7 @@ exports.storeMapData = function (req, res) {
 
     let pointOfInterestServerIdArray = [];
     if (req.body.pointOfInterestArray !== undefined) {
-        const store_point_of_interest = req.body.pointOfInterestArray.map(pointOfInterest => {
+        const store_point_of_interest_actions = req.body.pointOfInterestArray.map(pointOfInterest => {
             return new Promise((resolve, reject) => {
                 if (pointOfInterest.is_new === 'true') {
                     point_of_interests.create({
@@ -138,12 +138,11 @@ exports.storeMapData = function (req, res) {
             });
         });
 
-        Promise.all(store_point_of_interest)
+        Promise.all(store_point_of_interest_actions)
             .then(result => {
                 if (req.body.helperPostArray !== undefined) {
                     req.body.helperPostArray.map(helper_post => {
-
-                        if (helper_post.id_point_of_interest.indexOf("new") === -1) {
+                        if (helper_post.is_new === 'new') {
                             helper_posts.create({
                                 id_point_of_interest: helper_post.id_point_of_interest,
                                 description: helper_post.description,
@@ -151,14 +150,10 @@ exports.storeMapData = function (req, res) {
                             })
                         } else {
 
-                            let point_of_interest_updated_id_found = pointOfInterestServerIdArray.find(function (pointOfInterestUpdated) {
-                                return pointOfInterestUpdated.clientId === helper_post.id_point_of_interest.replace('new_', '');
-                            });
-
-                            console.log(point_of_interest_updated_id_found);
                             helper_posts.create({
-                                id_point_of_interest: point_of_interest_updated_id_found.serverId,
-                                description: helper_post.description
+                                id_point_of_interest: helper_post.id_point_of_interest,
+                                description: helper_post.description,
+                                nb_helper: helper_post.nb_helper
                             })
                         }
                     });
