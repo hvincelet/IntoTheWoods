@@ -266,16 +266,13 @@ helpers.map( (helper, index) => {
 <script type="text/javascript">
     var $ADD_HELPER_TABLE = $('#addHelperTable');
     var $HIDDEN_ADD_HELPER_TABLE = $('#hidden-addHelperTable');
-
     $('.table-addHelperTable').click(function () {
         var $clone = $HIDDEN_ADD_HELPER_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
         $ADD_HELPER_TABLE.append($clone);
     });
-
     $('.table-remove').click(function () {
         $(this).parents('tr').detach();
     });
-
     $('.cancel-addHelperTable').click(function () {
         $ADD_HELPER_TABLE.find('tr.duplicate').detach();
         var $clone = $HIDDEN_ADD_HELPER_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
@@ -295,7 +292,6 @@ helpers.map( (helper, index) => {
         modal.find('span.userMail').text(userMail);
         modal.find('span.userType').text(type);
     });
-
     $('#confirmRemove-button').click(function () {
         let userMail = $('.modal-body').find('span.userMail').text();
         let userType = $('.modal-body').find('span.userType').text();
@@ -320,7 +316,6 @@ helpers.map( (helper, index) => {
         }
         modal.find('#recipient-subject').val(subjectText + "<%=raid.name%> - Édition <%=raid.edition%>");
     });
-
     $('#sendMail-button').click(function () {
         let mail = $('#recipient-name').text();
         let subject = $('#recipient-subject').text();
@@ -397,20 +392,20 @@ helpers.map( (helper, index) => {
         let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
         let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
         let mails = [];
-
         $('#addHelperTable').find('tr').each(function () {
             let mail = $(this).find('td.helper_mail').html();
             if(validateEmail(mail)){
                 mails.push(mail);
             }
         });
-
+        let data = {
+            mails: mails
+        };
         $('#modal-helpers').modal('hide');
-
         $.ajax({
             type: 'POST',
             url: '/team/<%= raid.id %>/invitehelpers',
-            data: mails,
+            data: data,
             success: function () {
                 $MESSAGE_MODAL_TITLE.html("Helpers invité·e·s");
                 $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");

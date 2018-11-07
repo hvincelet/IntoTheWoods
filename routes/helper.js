@@ -7,17 +7,44 @@ exports.inviteHelper = function(req, res) {
     if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
         return res.redirect('/dashboard');
     }
-
-    let helper_list_to_invite = [];
-    const current_user_email = connected_user(req.sessionID).login;
-    helper_list_to_invite.foreach(function(helper_email){
+    //const helper_emails = req.body.mails;
+    const helper_emails = ['hvincele@enssat.fr'];
+    helper_emails.forEach(function(helper_email){
         if(helper_email != user.login){
-            //sender.sendMail(helper_email, );
+            let assignment_model = models.assignment;
+            let helper_model = models.helper;
+            let helper_post_model = models.helper_post;
+            let point_of_interest_model = models.point_of_interest;
+
+            helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
+            assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
+            helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
+
+            helper_model.findOne({
+                where: {
+                    email: helper_email
+                },
+                include: [{
+                    model: assignment_model,
+                    include: [{
+                        model: helper_post_model,
+                        include:[{
+                            model: point_of_interest_model,
+                            where: {
+                                id_raid: req.params.id
+                            }
+                        }]
+                    }]
+                }]
+            }).then(function(helper_found){
+                if(!helper_found){
+                    //sender.sendMailToHelperToInviteThem(helper_email, );
+                }
+            });
         }
     });
 };
 
-// Register new Helper default page
 exports.displayRegister = function(req, res){
 
     let raid_id = req.query.raid;
@@ -47,7 +74,8 @@ exports.displayRegister = function(req, res){
             helper_posts_found.forEach(function(helper_post, index, helper_posts_array){
                 models.assignment.findAndCountAll({
                     where: {
-                        id_helper_post: helper_post.dataValues.id
+                        id_helper_post: helper_post.dataValues.id,
+                        attributed: 1
                     }
                 }).then(function(all_assignement){
                     if(helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0){
