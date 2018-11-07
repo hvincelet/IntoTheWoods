@@ -31,18 +31,13 @@ intothewoods.use(session({
 global.connected_users = [];
 if (config.no_login) {
     connected_users.push({
-        login: "derouxjulien@gmail.com",
-        first_name: "Julien",
-        last_name: "Deroux",
-        initials: "JD",
+        login: "hugo.vincelet@gmail.com",
+        first_name: "Hugo",
+        last_name: "Vincelet",
+        initials: "HV",
         picture: null,
-        idCurrentRaid: -1, //for tests
-        raid_list: [{
-            id: 1,
-            place: "Pleumeur-Bodou, Lannion, Côtes-d'Armor, Bretagne, France métropolitaine, 22560, France",
-            lat: 48.7732657,
-            lng: -3.5187179
-        }]
+        idCurrentRaid: -1,
+        raid_list: [{id:1}, {id:2}, {id:3},{id:4},{id:5}]
     });
 }
 
