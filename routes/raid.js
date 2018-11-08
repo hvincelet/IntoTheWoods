@@ -92,31 +92,34 @@ exports.displaySportsTable = function (req, res) {
 
 exports.saveSportsRanking = function (req, res) {
     let user = connected_user(req.sessionID);
-    JSON.parse(req.body.sports_list).forEach(function (sport_row) {
-
-        models.course.create({
-            order_num: sport_row.order,
-            label: sport_row.name,
-            id_sport: sport_row.sport,
-            id_raid: user.idCurrentRaid
-        }).then(function () {
-            models.raid.findOne({
-                attributes: ['id', 'name', 'date', 'edition', 'place','lat','lng'],
-                where: {id: user.idCurrentRaid}
-            }).then(function(unique_raid_found){
-                user.raid_list.push({
-                    id: user.idCurrentRaid,
-                    name: unique_raid_found.dataValues.name,
-                    date: unique_raid_found.dataValues.date,
-                    edition: unique_raid_found.dataValues.edition,
-                    place: unique_raid_found.dataValues.place,
-                    lat: unique_raid_found.dataValues.lat,
-                    lng: unique_raid_found.dataValues.lng
-                });
-                return res.redirect('/editraid/' + user.idCurrentRaid + '/map');
-            });
+    const save_sports_actions = JSON.parse(req.body.sports_list).map(sport_row => {
+        return new Promise(resolve => {
+            console.log(sport_row);
+            models.course.create({
+                order_num: sport_row.order,
+                label: sport_row.name,
+                id_sport: sport_row.sport,
+                id_raid: user.idCurrentRaid
+            }).then(function () { return resolve(); });
         });
+    });
 
+    Promise.all(save_sports_actions).then(result => {
+        models.raid.findOne({
+            attributes: ['id', 'name', 'date', 'edition', 'place','lat','lng'],
+            where: {id: user.idCurrentRaid}
+        }).then(function(unique_raid_found){
+            user.raid_list.push({
+                id: user.idCurrentRaid,
+                name: unique_raid_found.dataValues.name,
+                date: unique_raid_found.dataValues.date,
+                edition: unique_raid_found.dataValues.edition,
+                place: unique_raid_found.dataValues.place,
+                lat: unique_raid_found.dataValues.lat,
+                lng: unique_raid_found.dataValues.lng
+            });
+            return res.redirect('/editraid/' + user.idCurrentRaid + '/map');
+        });
     });
 };
 
@@ -152,58 +155,6 @@ exports.displayAllRaids = function (req, res) {
         res.redirect('/dashboard');
     }
 };
-
-/*exports.displayRaid = function (req, res) {
-    const user = connected_user(req.sessionID);
-    if(user.raid_list.length === 0) {
-        res.redirect('/dashboard');
-    }else{
-        let found = user.raid_list.find(function (raid) {
-            return raid.id === parseInt(req.params.id);
-        });
-        if(!found){
-            res.redirect('/editraid')
-        }else{ // User is authenticated and allow to access this page
-            let organizers_linked_with_the_current_raid = [];
-            let helpers_linked_with_the_current_raid = [];
-             // get organizer (email, first_name, last_name)
-            organizers_linked_with_the_current_raid.push({
-                email: "graballa@enssat.fr",
-                first_name: 'Gwendal',
-                last_name: 'Raballand'
-            });
-            organizers_linked_with_the_current_raid.push({
-                email: "jderoux@enssat.fr",
-                first_name: 'Julien',
-                last_name: 'Deroux'
-            });
-
-            // Get helpers (email, first_name, last_name, posts)
-            helpers_linked_with_the_current_raid.push({
-               email: 'hvincele@enssat.fr',
-               first_name: 'Hugo',
-               last_name: 'Vincelet',
-               posts: ['Accueil', 'Buvette', 'Kayak', 'Circulation']
-            })
-            helpers_linked_with_the_current_raid.push({
-                email: 'gsicard@enssat.fr',
-                first_name: 'Guillaume',
-                last_name: 'Sicard',
-                posts: ['Circulation']
-            });
-
-            // Get Courses
-
-            res.render(pages_path + "template.ejs", {
-                pageTitle: "Gestion d'un Raid",
-                page: "edit_raid/details",
-                user: user,
-                raid: found,
-                organizers: organizers_linked_with_the_current_raid,
-                helpers: helpers_linked_with_the_current_raid
-            });
-        }
-    }*/
 
 exports.displayRaid = function(req, res) {
     const user = connected_user(req.sessionID);
@@ -249,135 +200,94 @@ exports.displayRaid = function(req, res) {
         let assignment_model = models.assignment;
         let helper_model = models.helper;
         let helper_post_model = models.helper_post;
-        let point_of_interest_model = models.point_of_interest;
 
-        //helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
-        assignment_model.belongsTo(helper_model, {foreignKey: 'id_helper'});
+        helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
         assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
-        helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
-        assignment_model.findAll({
-            attributes: ['id_helper','id_helper_post','attributed'],
+        helper_model.findAll({
             include: [{
-                model: helper_post_model,
-                attributes: ['id','description'],
-                include:[{
-                    model: point_of_interest_model,
+                model: assignment_model,
+                attributes: ['id_helper','id_helper_post','attributed'],
+                include: [{
+                    model: helper_post_model,
+                    attributes: ['id','description']
+                }],
+            }],
+            attributes: ['login','email','last_name','first_name']
+        }).then(function(assignment_found){
+            assignment_found.forEach(function(tuple){
+                let create_user = 0;
+                data_helper.forEach(function(object){
+                    if(object['user'] == tuple.dataValues.login){
+                        create_user = 1;
+                    }
+                });
+                if(create_user == 0){
+                    data_helper.push(
+                        {
+                            'user':tuple.dataValues.login,
+                            'data':{
+                                'email':tuple.dataValues.email,
+                                'last_name':tuple.dataValues.last_name,
+                                'first_name':tuple.dataValues.first_name,
+                                'assignment':[]
+                            }
+                        }
+                    );
+                }
+                data_helper.forEach(function(object){
+                    if(object['user'] == tuple.dataValues.login){
+                        object['data']['assignment'].push(
+                            {
+                                'id':tuple.dataValues.assignment.dataValues.helper_post.dataValues.id,
+                                'description':tuple.dataValues.assignment.dataValues.helper_post.dataValues.description,
+                                'attributed':tuple.dataValues.assignment.dataValues.attributed
+                            }
+                        );
+                    }
+                });
+            });
+
+
+            /*********************/
+            /*    Course infos   */
+            /*********************/
+
+            let courses_linked_with_the_current_raid = [];
+
+            let course_model = models.course;
+            let sport_model = models.sport;
+
+            sport_model.belongsTo(course_model, {foreignKey: 'id'});
+            const Sequelize = require('sequelize');
+            sport_model.findAll({
+                attributes: ['name'],
+                include: [{
+                    model: course_model,
+                    attributes: ['order_num'],
                     where: {
+                        id_sport: Sequelize.col('sport.id'),
                         id_raid: req.params.id
                     }
                 }]
-            }]
-        }).then(function(assignment_found){
-
-            const unique_assignments_array = assignment_found.filter(function(assignment, index, array){
-                return array.findIndex(function(value){ return value.dataValues.id_helper == assignment.dataValues.id_helper; }) == index;
-            });
-
-            const storeHelperActions = unique_assignments_array.map((assignment, index) => {
-                return new Promise((resolve, reject) => {
-                    helper_model.findOne({
-                        attributes: ['login','email','last_name','first_name'],
-                        where: {
-                            login: assignment.dataValues.id_helper
-                        }
-                    }).then(function(helper_found){
-                        const assignments_by_id_helper = assignment_found.filter(function(value){
-                            return value.dataValues.id_helper == helper_found.dataValues.login;
-                        });
-                        const assignment_attributed_to_helper = assignments_by_id_helper.find(function(value){
-                            return value.dataValues.attributed == 1;
-                        });
-                        let attributed = 0;
-                        if(assignment_attributed_to_helper){
-                            attributed = 1;
-                        }
-                        let helper = {
-                            login: helper_found.dataValues.login,
-                            email: helper_found.dataValues.email,
-                            last_name: helper_found.dataValues.last_name,
-                            first_name: helper_found.dataValues.first_name,
-                            attributed: attributed,
-                            assignment: []
-                        };
-                        assignments_by_id_helper.forEach(function(assignment_by_id_helper){
-                            helper.assignment.push({
-                                id: assignment_by_id_helper.dataValues.id_helper_post,
-                                description: assignment_by_id_helper.dataValues.helper_post.dataValues.description
-                            });
-                        });
-                        data_helper.push(helper);
-                        return resolve();
-                    });
+            }).then(function(course_name_and_order_found){
+                course_name_and_order_found.map(course => {
+                    /*courses_linked_with_the_current_raid.push({
+                        order: course.dataValues.course.order_num,
+                        name: course.dataValues.name
+                    });*/
+                    courses_linked_with_the_current_raid[course.dataValues.course.order_num] = course.dataValues.name;
                 });
-
-            });
-
-            Promise.all(storeHelperActions).then(result => {
-
-                /*********************/
-                /*    Course infos   */
-                /*********************/
-
-                let courses_linked_with_the_current_raid = [];
-
-                let course_model = models.course;
-                let sport_model = models.sport;
-
-                sport_model.belongsTo(course_model, {foreignKey: 'id'});
-                const Sequelize = require('sequelize');
-                sport_model.findAll({
-                    attributes: ['name'],
-                    include: [{
-                        model: course_model,
-                        attributes: ['order_num'],
-                        where: {
-                            id_sport: Sequelize.col('sport.id'),
-                            id_raid: req.params.id
-                        }
-                    }]
-                }).then(function(course_name_and_order_found){
-                    course_name_and_order_found.forEach(function(course){
-                        courses_linked_with_the_current_raid.push({
-                            order: course.dataValues.course.order_num,
-                            name: course.dataValues.name
-                        });
-                    });
-                    
-
-                    /******************/
-                    /*      STUB      */ // TODO : Change details.ejs to handle data_helper
-                    /******************/
-
-                    let helpers_linked_with_the_current_raid = [];
-                    helpers_linked_with_the_current_raid.push({
-                       email: 'hvincele@enssat.fr',
-                       first_name: 'Hugo',
-                       last_name: 'Vincelet',
-                       posts: ['Accueil', 'Buvette', 'Kayak', 'Circulation']
-                    })
-                    helpers_linked_with_the_current_raid.push({
-                        email: 'gsicard@enssat.fr',
-                        first_name: 'Guillaume',
-                        last_name: 'Sicard',
-                        posts: ['Circulation']
-                    });
-
-
-                    res.render(pages_path + "template.ejs", {
-                        pageTitle: "Gestion d'un Raid",
-                        page: "edit_raid/details",
-                        user: user,
-                        organizers: organizers_linked_with_the_current_raid,
-                        //helpers: data_helper,
-                        helpers: helpers_linked_with_the_current_raid,
-                        courses: courses_linked_with_the_current_raid,
-                        raid: raid
-                    });
-
+                res.render(pages_path + "template.ejs", {
+                    pageTitle: "Gestion d'un Raid",
+                    page: "edit_raid/details",
+                    user: user,
+                    organizers: organizers_linked_with_the_current_raid, // [{email, first_name, last_name}]
+                    helpers: data_helper, // [{email, first_name, last_name, posts_asked:[{helper_post_id, description}]}]
+                    courses: courses_linked_with_the_current_raid,
+                    raid: raid
                 });
             });
-
         });
 
     });
