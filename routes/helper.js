@@ -1,6 +1,7 @@
 const jdenticon = require('jdenticon');
 const pages_path = "../views/pages/";
 const models = require('../models');
+const sender = require('./sender');
 
 exports.inviteHelper = function(req, res) {
     const user = connected_user(req.sessionID);
@@ -8,13 +9,34 @@ exports.inviteHelper = function(req, res) {
         return res.redirect('/dashboard');
     }
 
-    let helper_list_to_invite = [];
-    const current_user_email = connected_user(req.sessionID).login;
-    helper_list_to_invite.foreach(function(helper_email){
-        if(helper_email != user.login){
-            //sender.sendMail(helper_email, );
+    // TODO Check if invited helper is already in helper's table
+
+    let helper_list_to_invite = req.body.mails;
+    let helper_invite_status = [];
+    helper_list_to_invite.map(helper_email => {
+        if(helper_email !== user.login){
+            let found = helper_invite_status.some(function (el) {
+                return el.id === helper_email;
+            });
+            if(!found){ // User is not already invite
+                sender.inviteHelper({
+                    email: helper_email,
+                    raid: req.body.raid
+                });
+                helper_invite_status.push({
+                    id: helper_email,
+                    status: "ok"
+                });
+            }
+        }else{
+            helper_invite_status.push({
+                id: helper_email,
+                status: "mail-is-login"
+            });
         }
     });
+
+    res.send(JSON.stringify({status: helper_invite_status}));
 };
 
 // Register new Helper default page

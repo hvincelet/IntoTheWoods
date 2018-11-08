@@ -326,11 +326,45 @@ helpers.map( (helper, index) => {
     });
 
     $('#sendMail-button').click(function () {
-        let mail = $('#recipient-name').text();
-        let subject = $('#recipient-subject').text();
-        let message = $('#message-text').text();
-        console.log(mail + "\n" + subject + "\n" + message);
-        // AJAX to delete user by this mail into type (Ex: delete user1@mail.com into organizer)
+        let mail = $('#recipient-name').val();
+        let subject = $('#recipient-subject').val();
+        let message = $('#message-text').val();
+        let $MESSAGE_MODAL = $('#messageModal');
+        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+        $('#mailModal').modal('hide');
+        $.ajax({
+            type: 'POST',
+            url: '/editraid/<%= raid.id %>/sendMessage',
+            data: {
+                mails: mail.split(','),
+                organizer: "<%= user.first_name%> <%= user.last_name %>",
+                message: message,
+                subject: subject,
+                raid_name: "<%=raid.name%>"
+            },
+            success: function (response) {
+                msg = JSON.parse(response).msg;
+                if(msg === "ok"){
+                    $MESSAGE_MODAL_TITLE.html("Message envoyé");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Le message a bien été envoyé à <strong>" + mail + "</strong>.");
+                }else{
+                    $MESSAGE_MODAL_TITLE.html("Message non envoyé...");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Le message n'a pas pu être envoyé à <strong>" + mail + "</strong>...");
+                }
+                $MESSAGE_MODAL.modal('show');
+            },
+            error: function (response) {
+                let msg = JSON.parse(response).msg;
+                $MESSAGE_MODAL_TITLE.html("Message non envoyé...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Le message n'a pas pu être envoyé à <strong>" + mail + "</strong>...");
+                $MESSAGE_MODAL.modal('show');
+            }
+        });
     });
 </script>
 <!-- JS for line-throught on radio button non-checked -->
@@ -365,18 +399,38 @@ helpers.map( (helper, index) => {
         let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
         if (validateEmail(mail)){
             let data = {
-                mail: mail
+                mail: mail,
+                raid: {
+                    name: "<%= raid.name%>",
+                    edition: "<%= raid.edition%>"
+                }
             };
             $.ajax({
                 type: 'POST',
                 url: '/team/<%= raid.id %>/inviteorganizers',
                 data: data,
-                success: function () {
-                    $('#mail_organizer').val("");
-                    $MESSAGE_MODAL_TITLE.html("Organisateur invité·e !");
-                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                    $MESSAGE_MODAL_CONTENT.html("L'organisateur a bien été invité.");
-                    $MESSAGE_MODAL.modal('show');
+                success: function (response) {
+                    let msg = JSON.parse(response).msg;
+                    if(msg === "ok"){
+                        $('#mail_organizer').val("");
+                        $MESSAGE_MODAL_TITLE.html("Organisateur invité·e !");
+                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                        $MESSAGE_MODAL_CONTENT.html("L'organisateur a bien été invité.");
+                        $MESSAGE_MODAL.modal('show');
+                    }else{
+                        $MESSAGE_MODAL_TITLE.html("Erreur...");
+                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                        if(msg === "no-account"){
+                            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer car il n'a pas créé de compte Organizer sur cette plateforme.");
+                        }else if(msg === "not-added"){
+                            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer...<br/>Merci de réitérer votre invitation dans quelques minutes.");
+                        }else if(msg === "mail-is-login"){
+                            $MESSAGE_MODAL_CONTENT.html("Impossible de vous invitez vous même comme Organizer...");
+                        }else{
+                            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer...");
+                        }
+                        $MESSAGE_MODAL.modal('show');
+                    }
                 },
                 error: function (response) {
                     let msg = JSON.parse(response).msg;
@@ -410,19 +464,27 @@ helpers.map( (helper, index) => {
         });
 
         $('#modal-helpers').modal('hide');
-
         $.ajax({
             type: 'POST',
             url: '/team/<%= raid.id %>/invitehelpers',
-            data: mails,
-            success: function () {
+            data: {mails: mails, raid: {name: "<%=raid.name%>", edition: "<%=raid.edition%>", id: "<%=raid.id%>"}},
+            success: function (response) {
+                invited_status = JSON.parse(response).status;
+                let helpers_not_invited = "";
                 $MESSAGE_MODAL_TITLE.html("Helpers invité·e·s");
                 $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
                 $MESSAGE_MODAL_CONTENT.html("Ces helpers ont bien été invité·e·s :<ul>");
-                mails.map( mail => {
-                    $MESSAGE_MODAL_CONTENT.append("<li>" + mail + "</li>");
+                invited_status.map( helper => {
+                    if(helper.status === "ok"){
+                        $MESSAGE_MODAL_CONTENT.append("<li>" + helper.id + "</li>");
+                    }else{
+                        helpers_not_invited += "<li>" + helper.id + "</li>";
+                    }
                 });
                 $MESSAGE_MODAL_CONTENT.append("</ul>");
+                if(helpers_not_invited !== ""){
+                    $MESSAGE_MODAL_CONTENT.append("Ces helpers n'ont pas pu être invités : <ul>" + helpers_not_invited + "</ul>");
+                }
                 $MESSAGE_MODAL.modal('show');
             },
             error: function (response) {

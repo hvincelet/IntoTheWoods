@@ -182,25 +182,56 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
         return res.redirect('/dashboard');
     }
 
-    let organizer_list_to_invite = ["hvincele@enssat.fr"];
-    organizer_list_to_invite.foreach(function(organizer_email){
-        if(organizer_email != user.login){
-            models.organizer.findOne({
-                where: {email: organizer_email}
-            }).then(function(organizer){
-                if(organizer){
-                    // Add organizer to raid team with id_raid = raid.id
-                    // sender.sendMail(organizer_email, );
-                    models.team.create({
-                        id_raid: req.params.raid_id,
-                        id_organizer: organizer_email
-                    }).then(function(orga_inserted_in_team){
-                        console.log(orga_inserted_in_team);
-                    });
-                }else{
-                    // Invite user to contact organizer for register himself
-                }
+    // TODO Check if invited organizer is already in team
+
+    let invited_organizer = req.body.mail;
+    if(invited_organizer !== user.login){
+        models.organizer.findOne({
+            where: {email: invited_organizer}
+        }).then(function (organizer) {
+            if(organizer){
+                models.team.create({
+                    id_raid: req.params.raid_id,
+                    id_organizer: invited_organizer
+                }).then(function (organizer_add_to_team) {
+                    if(organizer_add_to_team){
+                        // send mail
+                        sender.inviteOrganizer({
+                            email: invited_organizer,
+                            organizer: user.first_name + " " + user.last_name,
+                            raid: req.body.raid
+                        });
+                        res.send(JSON.stringify({msg: "ok"}));
+                    }else {
+                        res.send(JSON.stringify({msg: "not-added"}));
+                    }
+                })
+            }else{
+                res.send(JSON.stringify({msg: "no-account"}));
+            }
+        });
+    }else{
+        res.send(JSON.stringify({msg: "mail-is-login"}));
+    }
+};
+
+exports.sendMail = function (req, res) {
+    const user = connected_user(req.sessionID);
+    if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.id)})){
+        return res.redirect('/dashboard');
+    }
+
+    let mails = req.body.mails;
+    mails.map(mail =>{
+        if(mail !== ""){
+            sender.sendMail({
+                email: mail,
+                organizer: req.body.organizer,
+                message: req.body.message,
+                subject: req.body.subject,
+                raid_name: req.body.raid_name
             });
         }
     });
+    res.send(JSON.stringify({msg: "ok"}));
 };
