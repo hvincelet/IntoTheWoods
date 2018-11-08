@@ -251,7 +251,6 @@ exports.displayRaid = function(req, res) {
         let helper_post_model = models.helper_post;
         let point_of_interest_model = models.point_of_interest;
 
-        //helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
         assignment_model.belongsTo(helper_model, {foreignKey: 'id_helper'});
         assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
         helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
@@ -276,6 +275,9 @@ exports.displayRaid = function(req, res) {
 
             const storeHelperActions = unique_assignments_array.map((assignment, index) => {
                 return new Promise((resolve, reject) => {
+                    if(assignment.dataValues.helper_post === null){
+                        return resolve();
+                    }
                     helper_model.findOne({
                         attributes: ['login','email','last_name','first_name'],
                         where: {
