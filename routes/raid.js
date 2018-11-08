@@ -105,7 +105,6 @@ exports.saveSportsRanking = function (req, res) {
     });
 
     Promise.all(save_sports_actions).then(result => {
-        console.log("in");
         models.raid.findOne({
             attributes: ['id', 'name', 'date', 'edition', 'place','lat','lng'],
             where: {id: user.idCurrentRaid}
