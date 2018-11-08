@@ -124,6 +124,9 @@ app.route('/editraid/:id/map')
     .get(checkAuth, map.displayMap)
     .post(checkAuth, map.storeMapData);
 
+app.route('/editraid/:id/sendMessage')
+    .post(checkAuth, organizer.sendMail);
+
 app.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 

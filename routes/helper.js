@@ -1,50 +1,45 @@
 const jdenticon = require('jdenticon');
 const pages_path = "../views/pages/";
 const models = require('../models');
+const sender = require('./sender');
 
 exports.inviteHelper = function(req, res) {
     const user = connected_user(req.sessionID);
     if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
         return res.redirect('/dashboard');
     }
-    const helper_emails = req.body.mails;
-    //const helper_emails = ['hvincele@enssat.fr'];
-    helper_emails.forEach(function(helper_email){
-        if(helper_email != user.login){
-            let assignment_model = models.assignment;
-            let helper_model = models.helper;
-            let helper_post_model = models.helper_post;
-            let point_of_interest_model = models.point_of_interest;
 
-            helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
-            assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
-            helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
+    // TODO Check if invited helper is already in helper's table
 
-            helper_model.findOne({
-                where: {
-                    email: helper_email
-                },
-                include: [{
-                    model: assignment_model,
-                    include: [{
-                        model: helper_post_model,
-                        include:[{
-                            model: point_of_interest_model,
-                            where: {
-                                id_raid: req.params.id
-                            }
-                        }]
-                    }]
-                }]
-            }).then(function(helper_found){
-                if(!helper_found){
-                    //sender.sendMailToHelperToInviteThem(helper_email, );
-                }
+    let helper_list_to_invite = req.body.mails;
+    let helper_invite_status = [];
+    helper_list_to_invite.map(helper_email => {
+        if(helper_email !== user.login){
+            let found = helper_invite_status.some(function (el) {
+                return el.id === helper_email;
+            });
+            if(!found){ // User is not already invite
+                sender.inviteHelper({
+                    email: helper_email,
+                    raid: req.body.raid
+                });
+                helper_invite_status.push({
+                    id: helper_email,
+                    status: "ok"
+                });
+            }
+        }else{
+            helper_invite_status.push({
+                id: helper_email,
+                status: "mail-is-login"
             });
         }
     });
+
+    res.send(JSON.stringify({status: helper_invite_status}));
 };
 
+// Register new Helper default page
 exports.displayRegister = function(req, res){
 
     let raid_id = req.query.raid;
@@ -68,71 +63,65 @@ exports.displayRegister = function(req, res){
               }
           }]
       }],
-      attributes: ['id','description','nb_helper']
-    }).then(function(helper_posts_found){
-        if(helper_posts_found !== null){
-            helper_posts_found.forEach(function(helper_post, index, helper_posts_array){
-                models.assignment.findAndCountAll({
-                    where: {
-                        id_helper_post: helper_post.dataValues.id,
-                        attributed: 1
-                    }
-                }).then(function(all_assignement){
-                    if(helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0){
-                        get_post_clean.push({'id':helper_post.dataValues.id,'description':helper_post.dataValues.description});
-                    }
-                    if(index == helper_posts_array.length -1){
-                        res.render(pages_path + "helper_register.ejs", {
-                            pageTitle: "Inscription Bénévole",
-                            activity: get_post_clean
-                        });
-                    }
-                });
+      attributes: ['id','description']
+    }).then(function(helper_post_found){
+        if(helper_post_found !== null){
+            helper_post_found.forEach(function(tuple){
+                if(tuple.dataValues.point_of_interest != null){
+                    get_post_clean.push({'id':tuple.dataValues.id,'description':tuple.dataValues.description});
+                }
+            });
+            res.render(pages_path + "helper_register.ejs", {
+                pageTitle: "Inscription Bénévole",
+                activity: get_post_clean
             });
         }
     });
 };
 
+// Register new Helper with post form
 exports.register = function(req, res){
 
-    let id_helper = Math.random().toString(36).substr(2, 6);
-    const registerEmail = req.body.registerEmail;
-    const registerUserLn = req.body.registerUserLn;
-    const registerUserFn = req.body.registerUserFn;
-    const helperPostsWished = req.body.registerRun;
+    let id = Math.random().toString(36).substr(2, 6); // generate id helper
+    let registerEmail = req.body.registerEmail;
+    let registerUserLn = req.body.registerUserLn;
+    let registerUserFn = req.body.registerUserFn;
+    let registerRun = req.body.registerRun;
 
     models.helper.findOne({
         where: {
-            login: id_helper
+            login: id
         }
     }).then(function (helper_found) {
-        if (helper_found !== null) {
+        if (helper_found !== null) { // helper with id generated already exist
             while(helper_found !== null) {
-                id_helper = Math.random().toString(36).substr(2, 6);
+                id = Math.random().toString(36).substr(2, 6);
                 models.helper.findOne({
                     where: {
-                        login: id_helper
+                        login:id
                     }
                 }).then(function(test_helper) {
                     helper_found = test_helper;
                 });
             }
-        } else {
-            models.helper.create({
-                login: id_helper,
+        } else { // helper with id generated does not exist
+            models.helper.create({ // registration of the new helper
+                login: id,
                 email: registerEmail,
                 last_name: registerUserLn,
                 first_name: registerUserFn
             }).then(function () {
-                // TODO : sort helperPostsWished 
-                helperPostsWished.forEach(function(id_activity){
-                    models.assignment.create({
-                        id_helper: id_helper,
-                        id_helper_post: id_activity,
-                        attributed: 0
+                // Create assignment with poste(s) and helper in assignment table
+                registerRun.forEach(function(id_activity){
+                    models.assignment.create({ // create assignment with the new helper and poste(s)
+                        id_helper: id,
+                        id_helper_post: id_activity
                     });
                 });
-                res.redirect("/helper/" + id_helper + "/home");
+                // Redirect to helper_register with validMessage (organizer manage your inscription)
+                res.render(pages_path + "helper_register.ejs", {
+                    pageTitle: "Inscription Bénévole"
+                });
             });
         }
     });
@@ -140,18 +129,23 @@ exports.register = function(req, res){
 
 exports.displayHome = function(req, res){
 
+    let id = req.params.id;
+
     models.assignment.findOne({
         where: {
-            id_helper: req.params.id
+            id_helper: id
         }
     }).then(function (assignment_found) {
-        if (assignment_found !== null) {
+        if (assignment_found !== null) { // id of helper exist
             if (assignment_found.attributed == 0){
                 res.render(pages_path + "helper_register.ejs", {
                     pageTitle: "Inscription Bénévole",
-                    errorMessage: "Vous n'avez pas encore été attribué à un poste."
+                    errorMessage: "Cet identifiant n'a pas encore été attribué à un poste..."
                 });
             } else {
+                // TODO : page to see the map with the path to go to helper post
+                console.log(assignment_found.id_helper);
+                console.log(assignment_found.id_helper_post);
 
                 models.helper.findOne({
                     where: {
@@ -189,7 +183,7 @@ exports.displayHome = function(req, res){
         } else { // id of helper does not exist
             res.render(pages_path + "helper_register.ejs", {
                 pageTitle: "Inscription Bénévole",
-                errorMessage: "Cet identifiant n'existe pas."
+                errorMessage: "Cet identifiant n'existe pas ..."
             });
         }
     });

@@ -77,3 +77,113 @@ exports.sendMailToHelper = function(data){
       }
     });
 };
+
+exports.inviteOrganizer = function (data) {
+    let transporter = nodemailer.createTransport({
+        service: config.service,
+        auth: {
+            user: config.login,
+            pass: config.password
+        }
+    });
+
+    let email = data.email;
+    let mailOptions = {
+        from: "Into the Woods",
+        to: email,
+        subject: "[Into The Woods] Invitation organisation " + data.raid.name,
+        html: ""
+    };
+
+    let ejsTemplate = fs.readFileSync(__dirname + '/../views/pages/contents/email/inviteOrganizer.ejs','utf-8');
+    let content = ejs.render(ejsTemplate, {
+        organizer: data.organizer,
+        name: data.raid.name,
+        edition: data.raid.edition
+    },{
+        vars: ["organizer","name","edition"]
+    });
+
+    mailOptions['html'] = content;
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            console.log(error);
+        }else{
+            console.log('Email sent: ' + info.response);
+        }
+    });
+};
+
+exports.inviteHelper = function (data) {
+    let transporter = nodemailer.createTransport({
+        service: config.service,
+        auth: {
+            user: config.login,
+            pass: config.password
+        }
+    });
+
+    let email = data.email;
+    let mailOptions = {
+        from: "Into the Woods",
+        to: email,
+        subject: "[Into The Woods] Invitation bénévolat " + data.raid.name,
+        html: ""
+    };
+
+    let ejsTemplate = fs.readFileSync(__dirname + '/../views/pages/contents/email/inviteHelper.ejs','utf-8');
+    let content = ejs.render(ejsTemplate, {
+        id: data.raid.id,
+        name: data.raid.name,
+        edition: data.raid.edition
+    },{
+        vars: ["id","name","edition"]
+    });
+
+    mailOptions['html'] = content;
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            console.log(error);
+        }else{
+            console.log('Email sent: ' + info.response);
+        }
+    });
+};
+
+exports.sendMail = function (data) {
+    let transporter = nodemailer.createTransport({
+        service: config.service,
+        auth: {
+            user: config.login,
+            pass: config.password
+        }
+    });
+
+    let email = data.email;
+    let mailOptions = {
+        from: "Into the Woods",
+        to: email,
+        subject: "[Into The Woods] Vous avez reçu un message de " + data.organizer + " à propos du raid " + data.raid_name,
+        html: ""
+    };
+
+    let ejsTemplate = fs.readFileSync(__dirname + '/../views/pages/contents/email/sendMessage.ejs','utf-8');
+    let content = ejs.render(ejsTemplate, {
+        organizer: data.organizer,
+        message: data.message,
+        subject: data.subject
+    },{
+        vars: ["organizer", "message", "subject"]
+    });
+
+    mailOptions['html'] = content;
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            console.log(error);
+            return "nok";
+        }else{
+            console.log('Email sent: ' + info.response);
+            return "ok";
+        }
+    });
+};
