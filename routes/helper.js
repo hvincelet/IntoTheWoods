@@ -129,7 +129,7 @@ exports.register = function(req, res){
                     models.assignment.create({
                         id_helper: id_helper,
                         id_helper_post: id_activity,
-                        attributed: false
+                        attributed: 0
                     });
                 });
                 res.redirect("/helper/" + id_helper + "/home");
@@ -140,23 +140,18 @@ exports.register = function(req, res){
 
 exports.displayHome = function(req, res){
 
-    let id = req.params.id;
-
     models.assignment.findOne({
         where: {
-            id_helper: id
+            id_helper: req.params.id
         }
     }).then(function (assignment_found) {
-        if (assignment_found !== null) { // id of helper exist
+        if (assignment_found !== null) {
             if (assignment_found.attributed == 0){
                 res.render(pages_path + "helper_register.ejs", {
                     pageTitle: "Inscription Bénévole",
                     errorMessage: "Vous n'avez pas encore été attribué à un poste."
                 });
             } else {
-                // TODO : page to see the map with the path to go to helper post
-                console.log(assignment_found.id_helper);
-                console.log(assignment_found.id_helper_post);
 
                 models.helper.findOne({
                     where: {
