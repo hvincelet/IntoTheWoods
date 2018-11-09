@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr">
-<% include partials/head %>
+<% include ../partials/head %>
 <body>
 <div class="page login-page wood-background">
     <div class="container">
         <div class="form-outer text-center d-flex align-items-center">
             <div class="form-inner">
                 <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
-                <p>Bienvenue sur Into the Woods, l'application qui vous permet de participer facilement à différents raids ! Vous êtes sur le point de créer un compte sur la plateforme.<br/>
-                    Une fois que vous aurez rempli le formulaire, lu et accepté les termes et conditions d'utilisation du service, vous recevrez un mail récapitulatif de votre inscription.</p>
+                <p>Bienvenue sur Into the Woods, l'application qui vous permet de participer facilement à différents raids ! Vous êtes sur le point de créer un compte bénévole sur la plateforme.<br/>
+                    Merci de remplir le formulaire, de lire et accepter les termes et conditions d'utilisation du service.</p>
                 <% if(typeof errorMessage !== "undefined") { %>
                     <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
                         <%= errorMessage %>
@@ -17,6 +17,7 @@
                         </button>
                     </div>
                 <% } %>
+                <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Bénévolat sur l'édition <%=raid.edition%> du raid <%=raid.name%></h3>
                 <form class="text-left form-validate" method="post" action="/helper/register">
                     <div class="form-group-material">
                         <input id="register-userfn" type="text" name="registerUserFn" required data-msg="Merci d'entrer votre prénom" class="input-material">
@@ -58,6 +59,6 @@
         </div>
     </div>
 </div>
-<% include partials/footer %>
+<% include ../partials/footer %>
 </body>
 </html>

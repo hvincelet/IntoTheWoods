@@ -220,11 +220,10 @@ exports.displayRaid = function(req, res) {
                 }]
             }]
         }).then(function (assignment_found) {
-
             const unique_assignments_array = assignment_found.filter(function (assignment, index, array) {
                 return array.findIndex(function (value) {
-                    return value.dataValues.id_helper == assignment.dataValues.id_helper;
-                }) == index;
+                    return value.dataValues.id_helper === assignment.dataValues.id_helper;
+                }) === index;
             });
 
             const storeHelperActions = unique_assignments_array.map((assignment, index) => {
@@ -254,10 +253,12 @@ exports.displayRaid = function(req, res) {
                             assignment: []
                         };
                         assignments_by_id_helper.forEach(function (assignment_by_id_helper) {
-                            helper.assignment.push({
-                                id: assignment_by_id_helper.dataValues.id_helper_post,
-                                description: assignment_by_id_helper.dataValues.helper_post.dataValues.description
-                            });
+                            if(assignment_by_id_helper.dataValues.helper_post !== null){
+                                helper.assignment.push({
+                                    id: assignment_by_id_helper.dataValues.id_helper_post,
+                                    description: assignment_by_id_helper.dataValues.helper_post.dataValues.description
+                                });
+                            }
                         });
                         data_helper.push(helper);
                         return resolve();
@@ -290,40 +291,19 @@ exports.displayRaid = function(req, res) {
                         }
                     }]
                 }).then(function (course_name_and_order_found) {
-                    course_name_and_order_found.forEach(function (course) {
+                    course_name_and_order_found.map(course => {
                         courses_linked_with_the_current_raid.push({
                             order: course.dataValues.course.order_num,
                             name: course.dataValues.name
                         });
                     });
 
-
-                    /******************/
-                    /*      STUB      */ // TODO : Change details.ejs to handle data_helper
-                    /******************/
-
-                    let helpers_linked_with_the_current_raid = [];
-                    helpers_linked_with_the_current_raid.push({
-                        email: 'hvincele@enssat.fr',
-                        first_name: 'Hugo',
-                        last_name: 'Vincelet',
-                        posts: ['Accueil', 'Buvette', 'Kayak', 'Circulation']
-                    })
-                    helpers_linked_with_the_current_raid.push({
-                        email: 'gsicard@enssat.fr',
-                        first_name: 'Guillaume',
-                        last_name: 'Sicard',
-                        posts: ['Circulation']
-                    });
-
-
                     res.render(pages_path + "template.ejs", {
                         pageTitle: "Gestion d'un Raid",
                         page: "edit_raid/details",
                         user: user,
                         organizers: organizers_linked_with_the_current_raid,
-                        //helpers: data_helper,
-                        helpers: helpers_linked_with_the_current_raid,
+                        helpers: data_helper,
                         courses: courses_linked_with_the_current_raid,
                         raid: raid
                     });

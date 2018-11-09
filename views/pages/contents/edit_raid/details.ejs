@@ -33,9 +33,10 @@ helpers.map( (helper, index) => {
                                 <td class="pt-3-half" contenteditable="false" width="40%"><%= raid.place %></td>
                                 <td class="pt-3-half" contenteditable="false" width="20%"><%= raid.date %></td>
                                 <td class="pt-3-half" contenteditable="false" width="20%">
-                                    <ul style="list-style: none;"><% courses.map(course => { %>
-                                        <li><%= course %></li>
-                                    <% }); %></ul>
+                                    <% courses.map( (course, index) => { %>
+                                        <%= course.name %>
+                                        <% if(index !== courses.length) {%><br/><% }%>
+                                    <% }); %>
                                 </td>
                                 <td class="pt-3-half" contenteditable="false" width="20%">
                                     <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='/editraid/<%=raid.id%>/map';">Éditer la carte</button>
@@ -96,6 +97,7 @@ helpers.map( (helper, index) => {
                     <div class="card-body">
                         <div class="table-editable">
                             <button type="button" class="btn btn-primary btn-rounded" style="margin-bottom: 1em;" data-toggle="modal" data-target="#modal-helpers">Ajouter des helpers</button>
+                            <button type="button" class="btn btn-info btn-rounded" style="margin-bottom: 1em;" id="save-helper-post">Enregistrer les postes attribués</button>
                             <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
                                 <tr>
                                     <th class="text-center">Nom</th>
@@ -108,15 +110,15 @@ helpers.map( (helper, index) => {
                                     <td class="pt-3-half" contenteditable="false" width="40%"><%= helper.first_name %> <%=helper.last_name %></td>
                                     <td class="pt-3-half" contenteditable="false" width="20%">
                                         <div class="form-check" style="text-align: left;">
-                                            <% if(helper.posts.length === 1){ %>
+                                            <% if(helper.attributed === 1){ %>
                                                 <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>" type="radio" name="<%=helpers_id[helper.email]%>" checked disabled>
-                                                <label for="<%=helpers_id[helper.email]%>"><%=helper.posts[0]%></label>
+                                                <label for="<%=helpers_id[helper.email]%>"><%=helper.assignment[0].description%></label>
                                             <% }else{
-                                                helper.posts.forEach(function(post, index){
+                                                helper.assignment.map((post, index) =>{
                                             %>
-                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>-<%=post%>" type="radio" value="<%=post%>" name="<%=helpers_id[helper.email]%>">
-                                                <label for="<%=helpers_id[helper.email]%>-<%=post%>" id="<%=helpers_id[helper.email]%>-<%=post%>-label"><%=post%></label>
-                                                <% if (index !== helper.posts.length - 1){ %>
+                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>-<%=post.id%>" type="radio" value="<%=post.id%>" name="<%=helpers_id[helper.email]%>">
+                                                <label for="<%=helpers_id[helper.email]%>-<%=post.id%>" id="<%=helpers_id[helper.email]%>-<%=post.id%>-label"><%=post.description%></label>
+                                                <% if (index !== helper.assignment.length - 1){ %>
                                                     <br/>
                                                 <% } %>
                                             <% }); } %>
@@ -368,10 +370,20 @@ helpers.map( (helper, index) => {
 </script>
 <!-- JS for line-throught on radio button non-checked -->
 <script type="text/javascript">
+    var assignment = [];
     $(document).ready(function () {
         <% helpers.forEach(function (helper) { %>
             $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').change(function () {
                 let val = this.value;
+                let found = assignment.find(function (helper) {
+                    return helper.id_helper === "<%=helper.login%>"
+                });
+                if(found){
+                    found.id_helper_post = val;
+                }else{
+                    assignment.push({id_helper: "<%=helper.login%>", id_helper_post: val});
+                }
+                console.log(assignment);
                 $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').each(function () {
                    let label = this.id+"-label";
                    if(this.value !== val){
@@ -383,6 +395,36 @@ helpers.map( (helper, index) => {
             });
         <% }); %>
     });
+    
+    $('#save-helper-post').click(function () {
+        $.ajax({
+            type: 'POST',
+            url: '/helper/assign',
+            data: {
+                assignments_array: assignment
+            },
+            success: function (response) {
+                msg = JSON.parse(response).msg;
+                if(msg === "ok"){
+                    $MESSAGE_MODAL_TITLE.html("Postes assignés");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Les postes ont bien été attribués aux helpers concernés.<br/><small>Afin de voir les changements, raffraichissez la page.</small>");
+                }else{
+                    $MESSAGE_MODAL_TITLE.html("Postes non assignés...");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux helpers...");
+                }
+                $MESSAGE_MODAL.modal('show');
+            },
+            error: function (response) {
+                let msg = JSON.parse(response).msg;
+                $MESSAGE_MODAL_TITLE.html("Postes non assignés...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux helpers...");
+                $MESSAGE_MODAL.modal('show');
+            }
+        });
+    })
 </script>
 <!-- JS for invite organizer and helpers -->
 <script type="text/javascript">

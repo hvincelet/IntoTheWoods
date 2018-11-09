@@ -1,5 +1,5 @@
 const jdenticon = require('jdenticon');
-const pages_path = "../views/pages/";
+const pages_path = "../views/pages/helpers/";
 const models = require('../models');
 const sender = require('./sender');
 
@@ -59,10 +59,10 @@ exports.displayRegister = function(req, res){
               model: raid_model,
               where: {
                   id: raid_id
-              }
+              },
+              attributes: ['name', 'edition']
           }]
-      }],
-      attributes: ['id','description','nb_helper']
+      }],attributes: ['id', 'description', 'nb_helper']
     }).then(function(helper_posts_found){
         if(helper_posts_found !== null){
             helper_posts_found.forEach(function(helper_post, index, helper_posts_array){
@@ -78,7 +78,11 @@ exports.displayRegister = function(req, res){
                     if(index == helper_posts_array.length -1){
                         res.render(pages_path + "helper_register.ejs", {
                             pageTitle: "Inscription Bénévole",
-                            activity: get_post_clean
+                            activity: get_post_clean,
+                            raid: {
+                                name: helper_post.dataValues.point_of_interest.raid.name,
+                                edition: helper_post.dataValues.point_of_interest.raid.edition
+                            }
                         });
                     }
                 });
@@ -89,7 +93,7 @@ exports.displayRegister = function(req, res){
 
 exports.register = function(req, res){
 
-    let id_helper = Math.random().toString(36).substr(2, 6);
+    let id_helper = Math.random().toString(36).substr(2, 7);
     const registerEmail = req.body.registerEmail;
     const registerUserLn = req.body.registerUserLn;
     const registerUserFn = req.body.registerUserFn;
@@ -102,7 +106,7 @@ exports.register = function(req, res){
     }).then(function (helper_found) {
         if (helper_found !== null) {
             while(helper_found !== null) {
-                id_helper = Math.random().toString(36).substr(2, 6);
+                id_helper = Math.random().toString(36).substr(2, 7);
                 models.helper.findOne({
                     where: {
                         login: id_helper
