@@ -52,7 +52,7 @@ function setPointOfInterestFromCoordinates(coordinates) {
     if (pointOfInterestFound) {
         if (pointOfInterestFound.getId() === undefined) {
             console.log("Newly created point-of-interest");
-            pointOfInterestFound.setId("point_of_interest_" + ++lastPointOfInterestCreatedID);
+            pointOfInterestFound.setId("new_point_of_interest_" + ++lastPointOfInterestCreatedID);
 
             pointOfInterestArrayToStore.push({
                 id: lastPointOfInterestCreatedID,
@@ -61,7 +61,6 @@ function setPointOfInterestFromCoordinates(coordinates) {
 
             showPopup(pointOfInterestFound, "Créer le point d'intérêt");
         } else {
-            console.log("Id of the selected feature : " + pointOfInterestFound.getId());
             showPopup(pointOfInterestFound, "Editer le point d'intérêt");
         }
         map.removeOverlay(helpTooltip);
@@ -70,18 +69,20 @@ function setPointOfInterestFromCoordinates(coordinates) {
 
 function updatePointOfInterestId(serverId) {
     serverId.map(pointOfInterestServerId => {
-        let feature = vector.getSource().getFeatureById("point_of_interest_" + pointOfInterestServerId.clientId);
+        let feature = vector.getSource().getFeatureById("new_point_of_interest_" + pointOfInterestServerId.clientId);
         feature.setId("point_of_interest_" + pointOfInterestServerId.serverId);
 
         let pointOfInterestFound = pointOfInterestArrayToStore.find(function (pointOfInterest) {
-            return pointOfInterest.id === pointOfInterestServerId.clientId;
+            return (pointOfInterest.id === parseInt(pointOfInterestServerId.clientId)) && pointOfInterest.is_new;
         });
 
         pointOfInterestFound.id = pointOfInterestServerId.serverId;
         pointOfInterestFound.is_new = false;
 
         let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
-            return helperPost.id_point_of_interest === pointOfInterestServerId.clientId;
+            console.log(helperPost.id_point_of_interest);
+            console.log(pointOfInterestServerId.clientId);
+            return helperPost.id_point_of_interest === parseInt(pointOfInterestServerId.clientId);
         });
         if (helperPostFound !== undefined) {
             helperPostFound.id_point_of_interest = pointOfInterestServerId.serverId;
