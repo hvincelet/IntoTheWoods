@@ -202,6 +202,7 @@ exports.displayRaid = function(req, res) {
         let helper_post_model = models.helper_post;
         let point_of_interest_model = models.point_of_interest;
 
+        //helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
         assignment_model.belongsTo(helper_model, {foreignKey: 'id_helper'});
         assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
         helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
