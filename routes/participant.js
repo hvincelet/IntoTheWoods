@@ -8,7 +8,6 @@ exports.displayRegister = function(req, res){
     let get_raids_clean = [];
 
     let raid_model = models.raid;
-    console.log(raid_model);
 
     raid_model.findAll({
       attributes: ['id','name','date','edition']
@@ -16,9 +15,9 @@ exports.displayRegister = function(req, res){
         if(raids_found !== null){
             raids_found.forEach(function(raid, index, raid_array){
                 models.raid.findAndCountAll().then(function(all_assignement){
-                    //TODO : rajouter un tri pour ne récupérer que les raids d'une date > date du jour
-
-                    get_raids_clean.push({'id':raid.dataValues.id,'name':raid.dataValues.name,'edition':raid.dataValues.edition,'date':raid.dataValues.date});
+                    if(Date.parse(raid.dataValues.date) >= Date.now()){
+                        get_raids_clean.push({'id':raid.dataValues.id,'name':raid.dataValues.name,'edition':raid.dataValues.edition,'date':raid.dataValues.date});
+                    }
 
                     if(index == raid_array.length -1){
                         res.render(pages_path + "participant_register.ejs", {
@@ -28,6 +27,9 @@ exports.displayRegister = function(req, res){
                     }
                 });
             });
+        }
+        else{
+            //TODO mettre un render
         }
     });
 };
