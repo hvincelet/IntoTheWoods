@@ -135,8 +135,12 @@ app.route('/helper/register')
     .get(helper.displayRegister) // /helper/register?raid={raid_id}
     .post(helper.register);
 
+app.route('/helper/assign')
+    .post(checkAuth, organizer.assignHelper);
+
 app.route('/helper/:id/home')
     .get(helper.displayHome);
+
 
 
 app.route('/termsandpolicy')
