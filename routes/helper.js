@@ -6,7 +6,7 @@ const Op = Sequelize.Op;
 const date = require('date-and-time');
 const helpers = models.helper;
 
-exports.inviteHelper = function (req, res) {
+exports.inviteHelper = function(req, res) {
     const user = connected_user(req.sessionID);
     if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.raid_id);})){
         return res.redirect('/dashboard');
@@ -66,7 +66,9 @@ exports.inviteHelper = function (req, res) {
     res.send(JSON.stringify({status: helper_invite_status}));
 };
 
-exports.displayRegister = function (req, res) {
+// Register new Helper default page
+exports.displayRegister = function(req, res){
+
     let raid_id = req.query.raid;
     if (raid_id !== undefined) {
         let get_post_clean = [];
@@ -243,7 +245,7 @@ exports.register = function (req, res) {
     }
 };
 
-exports.displayHome = function (req, res) {
+exports.displayHome = function(req, res){
 
     models.assignment.findAll({
         where: {
@@ -348,3 +350,6 @@ exports.remove = function (req, res) {
         }
     });
 };
+exports.participantPassage = function(req, res){
+
+}

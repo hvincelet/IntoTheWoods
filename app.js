@@ -170,6 +170,10 @@ intothewoods.route('/helper/:id/home')
 intothewoods.route('/helper/check_in')
     .post(helper.performCheckin);
 
+intothewoods.route('/helper/participantPassage')
+    .post(helper.participantPassage);
+
+
 //Routes dedicated to the participants
 intothewoods.route('/participant/register')
     .get(participant.displayRegister)
