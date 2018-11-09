@@ -171,3 +171,7 @@ exports.displayHome = function(req, res){
         }
     });
 };
+
+exports.participantPassage = function(req, res){
+    
+}

@@ -130,6 +130,9 @@ app.route('/helper/register')
 app.route('/helper/:id/home')
     .get(helper.displayHome);
 
+app.route('/helper/participantPassage')
+    .post(helper.participantPassage);
+
 
 //Routes dedicated to the participants
 app.route('/participant/register')
