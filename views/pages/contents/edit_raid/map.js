@@ -128,20 +128,24 @@ function resetInteraction() {
     map.removeInteraction(draw);
 }
 
-/***************************************************************/
-/***************************************************************/
-/***                     Database access                     ***/
-/***************************************************************/
-/***************************************************************/
+/***************************************************************
+ ***************************************************************
+ ***                     Database access                     ***
+ ***************************************************************
+ ***************************************************************/
 
 function storeDataToDB() {
     const source = vector.getSource();
 
     const store_point_of_interest_actions = pointOfInterestArrayToStore.map(pointOfInterestToStore => {
         return new Promise((resolve, reject) => {
+            let pointOfInterestToStoreId = "point_of_interest_" + pointOfInterestToStore.id;
+            if (pointOfInterestToStore.is_new) {
+                pointOfInterestToStoreId = 'new_' + pointOfInterestToStoreId;
+            }
             pointOfInterestToStore['id'] = pointOfInterestToStore.id;
-            pointOfInterestToStore['lng'] = ol.proj.toLonLat(source.getFeatureById("point_of_interest_" + pointOfInterestToStore.id).getGeometry().getCoordinates())[0];
-            pointOfInterestToStore['lat'] = ol.proj.toLonLat(source.getFeatureById("point_of_interest_" + pointOfInterestToStore.id).getGeometry().getCoordinates())[1];
+            pointOfInterestToStore['lng'] = ol.proj.toLonLat(source.getFeatureById(pointOfInterestToStoreId).getGeometry().getCoordinates())[0];
+            pointOfInterestToStore['lat'] = ol.proj.toLonLat(source.getFeatureById(pointOfInterestToStoreId).getGeometry().getCoordinates())[1];
             return resolve();
         });
     });
@@ -159,7 +163,6 @@ function storeDataToDB() {
 
             Promise.all(store_course_actions)
                 .then(result => {
-                    console.log(courseArrayToStore);
                     let data = {
                         pointOfInterestArray: pointOfInterestArrayToStore,
                         courseArray: courseArrayToStore,
@@ -223,6 +226,7 @@ function showPopup(feature, header) {
     let helperPost = helperPostArrayToStore.find(function (helperPost) {
         return parseInt(feature.getId().replace("point_of_interest_", "")) === helperPost.id_point_of_interest;
     });
+
     if (helperPost !== undefined) {
         description = helperPost.description;
         nbHelper = helperPost.nb_helper;

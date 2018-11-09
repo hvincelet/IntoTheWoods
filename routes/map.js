@@ -22,7 +22,6 @@ exports.displayMap = function (req, res) {
             id_raid: raid.id
         }
     }).then(function (courses_found) {
-        console.log(courses_found);
         sports.findAll().then(function (all_sports) {
             courses_found.sort(function (a, b) {
                 return a.order_num - b.order_num;
@@ -122,7 +121,7 @@ exports.storeMapData = function (req, res) {
                         }
                     });
                 } else {
-                    point_of_interests.findById(pointOfInterest.id)
+                    point_of_interests.findByPk(pointOfInterest.id)
                         .then(function (pointOfInterest_found) {
                             if (pointOfInterest_found !== null) { // point of interest is already present in DB, it must be updated
                                 pointOfInterest_found.update({
@@ -142,19 +141,34 @@ exports.storeMapData = function (req, res) {
             .then(result => {
                 if (req.body.helperPostArray !== undefined) {
                     req.body.helperPostArray.map(helper_post => {
-                        if (helper_post.is_new === 'new') {
-                            helper_posts.create({
-                                id_point_of_interest: helper_post.id_point_of_interest,
-                                description: helper_post.description,
-                                nb_helper: helper_post.nb_helper
-                            })
-                        } else {
+
+                        if (helper_post.is_new === 'true') {
+                            console.log(pointOfInterestServerIdArray);
+                            let pointOfInterest = pointOfInterestServerIdArray.find(function (client_server_Id) {
+                                console.log(client_server_Id.clientId);
+                                console.log(helper_post.id_point_of_interest);
+                                return client_server_Id.clientId === helper_post.id_point_of_interest;
+                            });
 
                             helper_posts.create({
-                                id_point_of_interest: helper_post.id_point_of_interest,
+                                id_point_of_interest: pointOfInterest.serverId,
                                 description: helper_post.description,
                                 nb_helper: helper_post.nb_helper
                             })
+
+                        } else {
+                            helper_posts.update({
+                                    description: helper_post.description,
+                                    nb_Helper: helper_post.nb_helper
+                                },
+                                {where: {id: helper_post.id}}
+                            )
+
+//                             helper_posts.create({
+//                                 id_point_of_interest: helper_post.id_point_of_interest,
+//                                 description: helper_post.description,
+//                                 nb_helper: helper_post.nb_helper
+//                             })
                         }
                     });
                 }

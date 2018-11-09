@@ -15,40 +15,45 @@ app.use("/views", express.static(__dirname + '/views'));
 app.set('view engine', 'ejs');
 
 app.use(session({
-  genid: (req) => {
-    return uuid();
-  },
-  secret: 'c97c3d803f65426e82f507ba3f84c725',
-  resave: false,
-  saveUninitialized: true
+    genid: (req) => {
+        return uuid();
+    },
+    secret: 'c97c3d803f65426e82f507ba3f84c725',
+    resave: false,
+    saveUninitialized: true
 }));
 
 
 global.connected_users = [];
-if(config.no_login) {
+if (config.no_login) {
     connected_users.push({
-        login: "hugo.vincelet@gmail.com",
-        first_name: "Hugo",
-        last_name: "Vincelet",
-        initials: "HV",
+        login: "derouxjulien@gmail.com",
+        first_name: "Julien",
+        last_name: "Deroux",
+        initials: "JD",
         picture: null,
-        idCurrentRaid: -1,
-        raid_list: [{id:1}, {id:2}, {id:3},{id:4},{id:5}]
+        idCurrentRaid: -1, //for tests
+        raid_list: [{
+            id: 1,
+            place: "Pleumeur-Bodou, Lannion, Côtes-d'Armor, Bretagne, France métropolitaine, 22560, France",
+            lat: 48.7732657,
+            lng: -3.5187179
+        }]
     });
 }
 
-global.connected_user = function(uuid){
-    if(config.no_login) {
+global.connected_user = function (uuid) {
+    if (config.no_login) {
         return connected_users[0];
     }
-    return connected_users.find(function(user){
+    return connected_users.find(function (user) {
         return user.uuid == uuid;
     });
 };
 
 let checkAuth = function (req, res, next) {
-    if(!config.no_login) {
-        const user = connected_users.find(function(user){
+    if (!config.no_login) {
+        const user = connected_users.find(function (user) {
             return user.uuid == req.sessionID;
         });
         if (!user) {

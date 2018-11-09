@@ -100,7 +100,7 @@ exports.saveSportsRanking = function (req, res) {
             id_sport: sport_row.sport,
             id_raid: user.idCurrentRaid
         }).then(function () {
-            models.raid.findById(user.idCurrentRaid)
+            models.raid.findByPk(user.idCurrentRaid)
                 .then(function (unique_raid_found) {
                     user.raid_list.push({
                         id: user.idCurrentRaid,
