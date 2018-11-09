@@ -63,7 +63,6 @@ let map = new ol.Map({
 let currentFeatureEditing = "none";
 
 let modify = new ol.interaction.Modify({source: source});
-// map.addInteraction(modify);
 
 let draw, snap; // global so we can remove them later
 let typeSelect;
@@ -104,14 +103,11 @@ function addInteractions() {
 
     draw.on('drawend',
         function () {
-            measureTooltipElement.innerHTML += " de " + orderedCourseArray[idCurrentEditedCourse].sport_label;
+            distance = measureTooltipElement.innerHTML;
+            measureTooltipElement.innerHTML += " de " + courseArrayToStore[idCurrentEditedCourse].sport_label;
             measureTooltipElement.className = 'tooltip tooltip-static';
             measureTooltipElement.style.backgroundColor = courseColorArray[idCurrentEditedCourse];
             // measureTooltipElement.style.borderTopColor = courseColorArray[idCurrentEditedCourse];
-            // measureTooltipElement.css("border-top-color", "#ffcc33");
-
-
-            // $('div').append("<style>.tooltip-static:before {border-top-color: #ffcc33}</style>");
 
             measureTooltip.setOffset([0, -7]);
             // unset sketch
@@ -121,8 +117,6 @@ function addInteractions() {
             createMeasureTooltip();
             ol.Observable.unByKey(listener);
         }, this);
-
-
 }
 
 snap = new ol.interaction.Snap({source: source});
@@ -138,65 +132,52 @@ function resetInteraction() {
 /***************************************************************/
 /***                     Database access                     ***/
 /***************************************************************/
-
 /***************************************************************/
 
-let pointOfInterestArrayToStore = [];
-let courseArrayToStore = [];
-let helperPostArrayToStore = [];
-
 function storeDataToDB() {
-    let features = vector.getSource().getFeatures();
+    const source = vector.getSource();
 
-    const actions = features.map(feature => {
+    const store_point_of_interest_actions = pointOfInterestArrayToStore.map(pointOfInterestToStore => {
         return new Promise((resolve, reject) => {
-
-            if (feature.getId().indexOf("point_of_interest") !== -1) {
-                pointOfInterestArrayToStore.push({
-                    id: feature.getId().replace('point_of_interest_', ''),
-                    lng: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[0],
-                    lat: ol.proj.toLonLat(feature.getGeometry().getCoordinates())[1]
-                });
-                return resolve();
-            } else if (feature.getId().indexOf("course") !== -1) {
-                courseArrayToStore.push({
-                    id: feature.getId().replace('course_', ''),
-                    track_point_array: feature.getGeometry().getCoordinates()
-                });
-                return resolve();
-            } else {
-                console.log("error: unrecognized feature");
-                return resolve();
-            }
-
+            pointOfInterestToStore['id'] = pointOfInterestToStore.id;
+            pointOfInterestToStore['lng'] = ol.proj.toLonLat(source.getFeatureById("point_of_interest_" + pointOfInterestToStore.id).getGeometry().getCoordinates())[0];
+            pointOfInterestToStore['lat'] = ol.proj.toLonLat(source.getFeatureById("point_of_interest_" + pointOfInterestToStore.id).getGeometry().getCoordinates())[1];
+            return resolve();
         });
     });
 
-    Promise.all(actions)
+    Promise.all(store_point_of_interest_actions)
         .then(result => {
-            pointOfInterestArrayToStore = [];
-            courseArrayToStore = [];
-            helperPostArrayToStore = [];
-        }).catch(err => console.log(err));
+            const store_course_actions = courseArrayToStore.map(courseToStore => {
+                return new Promise((resolve, reject) => {
+                    if (source.getFeatureById("course_" + courseToStore.id) !== null) {
+                        courseToStore['track_point_array'] = source.getFeatureById("course_" + courseToStore.id).getGeometry().getCoordinates();
+                    }
+                    return resolve();
+                });
+            });
 
-    console.log(helperPostArrayToStore);
-
-    let data = {
-        pointOfInterestArray: pointOfInterestArrayToStore,
-        courseArray: courseArrayToStore,
-        helperPostArray: helperPostArrayToStore,
-        idRaid: raid.id
-    };
-    $.ajax({
-        type: 'POST',
-        url: '/editraid/' + raid.id + '/map',
-        data: data,
-        success: function (response) {
-            updateFeaturesId(response)
-        },
-        error: function (response) {
-        }
-    });
+            Promise.all(store_course_actions)
+                .then(result => {
+                    console.log(courseArrayToStore);
+                    let data = {
+                        pointOfInterestArray: pointOfInterestArrayToStore,
+                        courseArray: courseArrayToStore,
+                        helperPostArray: helperPostArrayToStore,
+                        idRaid: raid.id
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        url: '/editraid/' + raid.id + '/map',
+                        data: data,
+                        success: function (response) {
+                            updateFeaturesId(response);
+                        },
+                        error: function (response) {
+                        }
+                    });
+                });
+        });
 }
 
 function updateFeaturesId(data) {
@@ -240,19 +221,11 @@ function showPopup(feature, header) {
     let nbHelper = 1;
 
     let helperPost = helperPostArrayToStore.find(function (helperPost) {
-        return feature.getId().replace("point_of_interest_", "") === helperPost.id_point_of_interest;
+        return parseInt(feature.getId().replace("point_of_interest_", "")) === helperPost.id_point_of_interest;
     });
     if (helperPost !== undefined) {
         description = helperPost.description;
         nbHelper = helperPost.nb_helper;
-    } else {
-        helperPost = helperPostArray.find(function (helperPost) {
-            return parseInt(feature.getId().replace("point_of_interest_", "")) === helperPost.id_point_of_interest;
-        });
-        if (helperPost !== undefined) {
-            description = helperPost.description;
-            nbHelper = helperPost.nb_helper;
-        }
     }
 
     content.innerHTML = '<h6>' + header + '</h6>' +
@@ -406,7 +379,7 @@ let idCurrentEditedCourse = 0;
 
 function previousCourse() {
     if (idCurrentEditedCourse === 0) {
-        idCurrentEditedCourse = orderedCourseArray.length - 1;
+        idCurrentEditedCourse = courseArrayToStore.length - 1;
     } else {
         idCurrentEditedCourse--;
     }
@@ -414,7 +387,7 @@ function previousCourse() {
 }
 
 function nextCourse() {
-    if (idCurrentEditedCourse === orderedCourseArray.length - 1) {
+    if (idCurrentEditedCourse === courseArrayToStore.length - 1) {
         idCurrentEditedCourse = 0;
     } else {
         idCurrentEditedCourse++;
@@ -424,26 +397,6 @@ function nextCourse() {
 
 //TODO Centré sur la france si pas de localisation
 
-function editHelperPost(featureId) {
-    let description = $('#' + featureId + '_label').val();
-    let nbHelper = $('#' + featureId + '_nbHelper').val();
-
-    let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
-        return helperPost.id_point_of_interest === featureId.replace("point_of_interest_", "");
-    });
-
-    if (helperPostFound) {
-        helperPostFound.description = description;
-        helperPostFound.nb_helper = nbHelper;
-    } else {
-        helperPostArrayToStore.push({
-            id_point_of_interest: featureId.replace("point_of_interest_", ""),
-            description: description,
-            nb_helper: nbHelper
-        });
-    }
-    overlay.setPosition(undefined);
-}
-
 loadPointsOfInterest(pointOfInterestArrayToLoad);
 loadCourses(courseArrayToLoad);
+loadHelperPost(helperPostArrayToLoad);

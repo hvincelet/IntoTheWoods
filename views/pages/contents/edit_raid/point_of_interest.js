@@ -1,3 +1,5 @@
+let pointOfInterestArrayToStore = [];
+
 function loadPointsOfInterest(pointArray) {
     pointArray.map(pointOfInterest => {
         let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
@@ -7,6 +9,11 @@ function loadPointsOfInterest(pointArray) {
         );
         feature.setId("point_of_interest_" + pointOfInterest.id);
         source.addFeature(feature);
+
+        pointOfInterestArrayToStore.push({
+            id: pointOfInterest.id,
+            is_new: false
+        });
     });
 }
 
@@ -43,9 +50,15 @@ function setPointOfInterestFromCoordinates(coordinates) {
     });
 
     if (pointOfInterestFound) {
-        if (pointOfInterestFound.getId() === undefined) { // this is a newly created point-of-interest
+        if (pointOfInterestFound.getId() === undefined) {
             console.log("Newly created point-of-interest");
-            pointOfInterestFound.setId("new_point_of_interest_" + ++lastPointOfInterestCreatedID);
+            pointOfInterestFound.setId("point_of_interest_" + ++lastPointOfInterestCreatedID);
+
+            pointOfInterestArrayToStore.push({
+                id: lastPointOfInterestCreatedID,
+                is_new: true
+            });
+
             showPopup(pointOfInterestFound, "Créer le point d'intérêt");
         } else {
             console.log("Id of the selected feature : " + pointOfInterestFound.getId());
@@ -57,7 +70,23 @@ function setPointOfInterestFromCoordinates(coordinates) {
 
 function updatePointOfInterestId(serverId) {
     serverId.map(pointOfInterestServerId => {
-        let feature = vector.getSource().getFeatureById("new_point_of_interest_" + pointOfInterestServerId.clientId);
+        let feature = vector.getSource().getFeatureById("point_of_interest_" + pointOfInterestServerId.clientId);
         feature.setId("point_of_interest_" + pointOfInterestServerId.serverId);
+
+        let pointOfInterestFound = pointOfInterestArrayToStore.find(function (pointOfInterest) {
+            return pointOfInterest.id === pointOfInterestServerId.clientId;
+        });
+
+        pointOfInterestFound.id = pointOfInterestServerId.serverId;
+        pointOfInterestFound.is_new = false;
+
+        let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
+            return helperPost.id_point_of_interest === pointOfInterestServerId.clientId;
+        });
+        if (helperPostFound !== undefined) {
+            helperPostFound.id_point_of_interest = pointOfInterestServerId.serverId;
+            helperPostFound.is_new = false;
+        }
+
     });
 }

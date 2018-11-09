@@ -146,6 +146,7 @@ exports.register = function (req, res) {
                 first_name: req.body.firstname,
                 last_name: req.body.lastname,
                 password: hash,
+                active: false,
                 picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
             }).then(function () {
                 sender.sendMailToOrganizer(req.body.email, hash);

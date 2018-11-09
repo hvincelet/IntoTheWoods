@@ -22,29 +22,29 @@ exports.displayMap = function (req, res) {
             id_raid: raid.id
         }
     }).then(function (courses_found) {
+        console.log(courses_found);
         sports.findAll().then(function (all_sports) {
             courses_found.sort(function (a, b) {
                 return a.order_num - b.order_num;
             });
 
-            let courseArrayToLoad = [];
             const course_actions = courses_found.map(course => {
                 return new Promise((resolve, reject) => {
-                    courseArrayToLoad[course.id] = [];
+                    course.dataValues['track_point_array'] = [];
                     track_points.findAll({
                         where: {
                             id_track: course.id
                         }
                     }).then(function (track_points_found) {
                         track_points_found.forEach(function (track_point) {
-                            courseArrayToLoad[course.id].push(
+                            course.dataValues['track_point_array'].push(
                                 [track_point.lng, track_point.lat]
                             );
                         });
                         let sportFound = all_sports.find(function (sport) {
                             return sport.id === course.id_sport;
                         });
-                        course.dataValues["sport_label"] = sportFound.name;
+                        course.dataValues['sport_label'] = sportFound.name;
                         return resolve();
                     });
                 });
@@ -53,7 +53,7 @@ exports.displayMap = function (req, res) {
             Promise.all(course_actions)
                 .then(result => {
                     let pointOfInterestArrayToLoad = [];
-                    let helperPostArray = [];
+                    let helperPostArrayToLoad = [];
                     point_of_interests.findAll({ // loads the array of points-of-interest
                         where: {
                             id_raid: raid.id
@@ -71,7 +71,7 @@ exports.displayMap = function (req, res) {
                                     }
                                 }).then(function (helper_post_found) {
                                     if (helper_post_found !== null) {
-                                        helperPostArray.push(helper_post_found.dataValues);
+                                        helperPostArrayToLoad.push(helper_post_found.dataValues);
                                     }
                                     return resolve();
                                 })
@@ -86,10 +86,9 @@ exports.displayMap = function (req, res) {
                                     page: "edit_raid/map",
                                     user: user,
                                     raid: raid,
-                                    orderedCourseArray: courses_found,
                                     pointOfInterestArrayToLoad: pointOfInterestArrayToLoad,
-                                    courseArrayToLoad: courseArrayToLoad,
-                                    helperPostArray: helperPostArray
+                                    courseArrayToLoad: courses_found,
+                                    helperPostArrayToLoad: helperPostArrayToLoad
                                 });
                             });
                     }).catch(err => console.log(err));
@@ -102,16 +101,16 @@ exports.storeMapData = function (req, res) {
 
     let pointOfInterestServerIdArray = [];
     if (req.body.pointOfInterestArray !== undefined) {
-        const store_point_of_interest = req.body.pointOfInterestArray.map(pointOfInterest => {
+        const store_point_of_interest_actions = req.body.pointOfInterestArray.map(pointOfInterest => {
             return new Promise((resolve, reject) => {
-                if (pointOfInterest.id.indexOf("new") !== -1) {
+                if (pointOfInterest.is_new === 'true') {
                     point_of_interests.create({
                         id_raid: req.body.idRaid,
                         lat: pointOfInterest.lat,
                         lng: pointOfInterest.lng
                     }).then(function (pointOfInterestCreated) {
                         pointOfInterestServerIdArray.push({
-                            clientId: pointOfInterest.id.replace('new_', ''),
+                            clientId: pointOfInterest.id,
                             serverId: pointOfInterestCreated.dataValues.id
                         });
                         return resolve();
@@ -139,12 +138,11 @@ exports.storeMapData = function (req, res) {
             });
         });
 
-        Promise.all(store_point_of_interest)
+        Promise.all(store_point_of_interest_actions)
             .then(result => {
                 if (req.body.helperPostArray !== undefined) {
                     req.body.helperPostArray.map(helper_post => {
-
-                        if (helper_post.id_point_of_interest.indexOf("new") === -1) {
+                        if (helper_post.is_new === 'new') {
                             helper_posts.create({
                                 id_point_of_interest: helper_post.id_point_of_interest,
                                 description: helper_post.description,
@@ -152,14 +150,10 @@ exports.storeMapData = function (req, res) {
                             })
                         } else {
 
-                            let point_of_interest_updated_id_found = pointOfInterestServerIdArray.find(function (pointOfInterestUpdated) {
-                                return pointOfInterestUpdated.clientId === helper_post.id_point_of_interest.replace('new_', '');
-                            });
-
-                            console.log(point_of_interest_updated_id_found);
                             helper_posts.create({
-                                id_point_of_interest: point_of_interest_updated_id_found.serverId,
-                                description: helper_post.description
+                                id_point_of_interest: helper_post.id_point_of_interest,
+                                description: helper_post.description,
+                                nb_helper: helper_post.nb_helper
                             })
                         }
                     });
@@ -171,11 +165,7 @@ exports.storeMapData = function (req, res) {
     }
 
     if (req.body.courseArray !== undefined) {
-
         req.body.courseArray.map(course => {
-            if (course.id.indexOf("new") !== -1) {
-                course.id = course.id.replace('new_', ''); // temporary
-            }
             track_points.destroy({ // temporary
                 where: {
                     id_track: course.id
@@ -188,8 +178,13 @@ exports.storeMapData = function (req, res) {
                         lng: track_point[0]
                     })
                 });
+
+                courses.update(
+                    {distance: course.distance},
+                    {where: {id: course.id}}
+                )
+
             }).catch(err => console.log(err));
         });
-
     }
 };
