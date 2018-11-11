@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `place` TINYTEXT NULL,
   `lat` DOUBLE NULL,
   `lng` DOUBLE NULL,
+  `hashtag` VARCHAR(30) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -202,8 +203,9 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`helper_post` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `id_point_of_interest` INT UNSIGNED NOT NULL,
+  `title` VARCHAR(128) NULL,
   `description` VARCHAR(1024) NULL,
-  `nb_helper` INT UNSIGNED DEFAULT 1,
+  `nb_helper` INT DEFAULT 1,
   PRIMARY KEY (`id`),
   CONSTRAINT `id_point_of_interest`
     FOREIGN KEY (`id_point_of_interest`)
@@ -219,6 +221,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`assignment` (
   `id_helper` VARCHAR(7) NOT NULL,
   `id_helper_post` INT UNSIGNED NOT NULL,
   `attributed` VARCHAR(45) NULL,
+  `order` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id_helper`, `id_helper_post`),
   CONSTRAINT `id_helper`
     FOREIGN KEY (`id_helper`)
