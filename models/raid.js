@@ -32,6 +32,10 @@ module.exports = function(sequelize, DataTypes) {
       type: "DOUBLE",
       allowNull: true
     },
+    hashtag: {
+      type: DataTypes.STRING(30),
+      allowNull: true
+    },
     start_time: {
       type: DataTypes.TIME,
       allowNull: true

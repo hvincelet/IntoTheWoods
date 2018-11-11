@@ -14,7 +14,7 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 CREATE USER 'gluser2018'@'localhost' IDENTIFIED BY 'glpass2018';
 GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'localhost' IDENTIFIED BY 'glpass2018' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'148.60.%.%' IDENTIFIED BY 'glpass2018' WITH GRANT OPTION;
--- ALTER USER 'gluser2018'@'localhost' IDENTIFIED WITH mysql_native_password BY 'glpass2018';
+
 -- sequelize-auto -o "./models" -d intoTheWoodsDB -h localhost -u gluser2018 -x glpass2018 -e mysql
 
 -- -----------------------------------------------------
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `place` TINYTEXT NULL,
   `lat` DOUBLE NULL,
   `lng` DOUBLE NULL,
-  `start_time` TIME NULL,
+  `hashtag` VARCHAR(30) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -204,8 +204,9 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`helper_post` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `id_point_of_interest` INT UNSIGNED NOT NULL,
+  `title` VARCHAR(128) NULL,
   `description` VARCHAR(1024) NULL,
-  `nb_helper` INT UNSIGNED DEFAULT 1,
+  `nb_helper` INT DEFAULT 1,
   PRIMARY KEY (`id`),
   CONSTRAINT `id_point_of_interest`
     FOREIGN KEY (`id_point_of_interest`)
@@ -221,6 +222,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`assignment` (
   `id_helper` VARCHAR(7) NOT NULL,
   `id_helper_post` INT UNSIGNED NOT NULL,
   `attributed` VARCHAR(45) NULL,
+  `order` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id_helper`, `id_helper_post`),
   CONSTRAINT `id_helper`
     FOREIGN KEY (`id_helper`)

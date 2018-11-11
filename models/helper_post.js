@@ -16,12 +16,16 @@ module.exports = function(sequelize, DataTypes) {
         key: 'id'
       }
     },
+    title: {
+      type: DataTypes.STRING(128),
+      allowNull: true
+    },
     description: {
       type: DataTypes.STRING(1024),
       allowNull: true
     },
     nb_helper: {
-      type: DataTypes.INTEGER(10).UNSIGNED,
+      type: DataTypes.INTEGER(11),
       allowNull: true,
       defaultValue: '1'
     }
