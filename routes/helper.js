@@ -351,5 +351,46 @@ exports.remove = function (req, res) {
     });
 };
 exports.participantPassage = function(req, res){
+    let idParticipant = req.body.idParticipant;
+    let idRaid = req.body.idRaid;
+    let date = req.body.date;
 
-}
+    let orderRun;
+
+    models.stage.findAll({
+        where: {
+            id_participant: idParticipant
+        }
+    }).then(function (stages_found) {
+        if (stages_found !== null) {
+            orderRun = stages_found.length + 1;
+        }
+        else{
+            orderRun = 1;
+        }
+
+        models.course.findOne({
+            attributes: ['id'],
+            where: {
+                id_raid: idRaid,
+                order_num: orderRun
+            }
+        }).then(function (course_found) {
+            if(course_found !== null){
+                let time = Date.parse("January 01, 1970 "+stages_found[stages_found.length-1].time);
+
+                time = Date.parse(date)-(Date.parse(date)-time);
+
+                models.stage.create({
+                    id_participant: idParticipant,
+                    id_course: course_found.id,
+                    time: time
+                });
+            }
+            else{
+                console.log("erreur");
+                //TODO : renvoyer un message d'erreur
+            }
+        });
+    });
+};
