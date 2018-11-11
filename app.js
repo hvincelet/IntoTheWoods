@@ -131,7 +131,7 @@ app.route('/helper/:id/home')
     .get(helper.displayHome);
 
 app.route('/helper/participantPassage')
-    .post(helper.participantPassage);
+    .post(/*checkAuth, */helper.participantPassage); //TODO : Décommenter la ligne une fois le dev terminé
 
 
 //Routes dedicated to the participants
