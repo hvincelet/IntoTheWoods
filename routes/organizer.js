@@ -146,6 +146,7 @@ exports.register = function (req, res) {
                 first_name: req.body.firstname,
                 last_name: req.body.lastname,
                 password: hash,
+                active: false,
                 picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
             }).then(function () {
                 sender.sendMailToOrganizer(req.body.email, hash);
@@ -213,6 +214,72 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
     }else{
         res.send(JSON.stringify({msg: "mail-is-login"}));
     }
+};
+
+
+exports.assignHelper = function(req, res) {
+
+    req.body.assignments_array.forEach(function(assignment){
+        models.assignment.update({
+            attributed: 0,
+            where: {
+                id_helper: assignment.id_helper,
+                attributed: 1
+            }
+        }).then(function() {
+            models.assignment.update({
+                attributed: 1,
+                where: {
+                    id_helper: assignment.id_helper,
+                    id_helper_post: assignment.id_helper_post
+                }
+            }).then(function () {
+                models.helper.findOne({
+                    where: {
+                        login: assignment.id_helper
+                    },
+                    attributes: ['email']
+                }).then(function (helper_found) {
+                    if (helper_found !== null) {
+                        let local_email = helper_found.dataValues.email;
+                        models.helper_post.findOne({
+                            where: {
+                                id: assignment.id_helper_post
+                            },
+                            attributes: ['id_point_of_interest', 'description']
+                        }).then(function (helper_post_found) {
+                            if (helper_post_found !== null) {
+                                let description = helper_post_found.dataValues.description;
+                                models.point_of_interest.findOne({
+                                    where: {
+                                        id: helper_post_found.dataValues.id_point_of_interest
+                                    },
+                                    attributes: ['id_raid']
+                                }).then(function (point_of_interest_found) {
+                                    if (point_of_interest_found !== null) {
+                                        models.raid.findOne({
+                                            where: {
+                                                id: point_of_interest_found.dataValues.id_raid
+                                            },
+                                            attributes: ['name', 'date', 'edition', 'place']
+                                        }).then(function (raid_found) {
+                                            if (raid_found !== null) {
+                                                let local_name = raid_found.dataValues.name;
+                                                let local_date = raid_found.dataValues.date;
+                                                let local_edition = raid_found.dataValues.edition;
+                                                let local_place = raid_found.dataValues.place;
+                                                sender.sendMailToHelper(assignment.id_helper, assignment.id_helper_post, description, local_email, local_name, local_date, local_edition, local_place);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    });
 };
 
 exports.sendMail = function (req, res) {

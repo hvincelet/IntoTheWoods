@@ -5,7 +5,7 @@ const sender = require('./sender');
 
 exports.inviteHelper = function(req, res) {
     const user = connected_user(req.sessionID);
-    if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
+    if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.raid_id);})) {
         return res.redirect('/dashboard');
     }
 
@@ -75,7 +75,7 @@ exports.displayRegister = function(req, res){
                     if(helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0){
                         get_post_clean.push({'id':helper_post.dataValues.id,'description':helper_post.dataValues.description});
                     }
-                    if(index == helper_posts_array.length -1){
+                    if(index === helper_posts_array.length -1){
                         res.render(pages_path + "helper_register.ejs", {
                             pageTitle: "Inscription Bénévole",
                             activity: get_post_clean,
@@ -127,7 +127,8 @@ exports.register = function(req, res){
                     models.assignment.create({
                         id_helper: id_helper,
                         id_helper_post: id_activity,
-                        attributed: false
+                        attributed: 0,
+                        order: 1 // TODO : update this line when helper_register sends helper_posts order
                     });
                 });
                 res.redirect("/helper/" + id_helper + "/home");
@@ -138,23 +139,18 @@ exports.register = function(req, res){
 
 exports.displayHome = function(req, res){
 
-    let id = req.params.id;
-
     models.assignment.findOne({
         where: {
-            id_helper: id
+            id_helper: req.params.id
         }
     }).then(function (assignment_found) {
-        if (assignment_found !== null) { // id of helper exist
+        if (assignment_found !== null) {
             if (assignment_found.attributed == 0){
                 res.render(pages_path + "helper_register.ejs", {
                     pageTitle: "Inscription Bénévole",
                     errorMessage: "Vous n'avez pas encore été attribué à un poste."
                 });
             } else {
-                // TODO : page to see the map with the path to go to helper post
-                console.log(assignment_found.id_helper);
-                console.log(assignment_found.id_helper_post);
 
                 models.helper.findOne({
                     where: {
@@ -196,7 +192,6 @@ exports.displayHome = function(req, res){
             });
         }
     });
-
 };
 
 exports.participantPassage = function(req, res){
