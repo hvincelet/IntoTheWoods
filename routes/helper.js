@@ -308,6 +308,7 @@ exports.displayHome = function(req, res){
             });
         }
     });
+
 };
 
 exports.performCheckin = function (req, res) {
