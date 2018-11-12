@@ -119,6 +119,9 @@ app.route('/editraid/:id/map')
     .get(checkAuth, map.displayMap)
     .post(checkAuth, map.storeMapData);
 
+app.route('/editraid/:id/sendMessage')
+    .post(checkAuth, organizer.sendMail);
+
 app.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
@@ -131,8 +134,12 @@ app.route('/helper/register')
     .get(helper.displayRegister) // /helper/register?raid={raid_id}
     .post(helper.register);
 
+app.route('/helper/assign')
+    .post(checkAuth, organizer.assignHelper);
+
 app.route('/helper/:id/home')
     .get(helper.displayHome);
+
 
 
 app.route('/termsandpolicy')

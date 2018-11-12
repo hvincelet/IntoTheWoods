@@ -144,43 +144,45 @@ function storeDataToDB() {
                 pointOfInterestToStoreId = 'new_' + pointOfInterestToStoreId;
             }
             pointOfInterestToStore['id'] = pointOfInterestToStore.id;
-            pointOfInterestToStore['lng'] = ol.proj.toLonLat(source.getFeatureById(pointOfInterestToStoreId).getGeometry().getCoordinates())[0];
-            pointOfInterestToStore['lat'] = ol.proj.toLonLat(source.getFeatureById(pointOfInterestToStoreId).getGeometry().getCoordinates())[1];
+            if (!pointOfInterestToStore.removed) {
+                pointOfInterestToStore['lng'] = ol.proj.toLonLat(source.getFeatureById(pointOfInterestToStoreId).getGeometry().getCoordinates())[0];
+                pointOfInterestToStore['lat'] = ol.proj.toLonLat(source.getFeatureById(pointOfInterestToStoreId).getGeometry().getCoordinates())[1];
+            }
             return resolve();
         });
     });
 
-    Promise.all(store_point_of_interest_actions)
-        .then(result => {
-            const store_course_actions = courseArrayToStore.map(courseToStore => {
-                return new Promise((resolve, reject) => {
-                    if (source.getFeatureById("course_" + courseToStore.id) !== null) {
-                        courseToStore['track_point_array'] = source.getFeatureById("course_" + courseToStore.id).getGeometry().getCoordinates();
-                    }
-                    return resolve();
-                });
-            });
-
-            Promise.all(store_course_actions)
-                .then(result => {
-                    let data = {
-                        pointOfInterestArray: pointOfInterestArrayToStore,
-                        courseArray: courseArrayToStore,
-                        helperPostArray: helperPostArrayToStore,
-                        idRaid: raid.id
-                    };
-                    $.ajax({
-                        type: 'POST',
-                        url: '/editraid/' + raid.id + '/map',
-                        data: data,
-                        success: function (response) {
-                            updateFeaturesId(response);
-                        },
-                        error: function (response) {
-                        }
-                    });
-                });
+    // Promise.all(store_point_of_interest_actions)
+    //     .then(result => {
+    const store_course_actions = courseArrayToStore.map(courseToStore => {
+        return new Promise((resolve, reject) => {
+            if (source.getFeatureById("course_" + courseToStore.id) !== null) {
+                courseToStore['track_point_array'] = source.getFeatureById("course_" + courseToStore.id).getGeometry().getCoordinates();
+            }
+            return resolve();
         });
+    });
+    //
+    // Promise.all(store_course_actions)
+    //     .then(result => {
+    let data = {
+        pointOfInterestArray: pointOfInterestArrayToStore,
+        courseArray: courseArrayToStore,
+        helperPostArray: helperPostArrayToStore,
+        idRaid: raid.id
+    };
+    $.ajax({
+        type: 'POST',
+        url: '/editraid/' + raid.id + '/map',
+        data: data,
+        success: function (response) {
+            updateFeaturesId(response);
+        },
+        error: function (response) {
+        }
+    });
+    //         });
+    // });
 }
 
 function updateFeaturesId(data) {

@@ -1,8 +1,7 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>Into The Woods - Validation de votre bénévolat</title>
+    <title>Into The Woods - Réception d'un message de <%= organizer %></title>
     <link rel="icon" type="image/png" href="localhost:8080/views/img/favicon.png" />
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -36,12 +35,16 @@
     <div class="container">
         <div class="form-outer text-center d-flex align-items-center">
             <div class="form-inner">
-                <div class="logo text-uppercase">Bonjour,</div>
-                <p>Suite à votre demande de bénévolat sur notre site Into The Woods, nous avons le plaisir de vous confirmer votre participation en tant que bénévole.<br/>
-                  Vous participerez donc au raid <%=name%> édition <%=edition%> le <%=date%> à <%=place%> en tant que bénévole sur le poste <%=description%>.<br/>
-                  En cas de désistement, merci de dévalider votre inscription en cliquant sur le bouton ci-dessous.</p>
-                <a href="http://localhost:8080/helper/devalidate?id=<%=id_helper%>&job=<%=id_helper_post%>" class="btn btn-primary">Dévalider mon inscription</a><br/>
-                <small>Si le bouton ne fonctionne pas, utilisez le lien suivant : http://localhost:8080/helper/devalidate?id=<%=id_helper%>&job=<%=id_helper_post%></small>
+                <div class="logo text-uppercase">Into the Woods</div>
+                <p>Bonjour, vous avez reçu un message de <%= organizer%> :</p>
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header">
+                        <h4 class="my-0 font-weight-normal"><%= organizer%> - <%=subject%></h4>
+                    </div>
+                    <div class="card-body">
+                        <p><%=message%></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

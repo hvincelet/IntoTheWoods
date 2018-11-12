@@ -114,7 +114,7 @@ exports.storeMapData = function (req, res) {
                         });
                         return resolve();
                     }).catch(err => console.log(err));
-                } else if (pointOfInterest.id.indexOf("remove") !== -1) {
+                } else if (pointOfInterest.removed === 'true') {
                     return point_of_interests.destroy({
                         where: {
                             id: pointOfInterest.id.replace('remove_', '')
@@ -143,19 +143,24 @@ exports.storeMapData = function (req, res) {
                     req.body.helperPostArray.map(helper_post => {
 
                         if (helper_post.is_new === 'true') {
-                            console.log(pointOfInterestServerIdArray);
+
                             let pointOfInterest = pointOfInterestServerIdArray.find(function (client_server_Id) {
-                                console.log(client_server_Id.clientId);
-                                console.log(helper_post.id_point_of_interest);
                                 return client_server_Id.clientId === helper_post.id_point_of_interest;
                             });
 
-                            helper_posts.create({
-                                id_point_of_interest: pointOfInterest.serverId,
-                                description: helper_post.description,
-                                nb_helper: helper_post.nb_helper
-                            })
-
+                            if (pointOfInterest !== undefined){
+                                helper_posts.create({
+                                    id_point_of_interest: pointOfInterest.serverId,
+                                    description: helper_post.description,
+                                    nb_helper: helper_post.nb_helper
+                                });
+                            } else {
+                                helper_posts.create({
+                                    id_point_of_interest: helper_post.id_point_of_interest,
+                                    description: helper_post.description,
+                                    nb_helper: helper_post.nb_helper
+                                });
+                            }
                         } else {
                             helper_posts.update({
                                     description: helper_post.description,
@@ -163,12 +168,6 @@ exports.storeMapData = function (req, res) {
                                 },
                                 {where: {id: helper_post.id}}
                             )
-
-//                             helper_posts.create({
-//                                 id_point_of_interest: helper_post.id_point_of_interest,
-//                                 description: helper_post.description,
-//                                 nb_helper: helper_post.nb_helper
-//                             })
                         }
                     });
                 }
@@ -185,14 +184,15 @@ exports.storeMapData = function (req, res) {
                     id_track: course.id
                 }
             }).then(function () {
-                course.track_point_array.map(track_point => {
-                    track_points.create({
-                        id_track: course.id,
-                        lat: track_point[1],
-                        lng: track_point[0]
-                    })
-                });
-
+                if (course.track_point_array !== undefined) {
+                    course.track_point_array.map(track_point => {
+                        track_points.create({
+                            id_track: course.id,
+                            lat: track_point[1],
+                            lng: track_point[0]
+                        })
+                    });
+                }
                 courses.update(
                     {distance: course.distance},
                     {where: {id: course.id}}

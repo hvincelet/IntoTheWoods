@@ -1,8 +1,7 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>Into The Woods - Validation de votre bénévolat</title>
+    <title>Into The Woods - Invitation au bénévolat du raid <%= name %></title>
     <link rel="icon" type="image/png" href="localhost:8080/views/img/favicon.png" />
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -36,12 +35,12 @@
     <div class="container">
         <div class="form-outer text-center d-flex align-items-center">
             <div class="form-inner">
-                <div class="logo text-uppercase">Bonjour,</div>
-                <p>Suite à votre demande de bénévolat sur notre site Into The Woods, nous avons le plaisir de vous confirmer votre participation en tant que bénévole.<br/>
-                  Vous participerez donc au raid <%=name%> édition <%=edition%> le <%=date%> à <%=place%> en tant que bénévole sur le poste <%=description%>.<br/>
-                  En cas de désistement, merci de dévalider votre inscription en cliquant sur le bouton ci-dessous.</p>
-                <a href="http://localhost:8080/helper/devalidate?id=<%=id_helper%>&job=<%=id_helper_post%>" class="btn btn-primary">Dévalider mon inscription</a><br/>
-                <small>Si le bouton ne fonctionne pas, utilisez le lien suivant : http://localhost:8080/helper/devalidate?id=<%=id_helper%>&job=<%=id_helper_post%></small>
+                <div class="logo text-uppercase">Into the Woods</div>
+                <p>Bonjour, vous êtes invité à participer en tant que bénévole à l'édition <%=edition%> du raid <%=name%>.<br/>
+                Si vous souhaitez participer, merci cliquer sur le bouton ci-dessous pour vous inscrire comme bénévole à
+                ce raid et sélectionner vos choix en terme de postes.</p>
+                <a href="http://localhost:8080/helper/register?raid=<%=id%>" class="btn btn-primary">M'inscrire en tant que bénévole</a><br/>
+                <small>Si le bouton ne fonctionne pas, utilisez le lien suivant : http://localhost:8080/helper/register?raid=<%=id%></small>
             </div>
         </div>
     </div>

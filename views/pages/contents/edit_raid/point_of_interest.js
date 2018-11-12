@@ -12,7 +12,8 @@ function loadPointsOfInterest(pointArray) {
 
         pointOfInterestArrayToStore.push({
             id: pointOfInterest.id,
-            is_new: false
+            is_new: false,
+            removed: false
         });
     });
 }
@@ -29,12 +30,22 @@ function removePointOfInterest(featureId) {
     let feature = vector.getSource().getFeatureById(featureId);
     // remove on the map
     source.removeFeature(feature);
+
     // remove on the DB
-    if (feature.getId().indexOf("new") === -1) {
-        pointOfInterestArrayToStore.push({
-            id: "remove_" + feature.getId().replace('point_of_interest_', '')
-        });
+    let pointOfInterestFound = pointOfInterestArrayToStore.find(function (pointOfInterest) {
+        if (pointOfInterest.is_new) {
+            return (parseInt(featureId.replace('new_point_of_interest_','')) === pointOfInterest.id);
+        } else {
+            return (parseInt(featureId.replace('point_of_interest_','')) === pointOfInterest.id);
+        }
+    });
+
+    if (pointOfInterestFound.is_new) {
+        pointOfInterestArrayToStore.splice(pointOfInterestArrayToStore.indexOf(pointOfInterestFound), 1);
+    } else {
+        pointOfInterestFound.removed = true;
     }
+
     overlay.setPosition(undefined);
 }
 
@@ -56,7 +67,8 @@ function setPointOfInterestFromCoordinates(coordinates) {
 
             pointOfInterestArrayToStore.push({
                 id: lastPointOfInterestCreatedID,
-                is_new: true
+                is_new: true,
+                removed: false
             });
 
             showPopup(pointOfInterestFound, "Créer le point d'intérêt");

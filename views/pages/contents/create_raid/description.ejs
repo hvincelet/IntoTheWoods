@@ -79,7 +79,7 @@
 </section>
 
 <script type="application/javascript">
-
+    if ( $('#raidStartDate')[0].type != 'date' ) $('#raidStartDate').datepicker();
     $(document).ready(function () {
         $("#ajax").keyup(function () {
             if ($("#ajax").val().length >= 3) {

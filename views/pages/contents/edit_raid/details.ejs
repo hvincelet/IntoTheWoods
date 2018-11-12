@@ -32,7 +32,12 @@ helpers.map( (helper, index) => {
                             <tr>
                                 <td class="pt-3-half" contenteditable="false" width="40%"><%= raid.place %></td>
                                 <td class="pt-3-half" contenteditable="false" width="20%"><%= raid.date %></td>
-                                <td class="pt-3-half" contenteditable="false" width="20%">steps...</td>
+                                <td class="pt-3-half" contenteditable="false" width="20%">
+                                    <% courses.map( (course, index) => { %>
+                                        <%= course.name %>
+                                        <% if(index !== courses.length) {%><br/><% }%>
+                                    <% }); %>
+                                </td>
                                 <td class="pt-3-half" contenteditable="false" width="20%">
                                     <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="location.href='/editraid/<%=raid.id%>/map';">Éditer la carte</button>
                                 </td>
@@ -92,6 +97,7 @@ helpers.map( (helper, index) => {
                     <div class="card-body">
                         <div class="table-editable">
                             <button type="button" class="btn btn-primary btn-rounded" style="margin-bottom: 1em;" data-toggle="modal" data-target="#modal-helpers">Ajouter des helpers</button>
+                            <button type="button" class="btn btn-info btn-rounded" style="margin-bottom: 1em;" id="save-helper-post">Enregistrer les postes attribués</button>
                             <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
                                 <tr>
                                     <th class="text-center">Nom</th>
@@ -104,15 +110,15 @@ helpers.map( (helper, index) => {
                                     <td class="pt-3-half" contenteditable="false" width="40%"><%= helper.first_name %> <%=helper.last_name %></td>
                                     <td class="pt-3-half" contenteditable="false" width="20%">
                                         <div class="form-check" style="text-align: left;">
-                                            <% if(helper.posts.length === 1){ %>
+                                            <% if(helper.attributed === 1){ %>
                                                 <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>" type="radio" name="<%=helpers_id[helper.email]%>" checked disabled>
-                                                <label for="<%=helpers_id[helper.email]%>"><%=helper.posts[0]%></label>
+                                                <label for="<%=helpers_id[helper.email]%>"><%=helper.assignment[0].description%></label>
                                             <% }else{
-                                                helper.posts.forEach(function(post, index){
+                                                helper.assignment.map((post, index) =>{
                                             %>
-                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>-<%=post%>" type="radio" value="<%=post%>" name="<%=helpers_id[helper.email]%>">
-                                                <label for="<%=helpers_id[helper.email]%>-<%=post%>" id="<%=helpers_id[helper.email]%>-<%=post%>-label"><%=post%></label>
-                                                <% if (index !== helper.posts.length - 1){ %>
+                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>-<%=post.id%>" type="radio" value="<%=post.id%>" name="<%=helpers_id[helper.email]%>">
+                                                <label for="<%=helpers_id[helper.email]%>-<%=post.id%>" id="<%=helpers_id[helper.email]%>-<%=post.id%>-label"><%=post.description%></label>
+                                                <% if (index !== helper.assignment.length - 1){ %>
                                                     <br/>
                                                 <% } %>
                                             <% }); } %>
@@ -266,13 +272,16 @@ helpers.map( (helper, index) => {
 <script type="text/javascript">
     var $ADD_HELPER_TABLE = $('#addHelperTable');
     var $HIDDEN_ADD_HELPER_TABLE = $('#hidden-addHelperTable');
+
     $('.table-addHelperTable').click(function () {
         var $clone = $HIDDEN_ADD_HELPER_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
         $ADD_HELPER_TABLE.append($clone);
     });
+
     $('.table-remove').click(function () {
         $(this).parents('tr').detach();
     });
+
     $('.cancel-addHelperTable').click(function () {
         $ADD_HELPER_TABLE.find('tr.duplicate').detach();
         var $clone = $HIDDEN_ADD_HELPER_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
@@ -292,10 +301,10 @@ helpers.map( (helper, index) => {
         modal.find('span.userMail').text(userMail);
         modal.find('span.userType').text(type);
     });
+
     $('#confirmRemove-button').click(function () {
         let userMail = $('.modal-body').find('span.userMail').text();
         let userType = $('.modal-body').find('span.userType').text();
-        console.log(userMail + "\n" + userType);
         // AJAX to delete user by this mail into type (Ex: delete user1@mail.com into organizer)
     });
 </script>
@@ -316,20 +325,65 @@ helpers.map( (helper, index) => {
         }
         modal.find('#recipient-subject').val(subjectText + "<%=raid.name%> - Édition <%=raid.edition%>");
     });
+
     $('#sendMail-button').click(function () {
-        let mail = $('#recipient-name').text();
-        let subject = $('#recipient-subject').text();
-        let message = $('#message-text').text();
-        console.log(mail + "\n" + subject + "\n" + message);
-        // AJAX to delete user by this mail into type (Ex: delete user1@mail.com into organizer)
+        let mail = $('#recipient-name').val();
+        let subject = $('#recipient-subject').val();
+        let message = $('#message-text').val();
+        let $MESSAGE_MODAL = $('#messageModal');
+        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+        $('#mailModal').modal('hide');
+        $.ajax({
+            type: 'POST',
+            url: '/editraid/<%= raid.id %>/sendMessage',
+            data: {
+                mails: mail.split(','),
+                organizer: "<%= user.first_name%> <%= user.last_name %>",
+                message: message,
+                subject: subject,
+                raid_name: "<%=raid.name%>"
+            },
+            success: function (response) {
+                msg = JSON.parse(response).msg;
+                if(msg === "ok"){
+                    $MESSAGE_MODAL_TITLE.html("Message envoyé");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Le message a bien été envoyé à <strong>" + mail + "</strong>.");
+                }else{
+                    $MESSAGE_MODAL_TITLE.html("Message non envoyé...");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Le message n'a pas pu être envoyé à <strong>" + mail + "</strong>...");
+                }
+                $MESSAGE_MODAL.modal('show');
+            },
+            error: function (response) {
+                let msg = JSON.parse(response).msg;
+                $MESSAGE_MODAL_TITLE.html("Message non envoyé...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Le message n'a pas pu être envoyé à <strong>" + mail + "</strong>...");
+                $MESSAGE_MODAL.modal('show');
+            }
+        });
     });
 </script>
 <!-- JS for line-throught on radio button non-checked -->
 <script type="text/javascript">
+    var assignment = [];
     $(document).ready(function () {
         <% helpers.forEach(function (helper) { %>
             $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').change(function () {
                 let val = this.value;
+                let found = assignment.find(function (helper) {
+                    return helper.id_helper === "<%=helper.login%>"
+                });
+                if(found){
+                    found.id_helper_post = val;
+                }else{
+                    assignment.push({id_helper: "<%=helper.login%>", id_helper_post: val});
+                }
+                console.log(assignment);
                 $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').each(function () {
                    let label = this.id+"-label";
                    if(this.value !== val){
@@ -341,6 +395,36 @@ helpers.map( (helper, index) => {
             });
         <% }); %>
     });
+    
+    $('#save-helper-post').click(function () {
+        $.ajax({
+            type: 'POST',
+            url: '/helper/assign',
+            data: {
+                assignments_array: assignment
+            },
+            success: function (response) {
+                msg = JSON.parse(response).msg;
+                if(msg === "ok"){
+                    $MESSAGE_MODAL_TITLE.html("Postes assignés");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Les postes ont bien été attribués aux helpers concernés.<br/><small>Afin de voir les changements, raffraichissez la page.</small>");
+                }else{
+                    $MESSAGE_MODAL_TITLE.html("Postes non assignés...");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux helpers...");
+                }
+                $MESSAGE_MODAL.modal('show');
+            },
+            error: function (response) {
+                let msg = JSON.parse(response).msg;
+                $MESSAGE_MODAL_TITLE.html("Postes non assignés...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux helpers...");
+                $MESSAGE_MODAL.modal('show');
+            }
+        });
+    })
 </script>
 <!-- JS for invite organizer and helpers -->
 <script type="text/javascript">
@@ -356,18 +440,38 @@ helpers.map( (helper, index) => {
         let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
         if (validateEmail(mail)){
             let data = {
-                mail: mail
+                mail: mail,
+                raid: {
+                    name: "<%= raid.name%>",
+                    edition: "<%= raid.edition%>"
+                }
             };
             $.ajax({
                 type: 'POST',
                 url: '/team/<%= raid.id %>/inviteorganizers',
                 data: data,
-                success: function () {
-                    $('#mail_organizer').val("");
-                    $MESSAGE_MODAL_TITLE.html("Organisateur invité·e !");
-                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                    $MESSAGE_MODAL_CONTENT.html("L'organisateur a bien été invité.");
-                    $MESSAGE_MODAL.modal('show');
+                success: function (response) {
+                    let msg = JSON.parse(response).msg;
+                    if(msg === "ok"){
+                        $('#mail_organizer').val("");
+                        $MESSAGE_MODAL_TITLE.html("Organisateur invité·e !");
+                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                        $MESSAGE_MODAL_CONTENT.html("L'organisateur a bien été invité.");
+                        $MESSAGE_MODAL.modal('show');
+                    }else{
+                        $MESSAGE_MODAL_TITLE.html("Erreur...");
+                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                        if(msg === "no-account"){
+                            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer car il n'a pas créé de compte Organizer sur cette plateforme.");
+                        }else if(msg === "not-added"){
+                            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer...<br/>Merci de réitérer votre invitation dans quelques minutes.");
+                        }else if(msg === "mail-is-login"){
+                            $MESSAGE_MODAL_CONTENT.html("Impossible de vous invitez vous même comme Organizer...");
+                        }else{
+                            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer...");
+                        }
+                        $MESSAGE_MODAL.modal('show');
+                    }
                 },
                 error: function (response) {
                     let msg = JSON.parse(response).msg;
@@ -392,25 +496,36 @@ helpers.map( (helper, index) => {
         let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
         let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
         let mails = [];
+
         $('#addHelperTable').find('tr').each(function () {
             let mail = $(this).find('td.helper_mail').html();
             if(validateEmail(mail)){
                 mails.push(mail);
             }
         });
+
         $('#modal-helpers').modal('hide');
         $.ajax({
             type: 'POST',
             url: '/team/<%= raid.id %>/invitehelpers',
-            data: mails,
-            success: function () {
+            data: {mails: mails, raid: {name: "<%=raid.name%>", edition: "<%=raid.edition%>", id: "<%=raid.id%>"}},
+            success: function (response) {
+                invited_status = JSON.parse(response).status;
+                let helpers_not_invited = "";
                 $MESSAGE_MODAL_TITLE.html("Helpers invité·e·s");
                 $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
                 $MESSAGE_MODAL_CONTENT.html("Ces helpers ont bien été invité·e·s :<ul>");
-                mails.map( mail => {
-                    $MESSAGE_MODAL_CONTENT.append("<li>" + mail + "</li>");
+                invited_status.map( helper => {
+                    if(helper.status === "ok"){
+                        $MESSAGE_MODAL_CONTENT.append("<li>" + helper.id + "</li>");
+                    }else{
+                        helpers_not_invited += "<li>" + helper.id + "</li>";
+                    }
                 });
                 $MESSAGE_MODAL_CONTENT.append("</ul>");
+                if(helpers_not_invited !== ""){
+                    $MESSAGE_MODAL_CONTENT.append("Ces helpers n'ont pas pu être invités : <ul>" + helpers_not_invited + "</ul>");
+                }
                 $MESSAGE_MODAL.modal('show');
             },
             error: function (response) {

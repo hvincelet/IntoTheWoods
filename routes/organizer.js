@@ -183,31 +183,136 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
         return res.redirect('/dashboard');
     }
 
-    if(req.body.mail != user.login){
+    // TODO Check if invited organizer is already in team
+
+    let invited_organizer = req.body.mail;
+    if(invited_organizer !== user.login){
         models.organizer.findOne({
-            where: {email: req.body.mail}
-        }).then(function(organizer){
+            where: {email: invited_organizer}
+        }).then(function (organizer) {
             if(organizer){
-                models.team.findOne({
-                    where: {
-                        id_raid: req.params.raid_id,
-                        id_organizer: req.body.mail
-                    }
-                }).then(function(organizer_in_team){
-                    if(!organizer_in_team){
-                        models.team.create({
-                            id_raid: req.params.raid_id,
-                            id_organizer: req.body.mail
-                        }).then(function(orga_inserted_in_team){
-                            // sender.sendMailToNoticeNewOrganizer(req.body.mail, );
+                models.team.create({
+                    id_raid: req.params.raid_id,
+                    id_organizer: invited_organizer
+                }).then(function (organizer_add_to_team) {
+                    if(organizer_add_to_team){
+                        // send mail
+                        sender.inviteOrganizer({
+                            email: invited_organizer,
+                            organizer: user.first_name + " " + user.last_name,
+                            raid: req.body.raid
                         });
-                    }else{
-                        // Organizer already in team
+                        res.send(JSON.stringify({msg: "ok"}));
+                    }else {
+                        res.send(JSON.stringify({msg: "not-added"}));
                     }
                 })
             }else{
-                // sender.sendMailToInviteNewOrganizerToRegister(req.body.mail, );
+                res.send(JSON.stringify({msg: "no-account"}));
             }
         });
+    }else{
+        res.send(JSON.stringify({msg: "mail-is-login"}));
     }
+};
+
+
+exports.assignHelper = function(req, res) {
+
+    req.body.assignments_array.forEach(function(assignment){
+        models.assignment.findOne({
+            where: {
+                id_helper: assignment.id_helper,
+                id_helper_post: assignment.id_helper_post
+            }
+        }).then(function(assignment_found){
+            if(assignment_found !== null){
+                // Step 1 : update attributed value in assignment for pair (id_helper,id_helper_post)
+                assignment_found.update({
+                    attributed: 1
+                }).then(function(){
+                    // Step 2 : delete tuple in assignment where id_helper = id_helper of req
+                    models.assignment.destroy({
+                        where:{
+                            id_helper: assignment.id_helper,
+                            attributed: 0
+                        }
+                    }).then(function(){
+                        // Step 3 : find helper in helper table with id_helper
+                        models.helper.findOne({
+                            where: {
+                                login: assignment.id_helper
+                            },
+                            attributes: ['email']
+                        }).then(function(helper_found){
+                            if(helper_found !== null){
+                                // Step 4 : get email of helper in helper_found
+                                let local_email = helper_found.dataValues.email;
+                                // Step 5 : get id_point_of_interest from helper_post
+                                models.helper_post.findOne({
+                                    where:{
+                                        id:assignment.id_helper_post
+                                    },
+                                    attributes:['id_point_of_interest','description']
+                                }).then(function(helper_post_found){
+                                    if(helper_post_found !== null){
+                                        let description = helper_post_found.dataValues.description;
+                                        // Step 6 : get id_raid from point_of_interest
+                                        models.point_of_interest.findOne({
+                                            where:{
+                                                id: helper_post_found.dataValues.id_point_of_interest
+                                            },
+                                            attributes:['id_raid']
+                                        }).then(function(point_of_interest_found){
+                                            if(point_of_interest_found !== null){
+                                                // Step 7 : get informations from raid
+                                                models.raid.findOne({
+                                                      where:{
+                                                          id:point_of_interest_found.dataValues.id_raid
+                                                      },
+                                                      attributes:['name','date','edition','place']
+                                                }).then(function(raid_found){
+                                                    if(raid_found !== null){
+                                                        // Step 8 : get informations from raid
+                                                        let local_name = raid_found.dataValues.name;
+                                                        let local_date = raid_found.dataValues.date;
+                                                        let local_edition = raid_found.dataValues.edition;
+                                                        let local_place = raid_found.dataValues.place;
+                                                        // Step 9 : send mail to helper
+                                                        sender.sendMailToHelper(assignment.id_helper,assignment.id_helper_post,description,local_email,local_name,local_date,local_edition,local_place);
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    });
+                });
+            }
+        });
+
+    });
+};
+
+exports.sendMail = function (req, res) {
+    const user = connected_user(req.sessionID);
+    if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.id)})){
+        return res.redirect('/dashboard');
+    }
+
+    let mails = req.body.mails;
+    mails.map(mail =>{
+        if(mail !== ""){
+            sender.sendMail({
+                email: mail,
+                organizer: req.body.organizer,
+                message: req.body.message,
+                subject: req.body.subject,
+                raid_name: req.body.raid_name
+            });
+        }
+    });
+    res.send(JSON.stringify({msg: "ok"}));
 };
