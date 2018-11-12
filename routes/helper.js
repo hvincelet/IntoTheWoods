@@ -198,4 +198,5 @@ exports.displayHome = function(req, res){
             });
         }
     });
+
 };
