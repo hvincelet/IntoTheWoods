@@ -66,3 +66,5 @@ function loadPathToPost(){
       console.log(e);
     }
 }
+
+// https://www.google.com/maps/dir/?api=1&destination=48.737251,-3.4872647100484073&travelmode=car
