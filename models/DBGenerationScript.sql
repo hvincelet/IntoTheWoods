@@ -202,7 +202,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`helper_post` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_point_of_interest` INT UNSIGNED NOT NULL,
+  `id_point_of_interest` INT UNSIGNED NULL,
   `title` VARCHAR(128) NULL,
   `description` VARCHAR(1024) NULL,
   `nb_helper` INT DEFAULT 1,
