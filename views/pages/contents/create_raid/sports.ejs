@@ -108,7 +108,7 @@
     function validateSports(){
         let list = [
             <% sports.forEach(function(sport){ %>
-            {id: <%=sport.id%>, name: '<%= sport.name%>'},
+            {id: "<%=sport.id%>", name: '<%= sport.name%>'},
             <% }); %>
         ];
         list.forEach(function (sport) {
