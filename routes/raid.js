@@ -280,23 +280,22 @@ exports.displayRaid = function(req, res) {
                 let course_model = models.course;
                 let sport_model = models.sport;
 
-                sport_model.belongsTo(course_model, {foreignKey: 'id'});
+                course_model.belongsTo(sport_model, {foreignKey: 'id_sport'});
                 const Sequelize = require('sequelize');
-                sport_model.findAll({
-                    attributes: ['name'],
+                course_model.findAll({
+                    attributes: ['order_num'],
                     include: [{
-                        model: course_model,
-                        attributes: ['order_num'],
-                        where: {
-                            id_sport: Sequelize.col('sport.id'),
-                            id_raid: req.params.id
-                        }
-                    }]
+                        model: sport_model,
+                        attributes: ['name']
+                    }],
+                    where: {
+                        id_raid: req.params.id
+                    }
                 }).then(function (course_name_and_order_found) {
                     course_name_and_order_found.map(course => {
                         courses_linked_with_the_current_raid.push({
-                            order: course.dataValues.course.order_num,
-                            name: course.dataValues.name
+                            order: course.dataValues.order_num,
+                            name: course.dataValues.sport.name
                         });
                     });
 

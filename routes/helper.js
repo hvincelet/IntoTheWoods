@@ -97,7 +97,7 @@ exports.register = function(req, res){
     const registerEmail = req.body.registerEmail;
     const registerUserLn = req.body.registerUserLn;
     const registerUserFn = req.body.registerUserFn;
-    const helperPostsWished = req.body.registerRun;
+    let helperPostsWished = JSON.parse(req.body.wishes_list);
 
     models.helper.findOne({
         where: {
@@ -122,11 +122,11 @@ exports.register = function(req, res){
                 last_name: registerUserLn,
                 first_name: registerUserFn
             }).then(function () {
-                // TODO : sort helperPostsWished
-                helperPostsWished.forEach(function(id_activity){
+                helperPostsWished.map(wish =>{
                     models.assignment.create({
                         id_helper: id_helper,
-                        id_helper_post: id_activity,
+                        id_helper_post: wish.id,
+                        //order: wish.order,
                         attributed: 0
                     });
                 });
