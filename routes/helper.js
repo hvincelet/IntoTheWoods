@@ -61,7 +61,6 @@ exports.inviteHelper = function(req, res) {
 };
 
 exports.displayRegister = function(req, res){
-
     let raid_id = req.query.raid;
     let get_post_clean = [];
 
@@ -72,7 +71,6 @@ exports.displayRegister = function(req, res){
     point_of_interest_model.belongsTo(raid_model, {foreignKey: 'id_raid'});
     helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
-    // Get helper_post from database link to point of interest of current raid (JOIN LEVEL 2)
     helper_post_model.findAll({
       include: [{
           model: point_of_interest_model,
@@ -83,7 +81,7 @@ exports.displayRegister = function(req, res){
               },
               attributes: ['name', 'edition']
           }]
-      }],attributes: ['id', 'description', 'nb_helper']
+      }],attributes: ['id', 'title', 'nb_helper']
     }).then(function(helper_posts_found){
         if(helper_posts_found !== null){
             helper_posts_found.forEach(function(helper_post, index, helper_posts_array){
@@ -94,7 +92,7 @@ exports.displayRegister = function(req, res){
                     }
                 }).then(function(all_assignement){
                     if(helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0){
-                        get_post_clean.push({'id':helper_post.dataValues.id,'description':helper_post.dataValues.description});
+                        get_post_clean.push({'id':helper_post.dataValues.id,'title':helper_post.dataValues.title});
                     }
                     if(index === helper_posts_array.length -1){
                         res.render(pages_path + "helper_register.ejs", {
@@ -127,55 +125,53 @@ exports.register = function(req, res){
     const registerEmail = req.body.registerEmail;
     const registerUserLn = req.body.registerUserLn;
     const registerUserFn = req.body.registerUserFn;
-    let helperPostsWished = JSON.parse(req.body.wishes_list);
+    let helperPostsWished = JSON.parse(req.body.wishes);
 
     models.helper.findOne({
         where: {
             login: id_helper
         }
     }).then(function (helper_found) {
-        if (helper_found !== null) {
-            while(helper_found !== null) {
-                id_helper = Math.random().toString(36).substr(2, 7);
-                models.helper.findOne({
-                    where: {
-                        login: id_helper
-                    }
-                }).then(function(test_helper) {
-                    helper_found = test_helper;
-                });
-            }
-        } else {
-            models.helper.create({
-                login: id_helper,
-                email: registerEmail,
-                last_name: registerUserLn,
-                first_name: registerUserFn
-            }).then(function () {
-                helperPostsWished.map(wish =>{
-                    models.assignment.create({
-                        id_helper: id_helper,
-                        id_helper_post: wish.id,
-                        attributed: 0,
-                        order: wish.order
-                    });
-                });
-                res.redirect("/helper/" + id_helper + "/home");
+        while(helper_found !== null) {
+            id_helper = Math.random().toString(36).substr(2, 7);
+            models.helper.findOne({
+                where: {
+                    login: id_helper
+                }
+            }).then(function(test_helper) {
+                helper_found = test_helper;
             });
         }
+        models.helper.create({
+            login: id_helper,
+            email: registerEmail,
+            last_name: registerUserLn,
+            first_name: registerUserFn
+        }).then(function () {
+            helperPostsWished.map(wish =>{
+                models.assignment.create({
+                    id_helper: id_helper,
+                    id_helper_post: wish.id,
+                    attributed: 0,
+                    order: wish.order
+                });
+            });
+            res.redirect("/helper/" + id_helper + "/home");
+        });
     });
 };
 
 exports.displayHome = function(req, res){
 
-    models.assignment.findOne({
+    models.assignment.findAll({
         where: {
             id_helper: req.params.id
         }
-    }).then(function (assignment_found) {
-        if (assignment_found !== null) {
-            if (assignment_found.attributed === 0){
-                res.render(pages_path + "helper_register.ejs", {
+    }).then(function (assignments_found) {
+        if (assignments_found !== null) {
+            const assignment_found = assignments_found.find(function(assignment){return parseInt(assignment.attributed) === 1;});
+            if (assignment_found === undefined){
+                res.render(pages_path + "helper_home.ejs", {
                     pageTitle: "Inscription Bénévole",
                     errorMessage: "Vous n'avez pas encore été attribué à un poste."
                 });
@@ -215,7 +211,7 @@ exports.displayHome = function(req, res){
             }
 
         } else { // id of helper does not exist
-            res.render(pages_path + "helper_register.ejs", {
+            res.render(pages_path + "helper_home.ejs", {
                 pageTitle: "Inscription Bénévole",
                 errorMessage: "Cet identifiant n'existe pas."
             });

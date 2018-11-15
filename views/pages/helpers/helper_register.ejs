@@ -55,7 +55,7 @@
                                             <select name="whish_post" class="select2-selection--single"
                                                     style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
                                                 <% activity.forEach(function(item){ %>
-                                                    <option value='<%=item.id%>'> <%=item.description%> </option>
+                                                    <option value='<%=item.id%>'><%=item.title%></option>
                                                 <% }); %>
                                             </select>
                                         </td>
@@ -77,7 +77,7 @@
                                         <td class="pt-3-half" contenteditable="false" width="44%">
                                             <select name="whish_post" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
                                                 <% activity.forEach(function(item){ %>
-                                                    <option value='<%=item.id%>'> <%=item.description%> </option>
+                                                    <option value='<%=item.id%>'><%=item.title%></option>
                                                 <% }); %>
                                             </select>
                                         </td>
@@ -102,7 +102,7 @@
                     </div>
                     <div class="form-group text-center">
                         <input type="hidden" name="wishes" id="wishes_list">
-                        <input id="register" type="button" value="S'inscrire" class="btn btn-primary">
+                        <input id="register" type="button" value="S'inscrire" class="btn btn-primary" onclick="validateWishes()">
                     </div>
                 </form>
             </div>
@@ -159,9 +159,10 @@
     function validateWishes(){
         let list = [
             <% activity.forEach(function(item){ %>
-                {id: "<%=item.id%>", name: '<%=item.description%>'},
+                {id: "<%=item.id%>", name: '<%=item.title%>'},
             <% }); %>
         ];
+
         list.forEach(function (wish) {
             let elem = document.createElement('textarea');
             elem.innerHTML = wish.name;
@@ -173,8 +174,8 @@
         $('#table').find('tr').each(function () {
             let index = $(this).find('td.row-number').html()
             let selected_wish = $(this).find('td .select2-selection__rendered').text();
-
             if($.isNumeric( index ) && parseInt(index) > 0){
+
                 let wish = 0;
                 list.forEach(function (item) {
                     if(item.name === selected_wish){
@@ -187,7 +188,6 @@
                 });
             }
         });
-
         $('#wishes_list').val( JSON.stringify(whishes) );
         $('#helper_form').submit();
     }

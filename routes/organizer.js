@@ -220,73 +220,76 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
 exports.assignHelper = function(req, res) {
     const assign_helper_actions =  req.body.assignments_array.map(assignment => {
         return new Promise(resolve => {
-            models.assignment.update({
-                attributed: 0,
-                where: {
-                    id_helper: assignment.id_helper,
-                    attributed: 1
-                }
-            }).then(function() {
-                models.assignment.update({
-                    attributed: 1,
-                    where: {
-                        id_helper: assignment.id_helper,
-                        id_helper_post: assignment.id_helper_post
-                    }
+            models.assignment.findOne({
+                id_helper: assignment.id_helper,
+                attributed: 1
+            }).then(function(assignment_to_unattribute) {
+                console.log(assignment_to_unattribute);
+                assignment_to_unattribute.update({
+                    attributed: 0
                 }).then(function () {
-                    models.helper.findOne({
+                    return resolve();
+                    /*models.assignment.update({
+                        attributed: 1,
                         where: {
-                            login: assignment.id_helper
-                        },
-                        attributes: ['email']
-                    }).then(function(helper_found){
-                        if(helper_found !== null){
-                            let local_email = helper_found.dataValues.email;
-                            models.helper_post.findOne({
-                                where:{
-                                    id:assignment.id_helper_post
-                                },
-                                attributes:['id_point_of_interest','description']
-                            }).then(function(helper_post_found){
-                                if(helper_post_found !== null){
-                                    let description = helper_post_found.dataValues.description;
-                                    models.point_of_interest.findOne({
-                                        where:{
-                                            id: helper_post_found.dataValues.id_point_of_interest
-                                        },
-                                        attributes:['id_raid']
-                                    }).then(function(point_of_interest_found){
-                                        if(point_of_interest_found !== null){
-                                            models.raid.findOne({
-                                                where:{
-                                                    id:point_of_interest_found.dataValues.id_raid
-                                                },
-                                                attributes:['name','date','edition','place']
-                                            }).then(function(raid_found){
-                                                if(raid_found !== null){
-                                                    let local_name = raid_found.dataValues.name;
-                                                    let local_date = raid_found.dataValues.date;
-                                                    let local_edition = raid_found.dataValues.edition;
-                                                    let local_place = raid_found.dataValues.place;
-                                                    sender.sendMailToHelper({
-                                                        email: local_email,
-                                                        id_helper: assignment.id_helper,
-                                                        id_helper_post: assignment.id_helper_post,
-                                                        description: description,
-                                                        name: local_name,
-                                                        date: local_date,
-                                                        edition: local_edition,
-                                                        place: local_place
-                                                    });
-                                                    return resolve();
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
-                            });
+                            id_helper: assignment.id_helper,
+                            id_helper_post: assignment.id_helper_post
                         }
-                    });
+                    }).then(function () {
+                        models.helper.findOne({
+                            where: {
+                                login: assignment.id_helper
+                            },
+                            attributes: ['email']
+                        }).then(function(helper_found){
+                            if(helper_found !== null){
+                                let local_email = helper_found.dataValues.email;
+                                models.helper_post.findOne({
+                                    where:{
+                                        id:assignment.id_helper_post
+                                    },
+                                    attributes:['id_point_of_interest','description']
+                                }).then(function(helper_post_found){
+                                    if(helper_post_found !== null){
+                                        let description = helper_post_found.dataValues.description;
+                                        models.point_of_interest.findOne({
+                                            where:{
+                                                id: helper_post_found.dataValues.id_point_of_interest
+                                            },
+                                            attributes:['id_raid']
+                                        }).then(function(point_of_interest_found){
+                                            if(point_of_interest_found !== null){
+                                                models.raid.findOne({
+                                                    where:{
+                                                        id:point_of_interest_found.dataValues.id_raid
+                                                    },
+                                                    attributes:['name','date','edition','place']
+                                                }).then(function(raid_found){
+                                                    if(raid_found !== null){
+                                                        let local_name = raid_found.dataValues.name;
+                                                        let local_date = raid_found.dataValues.date;
+                                                        let local_edition = raid_found.dataValues.edition;
+                                                        let local_place = raid_found.dataValues.place;
+                                                        sender.sendMailToHelper({
+                                                            email: local_email,
+                                                            id_helper: assignment.id_helper,
+                                                            id_helper_post: assignment.id_helper_post,
+                                                            description: description,
+                                                            name: local_name,
+                                                            date: local_date,
+                                                            edition: local_edition,
+                                                            place: local_place
+                                                        });
+                                                        return resolve();
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    });*/
                 });
             });
         });
