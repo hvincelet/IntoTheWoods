@@ -34,6 +34,10 @@ exports.createRaid = function (req, res) {
         lat: 0.0,
         lng: 0.0
     }).then(function (raid_created) {
+        models.helper_post.create({
+            title: "Backup",
+            nb_helper: -1
+        });
         let user = connected_user(req.sessionID);
         user.idCurrentRaid = raid_created.dataValues.id;
         models.team.create({
@@ -96,7 +100,6 @@ exports.saveSportsRanking = function (req, res) {
     let user = connected_user(req.sessionID);
     const save_sports_actions = JSON.parse(req.body.sports_list).map(sport_row => {
         return new Promise(resolve => {
-            console.log(sport_row);
             models.course.create({
                 order_num: sport_row.order,
                 label: sport_row.name,
@@ -178,7 +181,7 @@ exports.displayRaid = function (req, res) {
     let organizer_model = models.organizer;
 
     team_model.belongsTo(organizer_model, {foreignKey: 'id_organizer'});
-    team_model.findAll({ // Get all organizers assigned to the current raid
+    team_model.findAll({
         include: [{
             model: organizer_model,
             attributes: ['email', 'last_name', 'first_name']
@@ -214,7 +217,6 @@ exports.displayRaid = function (req, res) {
         helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
         assignment_model.findAll({
-            attributes: ['id_helper', 'id_helper_post', 'attributed'],
             include: [{
                 model: helper_post_model,
                 attributes: ['id', 'description'],
@@ -244,28 +246,21 @@ exports.displayRaid = function (req, res) {
                         }
                     }).then(function (helper_found) {
                         const assignments_by_id_helper = assignment_found.filter(function (value) {
-                            return value.dataValues.id_helper == helper_found.dataValues.login;
+                            return value.dataValues.id_helper === helper_found.dataValues.login;
                         });
-                        const assignment_attributed_to_helper = assignments_by_id_helper.find(function (value) {
-                            return value.dataValues.attributed == 1;
-                        });
-                        let attributed = 0;
-                        if (assignment_attributed_to_helper) {
-                            attributed = 1;
-                        }
                         let helper = {
                             login: helper_found.dataValues.login,
                             email: helper_found.dataValues.email,
                             last_name: helper_found.dataValues.last_name,
                             first_name: helper_found.dataValues.first_name,
-                            attributed: attributed,
                             assignment: []
                         };
                         assignments_by_id_helper.forEach(function (assignment_by_id_helper) {
                             if (assignment_by_id_helper.dataValues.helper_post !== null) {
                                 helper.assignment.push({
                                     id: assignment_by_id_helper.dataValues.id_helper_post,
-                                    description: assignment_by_id_helper.dataValues.helper_post.dataValues.description
+                                    description: assignment_by_id_helper.dataValues.helper_post.dataValues.description,
+                                    attributed: assignment_by_id_helper.dataValues.attributed
                                 });
                             }
                         });

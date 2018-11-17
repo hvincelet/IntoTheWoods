@@ -9,6 +9,14 @@
                 <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
                 <p>Bienvenue sur Into the Woods, vous êtes sur le point de rejoindre votre poste.<br/>
                    Pour cela, suivez l'itinéraire sur la carte ci-dessous et valider lorsque vous y êtes.</p>
+                <% if(typeof errorMessage !== "undefined") { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+                        <%= errorMessage %>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <% }else{ %>
                  <div class="container-fluid">
                      <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.2.0/css/ol.css" type="text/css">
                      <div class="row">
@@ -30,6 +38,7 @@
                          </div>
                      </div>
                  </div>
+                <% } %>
             </div>
             <div class="copyrights text-center">
                 <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
