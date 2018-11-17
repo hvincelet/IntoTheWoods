@@ -77,7 +77,7 @@
                                         <td class="pt-3-half" contenteditable="false" width="44%">
                                             <select name="whish_post" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
                                                 <% activity.forEach(function(item){ %>
-                                                    <option value='<%=item.id%>'> <%=item.description%> </option>
+                                                    <option value='<%=item.id%>'><%=item.description%></option>
                                                 <% }); %>
                                             </select>
                                         </td>
@@ -156,12 +156,13 @@
         });
     }
 
-    function validateWishes(){
+    $('#register').click(function (){
         let list = [
             <% activity.forEach(function(item){ %>
-                {id: "<%=item.id%>", name: '<%=item.description%>'},
+                {id: "<%=item.id%>", name: ' <%=item.description%> '},
             <% }); %>
         ];
+        console.log(list);
         list.forEach(function (wish) {
             let elem = document.createElement('textarea');
             elem.innerHTML = wish.name;
@@ -190,7 +191,7 @@
 
         $('#wishes_list').val( JSON.stringify(whishes) );
         $('#helper_form').submit();
-    }
+    });
 </script>
 <% include ../partials/footer %>
 </body>

@@ -1,6 +1,7 @@
 let pointOfInterestArrayToStore = [];
 
 function loadPointsOfInterest(pointArray) {
+    console.log(typeof pointArray);
     pointArray.map(pointOfInterest => {
         let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
         let feature = new ol.Feature({

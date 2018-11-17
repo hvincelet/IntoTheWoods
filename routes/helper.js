@@ -102,7 +102,7 @@ exports.register = function (req, res) {
     const registerEmail = req.body.registerEmail;
     const registerUserLn = req.body.registerUserLn;
     const registerUserFn = req.body.registerUserFn;
-    let helperPostsWished = JSON.parse(req.body.wishes_list);
+    let helperPostsWished = JSON.parse(req.body.wishes);
 
     models.helper.findOne({
         where: {

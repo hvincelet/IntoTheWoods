@@ -49,6 +49,40 @@ helpers.map( (helper, index) => {
         </div>
     </div>
 </section>
+<% if (pois.length > 0 ) { %>
+<section class="forms">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <h4>Points d'intérêts</h4>
+                        <button style="margin-left: 1em;" type="button" class="btn btn-info btn-rounded btn-sm" >Sauvegarder les points d'intérêts</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-editable">
+                            <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
+                                <tr>
+                                    <th class="text-center">Nom</th>
+                                    <th class="text-center">Nombre de bénévols</th>
+                                    <th class="text-center">Description</th>
+                                </tr>
+                                <% pois.map(poi => { %>
+                                <tr>
+                                    <td class="pt-3-half" contenteditable="true" width="40%"><%=poi.name%></td>
+                                    <td width="20%" contenteditable="false"><input type="number" min="1" value="<%= poi.nb_helper %>"/></td>
+                                    <td width="40%" contenteditable="true"><%= poi.description %></td>
+                                </tr>
+                                <% }); %>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<% } %>
 <section class="forms">
     <div class="container-fluid">
         <div class="row">
@@ -97,6 +131,7 @@ helpers.map( (helper, index) => {
                     <div class="card-body">
                         <div class="table-editable">
                             <button type="button" class="btn btn-primary btn-rounded" style="margin-bottom: 1em;" data-toggle="modal" data-target="#modal-helpers">Ajouter des helpers</button>
+                            <% if(helpers.length > 0){%>
                             <button type="button" class="btn btn-info btn-rounded" style="margin-bottom: 1em;" id="save-helper-post">Enregistrer les postes attribués</button>
                             <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
                                 <tr>
@@ -129,6 +164,7 @@ helpers.map( (helper, index) => {
                                 </tr>
                                 <% }); %>
                             </table>
+                            <% } %>
                         </div>
                     </div>
                 </div>
@@ -136,405 +172,34 @@ helpers.map( (helper, index) => {
         </div>
     </div>
 </section>
-<!-- Add Helpers modal -->
-<div class="modal fade" id="modal-helpers" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">Ajout de nouveaux helpers</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="table-editable">
-                    <span class="table-addHelperTable float-right mb-3 mr-2"><a href="#!" class="text-success"><i class="fa fa-plus fa-2x" aria-hidden="true"></i></a></span>
-                    <table id="addHelperTable"
-                           class="table table-bordered table-responsive-md table-striped text-center">
-                        <tr>
-                            <th class="text-center">Adresse e-mail</th>
-                            <th class="text-center">Suppression</th>
-                        </tr>
-                        <tr class="duplicate">
-                            <td class="pt-3-half helper_mail" contenteditable="true"></td>
-                            <td width="5%">
-                                <span class="table-remove">
-                                    <button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button>
-                                </span>
-                            </td>
-                        </tr>
-                    </table>
-                    <table id="hidden-addHelperTable" style="display: none;">
-                        <!-- Default added row -->
-                        <tr class="hide duplicate">
-                            <td class="pt-3-half helper_mail" contenteditable="true"></td>
-                            <td width="5%">
-                                <span class="table-remove">
-                                    <button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button>
-                                </span>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary cancel-addHelperTable" data-dismiss="modal">Annuler</button>
-                <button type="button" id="submit-addHelperTable" class="btn btn-primary" onclick="inviteHelpers()">Invitez les helpers</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Remove confirmation modal -->
-<div class="modal fade" id="removeModal" tabindex="-1" role="dialog" aria-labelledby="confirmDialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDialog">Confirmation suppression</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <span class="userName"></span> (<span class="userMail"></span>) de la liste des <span class="userType"></span> ?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                <button type="button" id="confirmRemove-button" class="btn btn-danger">Confirmer la suppression</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Message modal -->
-<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageDialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="messageDialog">Title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-lg-3 text-center align-middle my-auto" id="messageIconDialog"></div>
-                    <div class="col-lg-9 align-middle my-auto" id="messageContentDialog"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Send mail modal -->
-<div class="modal fade" id="mailModal" tabindex="-1" role="dialog" aria-labelledby="mailDialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="mailDialog">Envoi d'un message</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="row">
-                        <div class="col-md-2">
-                            <label for="recipient-name" class="col-form-label">Pour :</label>
-                        </div>
-                        <div class="col-md-10">
-                            <input type="text" class="form-control form-control-success" id="recipient-name">
-                        </div>
-                    </div>
-                    <div class="row" style="margin-top: 1em;">
-                        <div class="col-md-2">
-                            <label for="recipient-subject" class="col-form-label">Objet :</label>
-                        </div>
-                        <div class="col-md-10">
-                            <input type="text" class="form-control form-control-success" id="recipient-subject">
-                        </div>
-                    </div>
-                    <div class="row" style="margin-top: 1em;">
-                        <div class="col-md-2">
-                            <label for="message-text" class="col-form-label">Message :</label>
-                        </div>
-                        <div class="col-md-10">
-                            <textarea class="form-control form-control-success" id="message-text"></textarea>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                <button type="button" id="sendMail-button" class="btn btn-primary">Envoyer le message</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- JS for add Helpers table -->
+<%- include details_modal.ejs %>
 <script type="text/javascript">
-    var $ADD_HELPER_TABLE = $('#addHelperTable');
-    var $HIDDEN_ADD_HELPER_TABLE = $('#hidden-addHelperTable');
-
-    $('.table-addHelperTable').click(function () {
-        var $clone = $HIDDEN_ADD_HELPER_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
-        $ADD_HELPER_TABLE.append($clone);
-    });
-
-    $('.table-remove').click(function () {
-        $(this).parents('tr').detach();
-    });
-
-    $('.cancel-addHelperTable').click(function () {
-        $ADD_HELPER_TABLE.find('tr.duplicate').detach();
-        var $clone = $HIDDEN_ADD_HELPER_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
-        $ADD_HELPER_TABLE.append($clone);
-    });
-</script>
-<!-- JS for confirm dialog -->
-<script type="text/javascript">
-    let $REMOVE_MODAL = $('#removeModal');
-    $REMOVE_MODAL.on('show.bs.modal', function (event) {
-        let deleteButton = $(event.relatedTarget);
-        let type = deleteButton.data('type');
-        let userName = deleteButton.data('username');
-        let userMail = deleteButton.data('usermail');
-        let modal = $(this);
-        modal.find('span.userName').text(userName);
-        modal.find('span.userMail').text(userMail);
-        modal.find('span.userType').text(type);
-    });
-
-    $('#confirmRemove-button').click(function () {
-        let userMail = $('.modal-body').find('span.userMail').text();
-        let userType = $('.modal-body').find('span.userType').text();
-        // AJAX to delete user by this mail into type (Ex: delete user1@mail.com into organizer)
-    });
-</script>
-<!-- JS for mail dialog -->
-<script type="text/javascript">
-    let $MAIL_MODAL = $('#mailModal');
-    $MAIL_MODAL.on('show.bs.modal', function (event) {
-        let contactButton = $(event.relatedTarget);
-        let mail = contactButton.data('mail');
-        let subject = contactButton.data('type');
-        let modal = $(this);
-        modal.find('#recipient-name').val(mail);
-        let subjectText = "[Into The Woods] ";
-        if(subject === "Organizers"){
-            subjectText += "Organisation "
-        }else if(subject === "Helpers"){
-            subjectText += "Bénévolat "
-        }
-        modal.find('#recipient-subject').val(subjectText + "<%=raid.name%> - Édition <%=raid.edition%>");
-    });
-
-    $('#sendMail-button').click(function () {
-        let mail = $('#recipient-name').val();
-        let subject = $('#recipient-subject').val();
-        let message = $('#message-text').val();
-        let $MESSAGE_MODAL = $('#messageModal');
-        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
-        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
-        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
-        $('#mailModal').modal('hide');
-        $.ajax({
-            type: 'POST',
-            url: '/editraid/<%= raid.id %>/sendMessage',
-            data: {
-                mails: mail.split(','),
-                organizer: "<%= user.first_name%> <%= user.last_name %>",
-                message: message,
-                subject: subject,
-                raid_name: "<%=raid.name%>"
-            },
-            success: function (response) {
-                msg = JSON.parse(response).msg;
-                if(msg === "ok"){
-                    $MESSAGE_MODAL_TITLE.html("Message envoyé");
-                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                    $MESSAGE_MODAL_CONTENT.html("Le message a bien été envoyé à <strong>" + mail + "</strong>.");
-                }else{
-                    $MESSAGE_MODAL_TITLE.html("Message non envoyé...");
-                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                    $MESSAGE_MODAL_CONTENT.html("Le message n'a pas pu être envoyé à <strong>" + mail + "</strong>...");
-                }
-                $MESSAGE_MODAL.modal('show');
-            },
-            error: function (response) {
-                let msg = JSON.parse(response).msg;
-                $MESSAGE_MODAL_TITLE.html("Message non envoyé...");
-                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                $MESSAGE_MODAL_CONTENT.html("Le message n'a pas pu être envoyé à <strong>" + mail + "</strong>...");
-                $MESSAGE_MODAL.modal('show');
-            }
-        });
-    });
-</script>
-<!-- JS for line-throught on radio button non-checked -->
-<script type="text/javascript">
+    // JS for line-throught on radio button non-checked
     var assignment = [];
     $(document).ready(function () {
         <% helpers.forEach(function (helper) { %>
-            $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').change(function () {
-                let val = this.value;
-                let found = assignment.find(function (helper) {
-                    return helper.id_helper === "<%=helper.login%>"
-                });
-                if(found){
-                    found.id_helper_post = val;
-                }else{
-                    assignment.push({id_helper: "<%=helper.login%>", id_helper_post: val});
-                }
-                console.log(assignment);
-                $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').each(function () {
-                   let label = this.id+"-label";
-                   if(this.value !== val){
-                       $('#'+label).css('text-decoration', 'line-through');
-                   }else{
-                       $('#'+label).css('text-decoration', 'none');
-                   }
-                });
+        $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').change(function () {
+            let val = this.value;
+            let found = assignment.find(function (helper) {
+                return helper.id_helper === "<%=helper.login%>"
             });
+            if(found){
+                found.id_helper_post = val;
+            }else{
+                assignment.push({id_helper: "<%=helper.login%>", id_helper_post: val});
+            }
+            console.log(assignment);
+            $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').each(function () {
+                let label = this.id+"-label";
+                if(this.value !== val){
+                    $('#'+label).css('text-decoration', 'line-through');
+                }else{
+                    $('#'+label).css('text-decoration', 'none');
+                }
+            });
+        });
         <% }); %>
     });
-    
-    $('#save-helper-post').click(function () {
-        $.ajax({
-            type: 'POST',
-            url: '/helper/assign',
-            data: {
-                assignments_array: assignment
-            },
-            success: function (response) {
-                msg = JSON.parse(response).msg;
-                if(msg === "ok"){
-                    $MESSAGE_MODAL_TITLE.html("Postes assignés");
-                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                    $MESSAGE_MODAL_CONTENT.html("Les postes ont bien été attribués aux helpers concernés.<br/><small>Afin de voir les changements, raffraichissez la page.</small>");
-                }else{
-                    $MESSAGE_MODAL_TITLE.html("Postes non assignés...");
-                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                    $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux helpers...");
-                }
-                $MESSAGE_MODAL.modal('show');
-            },
-            error: function (response) {
-                let msg = JSON.parse(response).msg;
-                $MESSAGE_MODAL_TITLE.html("Postes non assignés...");
-                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux helpers...");
-                $MESSAGE_MODAL.modal('show');
-            }
-        });
-    })
+    <%- scripts %>
 </script>
-<!-- JS for invite organizer and helpers -->
-<script type="text/javascript">
-    function validateEmail(email) {
-        var expr = /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
-        return expr.test(email);
-    }
-    function inviteOrganizer() {
-        let mail = $('#mail_organizer').val();
-        let $MESSAGE_MODAL = $('#messageModal');
-        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
-        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
-        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
-        if (validateEmail(mail)){
-            let data = {
-                mail: mail,
-                raid: {
-                    name: "<%= raid.name%>",
-                    edition: "<%= raid.edition%>"
-                }
-            };
-            $.ajax({
-                type: 'POST',
-                url: '/team/<%= raid.id %>/inviteorganizers',
-                data: data,
-                success: function (response) {
-                    let msg = JSON.parse(response).msg;
-                    if(msg === "ok"){
-                        $('#mail_organizer').val("");
-                        $MESSAGE_MODAL_TITLE.html("Organisateur invité·e !");
-                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                        $MESSAGE_MODAL_CONTENT.html("L'organisateur a bien été invité.");
-                        $MESSAGE_MODAL.modal('show');
-                    }else{
-                        $MESSAGE_MODAL_TITLE.html("Erreur...");
-                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
-                        if(msg === "no-account"){
-                            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer car il n'a pas créé de compte Organizer sur cette plateforme.");
-                        }else if(msg === "not-added"){
-                            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer...<br/>Merci de réitérer votre invitation dans quelques minutes.");
-                        }else if(msg === "mail-is-login"){
-                            $MESSAGE_MODAL_CONTENT.html("Impossible de vous invitez vous même comme Organizer...");
-                        }else{
-                            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer...");
-                        }
-                        $MESSAGE_MODAL.modal('show');
-                    }
-                },
-                error: function (response) {
-                    let msg = JSON.parse(response).msg;
-                    $MESSAGE_MODAL_TITLE.html("Erreur...");
-                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
-                    $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter cet·te organizer...");
-                    $MESSAGE_MODAL.modal('show');
-                }
-            });
-        }else{
-            if(mail.length > 0){
-                $MESSAGE_MODAL_TITLE.html("Erreur...");
-                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
-                $MESSAGE_MODAL_CONTENT.html("Merci de saisir une adresse e-mail valide...");
-                $MESSAGE_MODAL.modal('show');
-            }
-        }
-    }
-    function inviteHelpers(){
-        let $MESSAGE_MODAL = $('#messageModal');
-        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
-        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
-        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
-        let mails = [];
-
-        $('#addHelperTable').find('tr').each(function () {
-            let mail = $(this).find('td.helper_mail').html();
-            if(validateEmail(mail)){
-                mails.push(mail);
-            }
-        });
-
-        $('#modal-helpers').modal('hide');
-        $.ajax({
-            type: 'POST',
-            url: '/team/<%= raid.id %>/invitehelpers',
-            data: {mails: mails, raid: {name: "<%=raid.name%>", edition: "<%=raid.edition%>", id: "<%=raid.id%>"}},
-            success: function (response) {
-                invited_status = JSON.parse(response).status;
-                let helpers_not_invited = "";
-                $MESSAGE_MODAL_TITLE.html("Helpers invité·e·s");
-                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                $MESSAGE_MODAL_CONTENT.html("Ces helpers ont bien été invité·e·s :<ul>");
-                invited_status.map( helper => {
-                    if(helper.status === "ok"){
-                        $MESSAGE_MODAL_CONTENT.append("<li>" + helper.id + "</li>");
-                    }else{
-                        helpers_not_invited += "<li>" + helper.id + "</li>";
-                    }
-                });
-                $MESSAGE_MODAL_CONTENT.append("</ul>");
-                if(helpers_not_invited !== ""){
-                    $MESSAGE_MODAL_CONTENT.append("Ces helpers n'ont pas pu être invités : <ul>" + helpers_not_invited + "</ul>");
-                }
-                $MESSAGE_MODAL.modal('show');
-            },
-            error: function (response) {
-                let msg = JSON.parse(response).msg;
-                $MESSAGE_MODAL_TITLE.html("Erreur...");
-                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
-                $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter les helpers...");
-                $MESSAGE_MODAL.modal('show');
-            }
-        });
-    }
-</script>
+<!--<script type="text/javascript" src="/views/pages/contents/edit_raid/details.js"></script>-->
