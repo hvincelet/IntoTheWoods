@@ -3,9 +3,11 @@ const pages_path = "../views/pages/helpers/";
 const models = require('../models');
 const sender = require('./sender');
 
-exports.inviteHelper = function(req, res) {
+exports.inviteHelper = function (req, res) {
     const user = connected_user(req.sessionID);
-    if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
+    if (!user.raid_list.find(function (raid) {
+        return raid.id == req.params.raid_id
+    })) {
         return res.redirect('/dashboard');
     }
 
@@ -14,11 +16,11 @@ exports.inviteHelper = function(req, res) {
     let helper_list_to_invite = req.body.mails;
     let helper_invite_status = [];
     helper_list_to_invite.map(helper_email => {
-        if(helper_email !== user.login){
+        if (helper_email !== user.login) {
             let found = helper_invite_status.some(function (el) {
                 return el.id === helper_email;
             });
-            if(!found){ // User is not already invite
+            if (!found) { // User is not already invite
                 sender.inviteHelper({
                     email: helper_email,
                     raid: req.body.raid
@@ -28,7 +30,7 @@ exports.inviteHelper = function(req, res) {
                     status: "ok"
                 });
             }
-        }else{
+        } else {
             helper_invite_status.push({
                 id: helper_email,
                 status: "mail-is-login"
@@ -39,7 +41,7 @@ exports.inviteHelper = function(req, res) {
     res.send(JSON.stringify({status: helper_invite_status}));
 };
 
-exports.displayRegister = function(req, res){
+exports.displayRegister = function (req, res) {
 
     let raid_id = req.query.raid;
     let get_post_clean = [];
@@ -53,29 +55,32 @@ exports.displayRegister = function(req, res){
 
     // Get helper_post from database link to point of interest of current raid (JOIN LEVEL 2)
     helper_post_model.findAll({
-      include: [{
-          model: point_of_interest_model,
-          include: [{
-              model: raid_model,
-              where: {
-                  id: raid_id
-              },
-              attributes: ['name', 'edition']
-          }]
-      }],attributes: ['id', 'description', 'nb_helper']
-    }).then(function(helper_posts_found){
-        if(helper_posts_found !== null){
-            helper_posts_found.forEach(function(helper_post, index, helper_posts_array){
+        include: [{
+            model: point_of_interest_model,
+            include: [{
+                model: raid_model,
+                where: {
+                    id: raid_id
+                },
+                attributes: ['name', 'edition']
+            }]
+        }], attributes: ['id', 'description', 'nb_helper']
+    }).then(function (helper_posts_found) {
+        if (helper_posts_found !== null) {
+            helper_posts_found.forEach(function (helper_post, index, helper_posts_array) {
                 models.assignment.findAndCountAll({
                     where: {
                         id_helper_post: helper_post.dataValues.id,
                         attributed: 1
                     }
-                }).then(function(all_assignement){
-                    if(helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0){
-                        get_post_clean.push({'id':helper_post.dataValues.id,'description':helper_post.dataValues.description});
+                }).then(function (all_assignement) {
+                    if (helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0) {
+                        get_post_clean.push({
+                            'id': helper_post.dataValues.id,
+                            'description': helper_post.dataValues.description
+                        });
                     }
-                    if(index == helper_posts_array.length -1){
+                    if (index === helper_posts_array.length - 1) {
                         res.render(pages_path + "helper_register.ejs", {
                             pageTitle: "Inscription Bénévole",
                             activity: get_post_clean,
@@ -91,7 +96,7 @@ exports.displayRegister = function(req, res){
     });
 };
 
-exports.register = function(req, res){
+exports.register = function (req, res) {
 
     let id_helper = Math.random().toString(36).substr(2, 7);
     const registerEmail = req.body.registerEmail;
@@ -105,13 +110,13 @@ exports.register = function(req, res){
         }
     }).then(function (helper_found) {
         if (helper_found !== null) {
-            while(helper_found !== null) {
+            while (helper_found !== null) {
                 id_helper = Math.random().toString(36).substr(2, 7);
                 models.helper.findOne({
                     where: {
                         login: id_helper
                     }
-                }).then(function(test_helper) {
+                }).then(function (test_helper) {
                     helper_found = test_helper;
                 });
             }
@@ -136,7 +141,7 @@ exports.register = function(req, res){
     });
 };
 
-exports.displayHome = function(req, res){
+exports.displayHome = function (req, res) {
 
     models.assignment.findOne({
         where: {
@@ -144,7 +149,7 @@ exports.displayHome = function(req, res){
         }
     }).then(function (assignment_found) {
         if (assignment_found !== null) {
-            if (assignment_found.attributed == 0){
+            if (assignment_found.attributed === 0){
                 res.render(pages_path + "helper_register.ejs", {
                     pageTitle: "Inscription Bénévole",
                     errorMessage: "Vous n'avez pas encore été attribué à un poste."

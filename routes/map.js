@@ -22,7 +22,6 @@ exports.displayMap = function (req, res) {
             id_raid: raid.id
         }
     }).then(function (courses_found) {
-        console.log(courses_found);
         sports.findAll().then(function (all_sports) {
             courses_found.sort(function (a, b) {
                 return a.order_num - b.order_num;
@@ -115,14 +114,14 @@ exports.storeMapData = function (req, res) {
                         });
                         return resolve();
                     }).catch(err => console.log(err));
-                } else if (pointOfInterest.id.indexOf("remove") !== -1) {
+                } else if (pointOfInterest.removed === 'true') {
                     return point_of_interests.destroy({
                         where: {
                             id: pointOfInterest.id.replace('remove_', '')
                         }
                     });
                 } else {
-                    point_of_interests.findById(pointOfInterest.id)
+                    point_of_interests.findByPk(pointOfInterest.id)
                         .then(function (pointOfInterest_found) {
                             if (pointOfInterest_found !== null) { // point of interest is already present in DB, it must be updated
                                 pointOfInterest_found.update({
@@ -142,19 +141,33 @@ exports.storeMapData = function (req, res) {
             .then(result => {
                 if (req.body.helperPostArray !== undefined) {
                     req.body.helperPostArray.map(helper_post => {
-                        if (helper_post.is_new === 'new') {
-                            helper_posts.create({
-                                id_point_of_interest: helper_post.id_point_of_interest,
-                                description: helper_post.description,
-                                nb_helper: helper_post.nb_helper
-                            })
-                        } else {
 
-                            helper_posts.create({
-                                id_point_of_interest: helper_post.id_point_of_interest,
-                                description: helper_post.description,
-                                nb_helper: helper_post.nb_helper
-                            })
+                        if (helper_post.is_new === 'true') {
+
+                            let pointOfInterest = pointOfInterestServerIdArray.find(function (client_server_Id) {
+                                return client_server_Id.clientId === helper_post.id_point_of_interest;
+                            });
+
+                            if (pointOfInterest !== undefined){
+                                helper_posts.create({
+                                    id_point_of_interest: pointOfInterest.serverId,
+                                    description: helper_post.description,
+                                    nb_helper: helper_post.nb_helper
+                                });
+                            } else {
+                                helper_posts.create({
+                                    id_point_of_interest: helper_post.id_point_of_interest,
+                                    description: helper_post.description,
+                                    nb_helper: helper_post.nb_helper
+                                });
+                            }
+                        } else {
+                            helper_posts.update({
+                                    description: helper_post.description,
+                                    nb_Helper: helper_post.nb_helper
+                                },
+                                {where: {id: helper_post.id}}
+                            )
                         }
                     });
                 }
@@ -171,14 +184,15 @@ exports.storeMapData = function (req, res) {
                     id_track: course.id
                 }
             }).then(function () {
-                course.track_point_array.map(track_point => {
-                    track_points.create({
-                        id_track: course.id,
-                        lat: track_point[1],
-                        lng: track_point[0]
-                    })
-                });
-
+                if (course.track_point_array !== undefined) {
+                    course.track_point_array.map(track_point => {
+                        track_points.create({
+                            id_track: course.id,
+                            lat: track_point[1],
+                            lng: track_point[0]
+                        })
+                    });
+                }
                 courses.update(
                     {distance: course.distance},
                     {where: {id: course.id}}

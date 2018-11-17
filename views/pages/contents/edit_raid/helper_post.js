@@ -25,7 +25,7 @@ function editHelperPost(featureId) {
         helperPostFound.nb_helper = nbHelper;
     } else {
         helperPostArrayToStore.push({
-            id_point_of_interest: parseInt(featureId.replace("point_of_interest_", "")),
+            id_point_of_interest: parseInt(featureId.replace('point_of_interest_', '').replace('new_', '')),
             description: description,
             nb_helper: nbHelper,
             is_new: true
