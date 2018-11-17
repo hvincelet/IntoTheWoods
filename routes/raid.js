@@ -1,8 +1,10 @@
-const pages_path = "../views/pages/";
+const pages_path = __dirname + "/../views/pages/";
 const models = require('../models');
 
 const Nominatim = require('nominatim-geocoder');
 const geocoder = new Nominatim();
+const ejs = require('ejs');
+const fs = require('fs');
 
 
 exports.init = function (req, res) {
@@ -294,6 +296,27 @@ exports.displayRaid = function(req, res) {
                         });
                     });
 
+                    // Prepare render for JS file
+                    let compile = ejs.compile(fs.readFileSync(pages_path + "contents/edit_raid/details.js", 'utf-8'));
+                    let scripts_compiled = compile({raid: raid, user: user});
+
+                    let poi = [];
+                    poi.push({
+                        name: "Test",
+                        nb_helper: 3,
+                        description: "Blabal"
+                    });
+                    poi.push({
+                        name: "Test2",
+                        nb_helper: 2,
+                        description: "Blabaf  faafl"
+                    });
+                    poi.push({
+                        name: "Test3",
+                        nb_helper: 1,
+                        description: "Blaba addda addl"
+                    });
+
                     res.render(pages_path + "template.ejs", {
                         pageTitle: "Gestion d'un Raid",
                         page: "edit_raid/details",
@@ -301,9 +324,10 @@ exports.displayRaid = function(req, res) {
                         organizers: organizers_linked_with_the_current_raid,
                         helpers: data_helper,
                         courses: courses_linked_with_the_current_raid,
-                        raid: raid
+                        raid: raid,
+                        scripts: scripts_compiled,
+                        pois: poi
                     });
-
                 });
             });
         });
