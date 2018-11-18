@@ -219,7 +219,7 @@ exports.displayRaid = function (req, res) {
         assignment_model.findAll({
             include: [{
                 model: helper_post_model,
-                attributes: ['id', 'description'],
+                attributes: ['id', 'title'],
                 include: [{
                     model: point_of_interest_model,
                     where: {
@@ -259,7 +259,7 @@ exports.displayRaid = function (req, res) {
                             if (assignment_by_id_helper.dataValues.helper_post !== null) {
                                 helper.assignment.push({
                                     id: assignment_by_id_helper.dataValues.id_helper_post,
-                                    description: assignment_by_id_helper.dataValues.helper_post.dataValues.description,
+                                    description: assignment_by_id_helper.dataValues.helper_post.dataValues.title,
                                     attributed: assignment_by_id_helper.dataValues.attributed
                                 });
                             }
@@ -301,37 +301,47 @@ exports.displayRaid = function (req, res) {
                         });
                     });
 
-                    // Prepare render for JS file
-                    let compile = ejs.compile(fs.readFileSync(pages_path + "contents/edit_raid/details.js", 'utf-8'));
-                    let scripts_compiled = compile({raid: raid, user: user});
+                    /*********************************/
+                    /*    Points of interest infos   */
+                    /*********************************/
 
                     let poi = [];
-                    poi.push({
-                        name: "Test",
-                        nb_helper: 3,
-                        description: "Blabal"
-                    });
-                    poi.push({
-                        name: "Test2",
-                        nb_helper: 2,
-                        description: "Blabaf  faafl"
-                    });
-                    poi.push({
-                        name: "Test3",
-                        nb_helper: 1,
-                        description: "Blaba addda addl"
-                    });
 
-                    res.render(pages_path + "template.ejs", {
-                        pageTitle: "Gestion d'un Raid",
-                        page: "edit_raid/details",
-                        user: user,
-                        organizers: organizers_linked_with_the_current_raid,
-                        helpers: data_helper,
-                        courses: courses_linked_with_the_current_raid,
-                        raid: raid,
-                        scripts: scripts_compiled,
-                        pois: poi
+                    let poi_model = models.point_of_interest;
+                    let helper_post_model = models.helper_post;
+                    helper_post_model.belongsTo(poi_model, {foreignKey:"id_point_of_interest"});
+                    helper_post_model.findAll({
+                        attributes: ["title", "nb_helper", "description"],
+                        include:{
+                            model:poi_model,
+                            where:{
+                                id_raid: req.params.id
+                            }
+                        }
+                    }).then(function(helper_posts){
+                        helper_posts.forEach(function(helper_post){
+                            poi.push({
+                                name: helper_post.dataValues.title,
+                                nb_helper: helper_post.dataValues.nb_helper,
+                                description: helper_post.dataValues.description
+                            });
+                        });
+
+                        // Prepare render for JS file
+                        let compile = ejs.compile(fs.readFileSync(pages_path + "contents/edit_raid/details.js", 'utf-8'));
+                        let scripts_compiled = compile({raid: raid, user: user});
+
+                        res.render(pages_path + "template.ejs", {
+                            pageTitle: "Gestion d'un Raid",
+                            page: "edit_raid/details",
+                            user: user,
+                            organizers: organizers_linked_with_the_current_raid,
+                            helpers: data_helper,
+                            courses: courses_linked_with_the_current_raid,
+                            raid: raid,
+                            scripts: scripts_compiled,
+                            pois: poi
+                        });
                     });
                 });
             });
