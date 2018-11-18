@@ -2,6 +2,18 @@
 /*       Instantiate the map      */
 /**********************************/
 
+
+point_of_interest_test = {
+    id_raid: 1,
+    lat: 8.791813440122866,
+    lng: -3.5016345977783203
+};
+
+// if () { // click on open with google earth
+//     //console.log(https://www.google.com/maps/dir/?api=1&destination=48.737251,-3.4872647100484073&travelmode=car);
+// }
+
+
 let raster = new ol.layer.Tile({
     source: new ol.source.OSM()
 });
@@ -19,7 +31,7 @@ let map = new ol.Map({
 
 loadPathToPost();
 
-function loadPathToPost(){
+function loadPathToPost() {
 
     let lat1 = 48.7268687;
     let lng1 = -3.4599370999999337;
@@ -34,21 +46,21 @@ function loadPathToPost(){
                 y: lat1
             },
             endPoint: {
-              x: point_of_interest.lng,
-              y: point_of_interest.lat
+                x: point_of_interest.lng,
+                y: point_of_interest.lat
             },
             graph: graph,
             routePreference: routePreference,
             apiKey: "jhyvi0fgmnuxvfv0zjzorvdn",
-            onSuccess: function(result) {
-                var format= new ol.format.GeoJSON() ;
-                var feature= new ol.Feature({
-                    geometry : format.readGeometry(result.routeGeometry, {
-                        featureProjection:"EPSG:3857"
+            onSuccess: function (result) {
+                var format = new ol.format.GeoJSON();
+                var feature = new ol.Feature({
+                    geometry: format.readGeometry(result.routeGeometry, {
+                        featureProjection: "EPSG:3857"
                     })
                 });
                 feature.setStyle(new ol.style.Style({
-                    stroke : new ol.style.Stroke({
+                    stroke: new ol.style.Stroke({
                         color: 'red',
                         width: 3
                     })
@@ -63,8 +75,7 @@ function loadPathToPost(){
             }
         });
     } catch (e) {
-      console.log(e);
+        console.log(e);
     }
 }
 
-// https://www.google.com/maps/dir/?api=1&destination=48.737251,-3.4872647100484073&travelmode=car
