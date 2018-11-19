@@ -151,19 +151,19 @@ exports.storeMapData = function (req, res) {
                             if (pointOfInterest !== undefined){
                                 helper_posts.create({
                                     id_point_of_interest: pointOfInterest.serverId,
-                                    description: helper_post.description,
+                                    title: helper_post.description,
                                     nb_helper: helper_post.nb_helper
                                 });
                             } else {
                                 helper_posts.create({
                                     id_point_of_interest: helper_post.id_point_of_interest,
-                                    description: helper_post.description,
+                                    title: helper_post.description,
                                     nb_helper: helper_post.nb_helper
                                 });
                             }
                         } else {
                             helper_posts.update({
-                                    description: helper_post.description,
+                                    title: helper_post.description,
                                     nb_Helper: helper_post.nb_helper
                                 },
                                 {where: {id: helper_post.id}}

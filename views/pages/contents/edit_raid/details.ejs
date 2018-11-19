@@ -64,7 +64,7 @@ helpers.map( (helper, index) => {
                             <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
                                 <tr>
                                     <th class="text-center">Nom</th>
-                                    <th class="text-center">Nombre de bénévols</th>
+                                    <th class="text-center">Nombre de bénévole</th>
                                     <th class="text-center">Description</th>
                                 </tr>
                                 <% pois.map(poi => { %>
@@ -130,7 +130,7 @@ helpers.map( (helper, index) => {
                     </div>
                     <div class="card-body">
                         <div class="table-editable">
-                            <button type="button" class="btn btn-primary btn-rounded" style="margin-bottom: 1em;" data-toggle="modal" data-target="#modal-helpers">Ajouter des helpers</button>
+                            <button type="button" class="btn btn-primary btn-rounded" style="margin-bottom: 1em;" data-toggle="modal" data-target="#modal-helpers">Ajouter des bénévoles</button>
                             <% if(helpers.length > 0){%>
                             <button type="button" class="btn btn-info btn-rounded" style="margin-bottom: 1em;" id="save-helper-post">Enregistrer les postes attribués</button>
                             <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
@@ -145,18 +145,13 @@ helpers.map( (helper, index) => {
                                     <td class="pt-3-half" contenteditable="false" width="40%"><%= helper.first_name %> <%=helper.last_name %></td>
                                     <td class="pt-3-half" contenteditable="false" width="20%">
                                         <div class="form-check" style="text-align: left;">
-                                            <% if(helper.attributed === 1){ %>
-                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>" type="radio" name="<%=helpers_id[helper.email]%>" checked disabled>
-                                                <label for="<%=helpers_id[helper.email]%>"><%=helper.assignment[0].description%></label>
-                                            <% }else{
-                                                helper.assignment.map((post, index) =>{
-                                            %>
-                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>-<%=post.id%>" type="radio" value="<%=post.id%>" name="<%=helpers_id[helper.email]%>">
+                                            <% helper.assignment.map((post, index) =>{ %>
+                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>-<%=post.id%>" type="radio" value="<%=post.id%>" name="<%=helpers_id[helper.email]%>" <% if(parseInt(post.attributed) === 1){ %>checked<% } %>>
                                                 <label for="<%=helpers_id[helper.email]%>-<%=post.id%>" id="<%=helpers_id[helper.email]%>-<%=post.id%>-label"><%=post.description%></label>
                                                 <% if (index !== helper.assignment.length - 1){ %>
                                                     <br/>
                                                 <% } %>
-                                            <% }); } %>
+                                            <% }); %>
                                         </div>
                                     </td>
                                     <td width="20%"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" data-toggle="modal" data-target="#mailModal" data-mail="<%=helper.email%>" data-type="Helpers">Contacter</button></td>

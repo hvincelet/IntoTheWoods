@@ -212,9 +212,9 @@ function inviteHelpers(){
         success: function (response) {
             invited_status = JSON.parse(response).status;
             let helpers_not_invited = "";
-            $MESSAGE_MODAL_TITLE.html("Helpers invité·e·s");
+            $MESSAGE_MODAL_TITLE.html("Bénévole·s invité·e·s");
             $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-            $MESSAGE_MODAL_CONTENT.html("Ces helpers ont bien été invité·e·s :<ul>");
+            $MESSAGE_MODAL_CONTENT.html("Ces bénévole·s ont bien été invité·e·s :<ul>");
             invited_status.map( helper => {
                 if(helper.status === "ok"){
                     $MESSAGE_MODAL_CONTENT.append("<li>" + helper.id + "</li>");
@@ -224,7 +224,7 @@ function inviteHelpers(){
             });
             $MESSAGE_MODAL_CONTENT.append("</ul>");
             if(helpers_not_invited !== ""){
-                $MESSAGE_MODAL_CONTENT.append("Ces helpers n'ont pas pu être invités : <ul>" + helpers_not_invited + "</ul>");
+                $MESSAGE_MODAL_CONTENT.append("Ces bénévole·s n'ont pas pu être invité·e·s : <ul>" + helpers_not_invited + "</ul>");
             }
             $MESSAGE_MODAL.modal('show');
         },
@@ -232,7 +232,7 @@ function inviteHelpers(){
             let msg = JSON.parse(response).msg;
             $MESSAGE_MODAL_TITLE.html("Erreur...");
             $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
-            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter les helpers...");
+            $MESSAGE_MODAL_CONTENT.html("Impossible d'inviter les bénévole·s...");
             $MESSAGE_MODAL.modal('show');
         }
     });
