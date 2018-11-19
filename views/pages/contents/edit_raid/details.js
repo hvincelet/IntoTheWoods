@@ -198,7 +198,7 @@ function inviteHelpers(){
     let mails = [];
 
     $('#addHelperTable').find('tr').each(function () {
-        let mail = $(this).find('td.helper_mail').html();
+        let mail = $(this).find('td.helper_mail').text();
         if(validateEmail(mail)){
             mails.push(mail);
         }
