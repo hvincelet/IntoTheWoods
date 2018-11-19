@@ -172,7 +172,7 @@
         let whishes = [];
 
         $('#table').find('tr').each(function () {
-            let index = $(this).find('td.row-number').html()
+            let index = $(this).find('td.row-number').text()
             let selected_wish = $(this).find('td .select2-selection__rendered').text();
 
             if($.isNumeric( index ) && parseInt(index) > 0){
