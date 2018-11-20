@@ -63,61 +63,60 @@ exports.inviteHelper = function (req, res) {
 };
 
 exports.displayRegister = function(req, res){
-    let raid_id = req.query.raid;
+    const raid_id = req.query.raid;
     let get_post_clean = [];
 
-    let raid_model = models.raid;
     let point_of_interest_model = models.point_of_interest;
     let helper_post_model = models.helper_post;
 
-    point_of_interest_model.belongsTo(raid_model, {foreignKey: 'id_raid'});
     helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
-    helper_post_model.findAll({
-      include: [{
-          model: point_of_interest_model,
+    models.raid.findById(raid_id, {attributes:['name', 'edition']}).then(function(raid_found){
+        helper_post_model.findAll({
           include: [{
-              model: raid_model,
+              model: point_of_interest_model,
               where: {
-                  id: raid_id
-              },
-              attributes: ['name', 'edition']
-          }]
-      }],attributes: ['id', 'title', 'nb_helper']
-    }).then(function(helper_posts_found){
-        if(helper_posts_found !== null){
-            helper_posts_found.forEach(function(helper_post, index, helper_posts_array){
-                models.assignment.findAndCountAll({
-                    where: {
-                        id_helper_post: helper_post.dataValues.id,
-                        attributed: 1
-                    }
-                }).then(function(all_assignement){
-                    if(helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0){
-                        get_post_clean.push({'id':helper_post.dataValues.id,'title':helper_post.dataValues.title});
-                    }
-                    if (index === helper_posts_array.length - 1) {
-                        res.render(pages_path + "helper_register.ejs", {
-                            pageTitle: "Inscription Bénévole",
-                            activity: get_post_clean,
-                            raid: {
-                                name: helper_post.dataValues.point_of_interest.raid.name,
-                                edition: helper_post.dataValues.point_of_interest.raid.edition
-                            }
-                        });
+                  id_raid: raid_id
+              }
+          }],attributes: ['id', 'title', 'nb_helper']
+        }).then(function(helper_posts_found){
+            console.log(helper_posts_found);
+            if(helper_posts_found.length > 0){
+                helper_posts_found.forEach(function(helper_post, index, helper_posts_array){
+                    models.assignment.findAndCountAll({
+                        where: {
+                            id_helper_post: helper_post.dataValues.id,
+                            attributed: 1
+                        }
+                    }).then(function(all_assignement){
+                        if(helper_post.dataValues.point_of_interest !== null && helper_post.dataValues.nb_helper - all_assignement.count > 0){
+                            get_post_clean.push({'id':helper_post.dataValues.id,'title':helper_post.dataValues.title});
+                        }else if(helper_post.dataValues.title === "Backup"){
+                            get_post_clean.push({'id':helper_post.dataValues.id,'title':helper_post.dataValues.title});
+                        }
+                        if (index === helper_posts_array.length - 1) {
+                            res.render(pages_path + "helper_register.ejs", {
+                                pageTitle: "Inscription Bénévole",
+                                activity: get_post_clean,
+                                raid: {
+                                    name: raid_found.dataValues.name,
+                                    edition: raid_found.dataValues.edition
+                                }
+                            });
+                        }
+                    });
+                });
+            }else{
+                res.render(pages_path + "helper_register.ejs", {
+                    pageTitle: "Inscription Bénévole",
+                    activity: get_post_clean,
+                    raid: {
+                        name: raid_found.dataValues.name,
+                        edition: raid_found.dataValues.edition
                     }
                 });
-            });
-        }else{
-            res.render(pages_path + "helper_register.ejs", {
-                pageTitle: "Inscription Bénévole",
-                activity: get_post_clean,
-                raid: {
-                    name: helper_post.dataValues.point_of_interest.raid.name,
-                    edition: helper_post.dataValues.point_of_interest.raid.edition
-                }
-            });
-        }
+            }
+        });
     });
 };
 
@@ -154,7 +153,6 @@ exports.register = function (req, res) {
                 models.assignment.create({
                     id_helper: id_helper,
                     id_helper_post: wish.id,
-                    attributed: 0,
                     order: wish.order
                 });
             });
@@ -171,7 +169,7 @@ exports.displayHome = function (req, res) {
         }
     }).then(function (assignments_found) {
         if (assignments_found !== null) {
-            const assignment_found = assignments_found.find(function(assignment){return parseInt(assignment.attributed) === 1;});
+            const assignment_found = assignments_found.find(function(assignment){return assignment.attributed === 1;});
             if (assignment_found === undefined){
                 res.render(pages_path + "helper_home.ejs", {
                     pageTitle: "Inscription Bénévole",

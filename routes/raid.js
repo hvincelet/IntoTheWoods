@@ -34,10 +34,6 @@ exports.createRaid = function (req, res) {
         lat: 0.0,
         lng: 0.0
     }).then(function (raid_created) {
-        models.helper_post.create({
-            title: "Backup",
-            nb_helper: -1
-        });
         let user = connected_user(req.sessionID);
         user.idCurrentRaid = raid_created.dataValues.id;
         models.team.create({
@@ -47,7 +43,7 @@ exports.createRaid = function (req, res) {
 
         geocoder.search({q: req.body.raidPlace}) // allows to list all the locations corresponding to the city entered
             .then((response) => {
-                if (typeof response[0].lat !== undefined) {
+                if (typeof response[0].lat !== "undefined") {
                     raid_created.update({
                         place: response[0].display_name,
                         lat: response[0].lat,
@@ -226,7 +222,8 @@ exports.displayRaid = function (req, res) {
                         id_raid: req.params.id
                     }
                 }]
-            }]
+            }],
+            order: ['order']
         }).then(function (assignment_found) {
             const unique_assignments_array = assignment_found.filter(function (assignment, index, array) {
                 return array.findIndex(function (value) {
@@ -236,7 +233,7 @@ exports.displayRaid = function (req, res) {
 
             const storeHelperActions = unique_assignments_array.map((assignment, index) => {
                 return new Promise((resolve, reject) => {
-                    if (assignment.dataValues.helper_post === null) {
+                    if (assignment.dataValues.helper_post === null && assignment.dataValues.title !== "Backup") {
                         return resolve();
                     }
                     helper_model.findOne({
