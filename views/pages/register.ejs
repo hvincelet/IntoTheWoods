@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<% include partials/head %>
+<body>
+<div class="page login-page wood-background">
+    <div class="container">
+        <div class="form-outer text-center d-flex align-items-center">
+            <div class="form-inner">
+                <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
+                <p>Bienvenue sur Into the Woods, l'application qui vous permet de créer et gérer facilement vos Raids ! Vous êtes sur le point de créer un compte sur la plateforme.<br/>
+                    Une fois que vous aurez rempli le formulaire, lu et accepté les termes et conditions d'utilisation du service, vous recevrez un mail vous demandant de confirmer votre inscription.</p>
+                <% if(typeof errorMessage !== "undefined") { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+                        <%= errorMessage %>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <% } %>
+                <form class="text-left form-validate" method="post" action="/register">
+                    <div class="form-group-material">
+                        <input id="register-userfn" type="text" name="registerUserFn" required data-msg="Merci d'entrer votre prénom" class="input-material">
+                        <label for="register-userfn" class="label-material">Prénom</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="register-userln" type="text" name="registerUserLn" required data-msg="Merci d'entrer votre nom" class="input-material">
+                        <label for="register-userln" class="label-material">Nom</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="register-email" type="email" name="registerEmail" required data-msg="Merci d'entrer votre adresse e-mail" class="input-material">
+                        <label for="register-email" class="label-material">Adresse e-mail</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="register-password" type="password" name="registerPassword" required data-msg="Merci d'entrer votre mot de passe" class="input-material">
+                        <label for="register-password" class="label-material">Mot de passe</label>
+                    </div>
+                    <div class="form-group terms-conditions text-center">
+                        <input id="register-agree" name="registerAgree" type="checkbox" required value="1" data-msg="Votre accord est obligatoire" class="form-control-custom">
+                        <label for="register-agree">J'accepte <a href="/termsandpolicy" target="_blank">les termes et les conditions d'utilisation</a></label>
+                    </div>
+                    <div class="form-group text-center">
+                        <a id="register" class="btn btn-primary" href="javascript:register()">S'inscrire</a>
+                    </div>
+                </form><small>Vous avez déjà un compte ? </small><a href="/login" class="signup">Connectez-vous</a>
+            </div>
+            <div class="copyrights text-center">
+                <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+                <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+            </div>
+            <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalLabel">Title</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="submit-button" class="btn btn-primary">Button</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% include partials/footer %>
+<script type="text/javascript">
+    function register() {
+        let data = {
+            firstname : $('#register-userfn').val(),
+            lastname : $('#register-userln').val(),
+            email : $('#register-email').val(),
+            password : $('#register-password').val()
+        };
+        $.ajax({
+            type: 'POST',
+            url: '/register',
+            data: data,
+            success: function (response) {
+                let msg = JSON.parse(response).msg;
+
+                if (msg==="already-exist"){
+
+                    $('.modal-title').text('Adresse e-mail déjà utilisée !');
+                    $('.modal-body').text("Cette adresse e-mail ("+data['email']+") est déjà utilisée, merci d'en utiliser une autre.");
+                    $('#submit-button').text('Retour');
+                    $('#submit-button').attr('data-dismiss', 'modal');
+                    $('#modal').modal('show');
+                }else if (msg==="ok"){
+                    $('.modal-title').text('Inscription enregistrée !');
+                    $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
+                    $('#submit-button').text('Retourner à la page de connexion');
+                    $('#submit-button').attr('onclick', 'document.location.href=\'/login\'');
+                    $('#modal').modal('show');
+                }
+            },
+            error: function (msg) {
+                $('.modal-title').text('Erreur lors de l\'inscription...');
+                $('.modal-body').text("Erreur "+msg.status+" : "+msg.statusText);
+                $('#submit-button').text('Recharger la page');
+                $('#submit-button').attr('onclick', 'location.reload()');
+                $('#modal').modal('show');
+            }
+        });
+    }
+</script>
+</body>
+</html>

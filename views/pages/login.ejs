@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<% include partials/head %>
+<body>
+<div class="page login-page wood-background">
+    <div class="container">
+        <div class="form-outer text-center d-flex align-items-center">
+            <div class="form-inner">
+                <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
+                <p>Bienvenue sur Into the Woods, l'application qui vous permet de créer et gérer facilement vos Raids ! Pour commencer à utiliser ce service, merci de vous connecter ou bien de vous créer un compte.</p>
+                <% if(typeof errorMessage !== "undefined") { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+                        <%= errorMessage %>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <% } %>
+                <% if(typeof successMessage !== "undefined") { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+                        <%= successMessage %>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <% } %>
+                <form method="post" class="text-left form-validate" action="/login">
+                    <div class="form-group-material">
+                        <input id="login-username" type="email" name="loginUsername" required data-msg="Merci d'entrer votre identifiant" class="input-material">
+                        <label for="login-username" class="label-material">Identifiant</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="login-password" type="password" name="loginPassword" required data-msg="Merci d'entrer votre mot de passe" class="input-material">
+                        <label for="login-password" class="label-material">Mot de passe</label>
+                    </div>
+                    <div class="form-group text-center">
+                        <input type="submit" class="btn btn-primary" value="Connexion"/>
+                    </div>
+                </form>
+                <a href="#" data-toggle="modal" data-target="#resetModal" class="forgot-pass">Mot de passe oublié ?</a><small>Vous n'avez pas de compte ? </small><a href="/register" class="signup">Créez-en un !</a>
+            </div>
+            <div class="copyrights text-center">
+                <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+                <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Reset password modal -->
+<div class="modal fade" id="resetModal" tabindex="-1" role="dialog" aria-labelledby=resetDialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetDialog">Réinitialisation du mot de passe</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row col-md-12">
+                        <label for="mail" class="col-form-label">Saisissez votre adresse e-mail pour recevoir un mot de passe temporaire.</label>
+                    </div>
+                    <div class="row col-md-12">
+                        <input type="email" class="form-control form-control-success" id="mail">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer col-md-12">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                <button type="button" id="sendMail-button" class="btn btn-warning">Réinitialiser le mot de passe</button>
+            </div>
+        </div>
+    </div>
+</div>
+<% include partials/footer %>
+</body>
+</html>
