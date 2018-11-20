@@ -34,10 +34,6 @@ exports.createRaid = function (req, res) {
         lat: 0.0,
         lng: 0.0
     }).then(function (raid_created) {
-        models.helper_post.create({
-            title: "Backup",
-            nb_helper: -1
-        });
         let user = connected_user(req.sessionID);
         user.idCurrentRaid = raid_created.dataValues.id;
         models.team.create({
@@ -47,7 +43,7 @@ exports.createRaid = function (req, res) {
 
         geocoder.search({q: req.body.raidPlace}) // allows to list all the locations corresponding to the city entered
             .then((response) => {
-                if (typeof response[0].lat !== undefined) {
+                if (typeof response[0].lat !== "undefined") {
                     raid_created.update({
                         place: response[0].display_name,
                         lat: response[0].lat,
@@ -105,15 +101,18 @@ exports.saveSportsRanking = function (req, res) {
                 label: sport_row.name,
                 id_sport: sport_row.sport,
                 id_raid: user.idCurrentRaid
-            }).then(function () { return resolve(); });
+            }).then(function () {
+                return resolve();
+            });
         });
     });
 
     Promise.all(save_sports_actions).then(result => {
         models.raid.findOne({
-            attributes: ['id', 'name', 'date', 'edition', 'place','lat','lng'],
+            attributes: ['id', 'name', 'date', 'edition', 'place', 'lat', 'lng'],
             where: {id: user.idCurrentRaid}
-        }).then(function(unique_raid_found){
+            //models.raid.findByPk(user.idCurrentRaid)
+        }).then(function (unique_raid_found) {
             user.raid_list.push({
                 id: user.idCurrentRaid,
                 name: unique_raid_found.dataValues.name,
@@ -150,21 +149,23 @@ exports.getGeocodedResults = function (req, res) {
 
 exports.displayAllRaids = function (req, res) {
     const user = connected_user(req.sessionID);
-    if(user.raid_list.length !== 0) {
+    if (user.raid_list.length !== 0) {
         res.render(pages_path + "template.ejs", {
             pageTitle: "Gestion des Raids",
             page: "edit_raid/all",
             user: user
         });
-    }else{
+    } else {
         res.redirect('/dashboard');
     }
 };
 
-exports.displayRaid = function(req, res) {
+exports.displayRaid = function (req, res) {
     const user = connected_user(req.sessionID);
-    const raid = user.raid_list.find(function(raid){return raid.id == req.params.id});
-    if(!raid){
+    const raid = user.raid_list.find(function (raid) {
+        return raid.id == req.params.id
+    });
+    if (!raid) {
         return res.redirect('/dashboard');
     }
 
@@ -185,10 +186,10 @@ exports.displayRaid = function(req, res) {
         where: {
             id_raid: req.params.id
         }
-    }).then(function(organizers_found){
+    }).then(function (organizers_found) {
 
         let organizers_linked_with_the_current_raid = [];
-        organizers_found.forEach(function(organizer){
+        organizers_found.forEach(function (organizer) {
             organizers_linked_with_the_current_raid.push({
                 email: organizer.dataValues.organizer.dataValues.email,
                 first_name: organizer.dataValues.organizer.dataValues.first_name,
@@ -221,7 +222,8 @@ exports.displayRaid = function(req, res) {
                         id_raid: req.params.id
                     }
                 }]
-            }]
+            }],
+            order: ['order']
         }).then(function (assignment_found) {
             const unique_assignments_array = assignment_found.filter(function (assignment, index, array) {
                 return array.findIndex(function (value) {
@@ -231,7 +233,7 @@ exports.displayRaid = function(req, res) {
 
             const storeHelperActions = unique_assignments_array.map((assignment, index) => {
                 return new Promise((resolve, reject) => {
-                    if(assignment.dataValues.helper_post === null){
+                    if (assignment.dataValues.helper_post === null && assignment.dataValues.title !== "Backup") {
                         return resolve();
                     }
                     helper_model.findOne({
@@ -251,7 +253,7 @@ exports.displayRaid = function(req, res) {
                             assignment: []
                         };
                         assignments_by_id_helper.forEach(function (assignment_by_id_helper) {
-                            if(assignment_by_id_helper.dataValues.helper_post !== null){
+                            if (assignment_by_id_helper.dataValues.helper_post !== null) {
                                 helper.assignment.push({
                                     id: assignment_by_id_helper.dataValues.id_helper_post,
                                     description: assignment_by_id_helper.dataValues.helper_post.dataValues.title,
