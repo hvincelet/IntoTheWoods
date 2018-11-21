@@ -144,7 +144,7 @@ exports.register = function (req, res) {
                 password: hash,
                 picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
             }).then(function () {
-                sender.sendMailToOrganizer(req.body.email, hash);
+                //sender.sendMailToOrganizer(req.body.email, hash);
                 res.send(JSON.stringify({msg: "ok"}));
             });
         }
