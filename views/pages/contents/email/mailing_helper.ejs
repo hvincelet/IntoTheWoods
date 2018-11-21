@@ -36,12 +36,16 @@
     <div class="container">
         <div class="form-outer text-center d-flex align-items-center">
             <div class="form-inner">
-                <div class="logo text-uppercase">Bonjour,</div>
-                <p>Suite à votre demande de bénévolat sur notre site Into The Woods, nous avons le plaisir de vous confirmer votre participation en tant que bénévole.<br/>
-                    Vous participerez donc au raid <b><%=name%> édition <%=edition%></b> le <b><%=date%></b> à <b><%=place%></b> en tant que bénévole sur le poste <b><u><%=description%></u></b>.<br/>
+                <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
+                <p>Bonjour, suite à votre demande de bénévolat sur notre site Into The Woods, nous avons le plaisir de vous confirmer votre participation en tant que bénévole.<br/>
+                    Vous participerez donc au raid <b><%=name%> édition <%=edition%></b> le <b><%=date%></b> à <b><%=place%></b> en tant que bénévole sur le poste <b><u><%=title%></u></b>.<br/>
+                    <% if(description !== ""){%>
+                        Description du poste : <%=description%>
+                    <%};%>
                     <br/>
                     Pour rejoindre votre poste le jour de l'événement, veuillez vous rendre sur Into the Woods par ce lien : <br/></p>
                 <a type="button" href="https://intothewoods.runtonic.ovh/helper/<%=id_helper%>/home" class="btn btn-primary">Me rendre à mon poste</a>
+                <small>Si le bouton ne fonctionne pas, utilisez le lien suivant : https://intothewoods.runtonic.ovh/helper/<%=id_helper%>/home</small>
             </div>
         </div>
     </div>

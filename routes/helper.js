@@ -1,4 +1,4 @@
-const pages_path = "../views/pages/helpers/";
+const pages_path = __dirname+"/../views/pages/helpers/";
 const models = require('../models');
 const sender = require('./sender');
 
@@ -127,7 +127,7 @@ exports.register = function (req, res) {
     const registerEmail = req.body.registerEmail;
     const registerUserLn = req.body.registerUserLn;
     const registerUserFn = req.body.registerUserFn;
-    let helperPostsWished = JSON.parse(req.body.wishes);
+    let helperPostsWished = req.body.whishes;
 
     models.helper.findOne({
         where: {
@@ -158,7 +158,7 @@ exports.register = function (req, res) {
                     order: wish.order
                 });
             });
-            res.redirect("/helper/" + id_helper + "/home");
+            res.send(JSON.stringify({msg: "ok"}));
         });
     });
 };
@@ -216,6 +216,35 @@ exports.displayHome = function (req, res) {
             res.render(pages_path + "helper_register.ejs", {
                 pageTitle: "Inscription Bénévole",
                 errorMessage: "Cet identifiant n'existe pas."
+            });
+        }
+    });
+};
+
+exports.remove = function (req, res) {
+    const user = connected_user(req.sessionID);
+    if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.id)})){
+        return res.redirect('/dashboard');
+    }
+
+    let helper_id = req.body.helper_id;
+
+    models.assignment.findAll({
+        where: {
+            id_helper: helper_id
+        }
+    }).then(function (assignments_found) {
+        if(assignments_found){
+            let delete_assignments_actions = assignments_found.map(assignment => {
+                return new Promise(resolve => {
+                    models.assignment.destroy({ where: {id_helper: helper_id} }).then(function () { return resolve(); });
+                });
+            });
+
+            Promise.all(delete_assignments_actions).then(result => {
+                models.helper.destroy({ where: {login: helper_id} }).then(function () {
+                    res.send(JSON.stringify({msg: "ok"}));
+                });
             });
         }
     });
