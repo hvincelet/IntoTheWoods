@@ -1,8 +1,7 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>Into The Woods - Validation de votre bénévolat</title>
+    <title>Into The Woods - Invitation à l'organisation du raid <%= name %></title>
     <link rel="icon" type="image/png" href="https://intothewoods.runtonic.ovh/views/img/favicon.png" />
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -36,12 +35,9 @@
     <div class="container">
         <div class="form-outer text-center d-flex align-items-center">
             <div class="form-inner">
-                <div class="logo text-uppercase">Bonjour,</div>
-                <p>Suite à votre demande de bénévolat sur notre site Into The Woods, nous avons le plaisir de vous confirmer votre participation en tant que bénévole.<br/>
-                    Vous participerez donc au raid <b><%=name%> édition <%=edition%></b> le <b><%=date%></b> à <b><%=place%></b> en tant que bénévole sur le poste <b><u><%=description%></u></b>.<br/>
-                    <br/>
-                    Pour rejoindre votre poste le jour de l'événement, veuillez vous rendre sur Into the Woods par ce lien : <br/></p>
-                <a type="button" href="https://intothewoods.runtonic.ovh/helper/<%=id_helper%>/home" class="btn btn-primary">Me rendre à mon poste</a>
+                <div class="logo text-uppercase">Into the Woods</div>
+                <p>Bonjour, <%= organizer%> vous a invité à participer à l'organisation de l'édition <%=edition%> du raid <%=name%>.<br/>
+                Comme vous disposez déjà d'un compte sur notre plateforme Into the Woods, vous retrouverez ce raid dans la liste de vos raids.</p>
             </div>
         </div>
     </div>

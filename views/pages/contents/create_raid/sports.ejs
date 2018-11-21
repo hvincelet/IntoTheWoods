@@ -55,7 +55,7 @@
                                                 </td>
                                                 <td width="5%">
                                                     <span class="table-remove"><button type="button"
-                                                                                       class="btn btn-danger btn-rounded btn-sm my-0">Remove</button></span>
+                                                                                       class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button></span>
                                                 </td>
                                             </tr>
                                         </table>
@@ -81,7 +81,7 @@
                                                 </td>
                                                 <td width="5%">
                                                     <span class="table-remove"><button type="button"
-                                                                                       class="btn btn-danger btn-rounded btn-sm my-0">Remove</button></span>
+                                                                                       class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button></span>
                                                 </td>
                                             </tr>
                                         </table>
@@ -108,7 +108,7 @@
     function validateSports(){
         let list = [
             <% sports.forEach(function(sport){ %>
-            {id: <%=sport.id%>, name: '<%= sport.name%>'},
+            {id: "<%=sport.id%>", name: '<%= sport.name%>'},
             <% }); %>
         ];
         list.forEach(function (sport) {
@@ -120,7 +120,7 @@
         let sports = [];
 
         $('#table').find('tr').each(function () {
-            let index = $(this).find('td.row-number').html()
+            let index = $(this).find('td.row-number').text()
             let selected_sport = $(this).find('td .select2-selection__rendered').text();
 
             if($.isNumeric( index ) && parseInt(index) > 0){
@@ -133,7 +133,7 @@
                 sports.push({
                     order: index,
                     sport: sport_type,
-                    name: $(this).find('td.sport_name').html().replace('<br>', '')
+                    name: $(this).find('td.sport_name').text()
                 });
             }
         });

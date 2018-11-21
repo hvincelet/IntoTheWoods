@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<% include ../partials/head %>
+<body>
+<div class="page login-page wood-background">
+    <div class="container">
+        <div class="form-outer text-center d-flex align-items-center">
+            <div class="form-inner">
+                <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
+                <p>Bienvenue sur Into the Woods, l'application qui vous permet de participer facilement à différents raids ! Vous êtes sur le point de créer un compte bénévole sur la plateforme.<br/>
+                    Merci de remplir le formulaire, de lire et accepter les termes et conditions d'utilisation du service.</p>
+                <% if(typeof errorMessage !== "undefined") { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+                        <%= errorMessage %>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <% } %>
+                <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Bénévolat sur l'édition <%=raid.edition%> du raid "<%=raid.name%>"</h3>
+                <form id="helper_form" class="text-left form-validate" method="post" action="/helper/register" style="max-width: none !important;">
+                    <div class="form-group-material">
+                        <input id="register-userfn" type="text" name="registerUserFn" required data-msg="Merci d'entrer votre prénom" class="input-material">
+                        <label for="register-userfn" class="label-material">Prénom</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="register-userln" type="text" name="registerUserLn" required data-msg="Merci d'entrer votre nom" class="input-material">
+                        <label for="register-userln" class="label-material">Nom</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="register-email" type="email" name="registerEmail" required data-msg="Merci d'entrer votre adresse e-mail" class="input-material">
+                        <label for="register-email" class="label-material">Adresse e-mail</label>
+                    </div>
+                    <% if(typeof activity !== "undefined") { %>
+                    <div class="form-group">
+                        <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Indiquez vos voeux</h3>
+                        <div class="card-body">
+                            <div class="table-editable">
+                                <span class="table-add float-right mb-3 mr-2">
+                                    <a href="#!" class="text-success">
+                                        <i class="fa fa-plus fa-2x" aria-hidden="true"></i>
+                                    </a>
+                                </span>
+                                <table id="table"
+                                       class="table table-bordered table-responsive-md table-striped text-center">
+                                    <tr>
+                                        <th class="text-center">Ordre</th>
+                                        <th class="text-center">Poste</th>
+                                        <th class="text-center">Tri</th>
+                                        <th class="text-center">Suppression</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="pt-3-half row-number" width="2%">1</td>
+                                        <td class="pt-3-half" contenteditable="false" width="44%">
+                                            <select name="whish_post" class="select2-selection--single"
+                                                    style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
+                                                <% activity.forEach(function(item){ %>
+                                                    <option value='<%=item.id%>'><%=item.title%></option>
+                                                <% }); %>
+                                            </select>
+                                        </td>
+                                        <td class="pt-3-half" width="5%">
+                                            <span class="table-up" style="margin-right: 5px;"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-up"></i></a></span>
+                                            <span class="table-down"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-down"></i></a></span>
+                                        </td>
+                                        <td width="5%">
+                                            <span class="table-remove">
+                                                <button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table id="hidden-table" style="display: none;">
+                                    <!-- Default added row -->
+                                    <tr class="hide">
+                                        <td class="pt-3-half row-number" width="2%"></td>
+                                        <td class="pt-3-half" contenteditable="false" width="44%">
+                                            <select name="whish_post" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
+                                                <% activity.forEach(function(item){ %>
+                                                    <option value='<%=item.id%>'><%=item.title%></option>
+                                                <% }); %>
+                                            </select>
+                                        </td>
+                                        <td class="pt-3-half" width="5%">
+                                            <span class="table-up" style="margin-right: 5px;"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-up"></i></a></span>
+                                            <span class="table-down"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-down"></i></a></span>
+                                        </td>
+                                        <td width="5%">
+                                            <span class="table-remove">
+                                                <button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+                    <div class="form-group terms-conditions text-center">
+                        <input id="register-agree" name="registerAgree" type="checkbox" required value="1" data-msg="Votre accord est obligatoire" class="form-control-custom">
+                        <label for="register-agree">J'accepte <a href="/termsandpolicy" target="_blank">les termes et les conditions d'utilisation</a></label>
+                    </div>
+                    <div class="form-group text-center">
+                        <input type="hidden" name="wishes" id="wishes_list">
+                        <input id="register" type="button" value="S'inscrire" class="btn btn-primary">
+                    </div>
+                </form>
+            </div>
+            <div class="copyrights text-center">
+                <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+                <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.select2-selection--single').select2({width: 'resolve'});
+    });
+
+    var $TABLE = $('#table');
+    var $HIDDEN_TABLE = $('#hidden-table');
+    var nbrow = $TABLE.length;
+
+    $('.table-add').click(function () {
+        var $clone = $HIDDEN_TABLE.find('tr.hide').clone(true).removeClass('hide table-line');
+        $clone.find('select').addClass('select2-selection--single');
+        nbrow++;
+        $clone.find('td.row-number').html(nbrow);
+        $TABLE.append($clone);
+        $('.select2-selection--single').select2({width: 'resolve'});
+        update_index();
+    });
+
+    $('.table-remove').click(function () {
+        $(this).parents('tr').detach();
+        update_index();
+    });
+
+    $('.table-up').click(function () {
+        var $row = $(this).parents('tr');
+        if ($row.index() === 1) return; // Don't go above the header
+        $row.prev().before($row.get(0));
+        update_index();
+    });
+
+    $('.table-down').click(function () {
+        var $row = $(this).parents('tr');
+        $row.next().after($row.get(0));
+        update_index();
+    });
+
+    function update_index() {
+        $TABLE.find('tr').each(function () {
+            $(this).find('td.row-number').html($(this).index());
+        });
+    }
+
+    $('#register').click(function (){
+        let list = [
+            <% activity.forEach(function(item){ %>
+                {id: "<%=item.id%>", name: '<%=item.title%>'},
+            <% }); %>
+        ];
+
+        list.forEach(function (wish) {
+            let elem = document.createElement('textarea');
+            elem.innerHTML = wish.name;
+            wish.name = elem.value;
+        });
+
+        let whishes = [];
+
+        $('#table').find('tr').each(function () {
+            let index = $(this).find('td.row-number').text()
+            let selected_wish = $(this).find('td .select2-selection__rendered').text();
+
+            if($.isNumeric( index ) && parseInt(index) > 0){
+                let wish = 0;
+                list.forEach(function (item) {
+                    if(item.name === selected_wish){
+                        wish = item.id;
+                    }
+                });
+                whishes.push({
+                    order: index,
+                    id: wish
+                });
+            }
+        });
+
+        $('#wishes_list').val( JSON.stringify(whishes) );
+        $('#helper_form').submit();
+    });
+</script>
+<% include ../partials/footer %>
+</body>
+</html>

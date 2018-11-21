@@ -5,12 +5,12 @@ const crypto = require('crypto');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
 
-exports.displayHome = function(req, res) {
+exports.displayHome = function (req, res) {
     models.raid.findAll({
         attributes: ['id', 'name', 'date', 'edition', 'place']
-    }).then(function (raids_found){
+    }).then(function (raids_found) {
         let raids = [];
-        raids_found.forEach(function(raid){
+        raids_found.forEach(function (raid) {
             raids.push({
                 id: raid.dataValues.id,
                 name: raid.dataValues.name,
@@ -27,7 +27,7 @@ exports.displayHome = function(req, res) {
             user: user
         });
     });
-}
+};
 
 exports.dashboard = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -40,7 +40,7 @@ exports.dashboard = function (req, res) {
 
 exports.displayLogScreen = function (req, res) {
     const user = connected_user(req.sessionID);
-    if(user) {
+    if (user) {
         return res.redirect("/");
     }
     res.render(pages_path + "login.ejs", {
@@ -66,9 +66,9 @@ exports.idVerification = function (req, res) {
                 last_name: organizer_found.dataValues.last_name,
                 initials: organizer_found.dataValues.first_name.charAt(0).concat(organizer_found.dataValues.last_name.charAt(0)).toUpperCase(),
                 picture: organizer_found.dataValues.picture,
-                raid_list: [], // {id, name, edition}
+                raid_list: [],
                 idCurrentRaid: -1
-            }
+            };
 
             let team_model = models.team;
             let raid_model = models.raid;
@@ -84,14 +84,18 @@ exports.idVerification = function (req, res) {
                         //date > date_of_the_day - one_month
                     }
                 }],
-                attributes: ['id', 'name', 'edition']
+                attributes: ['id', 'name', 'edition', 'date', 'place', 'lat', 'lng']
             }).then(function(raids_found){
                 if(raids_found){
                     raids_found.forEach(function(tuple){
                         user.raid_list.push({
                             id: tuple.dataValues.id,
                             name: tuple.dataValues.name,
-                            edition: tuple.dataValues.edition
+                            edition: tuple.dataValues.edition,
+                            date: tuple.dataValues.date,
+                            place: tuple.dataValues.place,
+                            lat: tuple.dataValues.lat,
+                            lng: tuple.dataValues.lng
                         });
                     });
                 }
@@ -109,15 +113,15 @@ exports.idVerification = function (req, res) {
 
 exports.logout = function (req, res) {
     let connected_user_index;
-    const user = connected_users.find(function(user, index){
+    const user = connected_users.find(function (user, index) {
         connected_user_index = index;
-        return user.uuid == req.sessionID;
+        return user.uuid === req.sessionID;
     });
-    if(user){
+    if (user) {
         connected_users.splice(connected_user_index, 1);
     }
     res.redirect('/');
-}
+};
 
 exports.displayRegister = function (req, res) {
     res.render(pages_path + "register.ejs", {
@@ -142,16 +146,17 @@ exports.register = function (req, res) {
                 first_name: req.body.firstname,
                 last_name: req.body.lastname,
                 password: hash,
+                active: false,
                 picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
             }).then(function () {
-                //sender.sendMailToOrganizer(req.body.email, hash);
+                sender.sendMailToOrganizer(req.body.email, hash);
                 res.send(JSON.stringify({msg: "ok"}));
             });
         }
     });
 };
 
-exports.validate = function(req, res) {
+exports.validate = function (req, res) {
     models.organizer.findOne({
         where: {
             email: req.query.id,
@@ -172,166 +177,160 @@ exports.validate = function(req, res) {
     })
 }
 
-exports.manageTeam = function(req, res) {
+exports.shareRaidToOthersOrganizers = function(req, res) {
     const user = connected_user(req.sessionID);
-    res.render(pages_path + "template.ejs", {
-        pageTitle: "Equipe et organisateurs",
-        page: "manage_team/team",
-        user: user
-      });
-}
+    if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
+        return res.redirect('/dashboard');
+    }
 
-exports.manageHelper = function(req, res) {
+    // TODO Check if invited organizer is already in team
 
-    const user = connected_user(req.sessionID);
-
-    let data_helper = [];
-
-    let assignment_model = models.assignment;
-    let helper_model = models.helper;
-    let helper_post_model = models.helper_post;
-
-    helper_model.belongsTo(assignment_model, {foreignKey: 'login'});
-    assignment_model.belongsTo(helper_post_model, {foreignKey: 'id_helper_post'});
-
-    helper_model.findAll({
-        include: [{
-            model: assignment_model,
-            attributes: ['id_helper','id_helper_post','attributed'],
-            include: [{
-                model: helper_post_model,
-                attributes: ['id','description']
-            }],
-        }],
-        attributes: ['login','email','last_name','first_name']
-    }).then(function(assignment_found){
-        if(assignment_found !== null){
-            assignment_found.forEach(function(tuple){
-                let create_user = 0;
-                data_helper.forEach(function(object){
-                    if(object['user'] == tuple.dataValues.login){
-                        create_user = 1;
+    let invited_organizer = req.body.mail;
+    if(invited_organizer !== user.login){
+        models.organizer.findOne({
+            where: {email: invited_organizer}
+        }).then(function (organizer) {
+            if(organizer){
+                models.team.create({
+                    id_raid: req.params.raid_id,
+                    id_organizer: invited_organizer
+                }).then(function (organizer_add_to_team) {
+                    if(organizer_add_to_team){
+                        // send mail
+                        sender.inviteOrganizer({
+                            email: invited_organizer,
+                            organizer: user.first_name + " " + user.last_name,
+                            raid: req.body.raid
+                        });
+                        res.send(JSON.stringify({msg: "ok"}));
+                    }else {
+                        res.send(JSON.stringify({msg: "not-added"}));
                     }
-                });
-                if(create_user == 0){
-                    data_helper.push(
-                        {
-                            'user':tuple.dataValues.login,
-                            'data':{
-                                'email':tuple.dataValues.email,
-                                'last_name':tuple.dataValues.last_name,
-                                'first_name':tuple.dataValues.first_name,
-                                'assignment':[]
-                            }
-                        }
-                    );
-                }
-                data_helper.forEach(function(object){
-                    if(object['user'] == tuple.dataValues.login){
-                        object['data']['assignment'].push(
-                            {
-                                'id':tuple.dataValues.assignment.dataValues.helper_post.dataValues.id,
-                                'description':tuple.dataValues.assignment.dataValues.helper_post.dataValues.description,
-                                'attributed':tuple.dataValues.assignment.dataValues.attributed
-                            }
-                        );
-                    }
-                });
-            });
-            res.render(pages_path + "template.ejs", {
-                pageTitle: "Gérer les bénévoles",
-                page: "manage_team/helper",
-                user: user,
-                data: data_helper
-            });
-        }
-    });
-
+                })
+            }else{
+                res.send(JSON.stringify({msg: "no-account"}));
+            }
+        });
+    }else{
+        res.send(JSON.stringify({msg: "mail-is-login"}));
+    }
 };
+
 
 exports.assignHelper = function(req, res) {
+    const assign_helper_actions =  req.body.assignments_array.map(assignment => {
+        return new Promise(resolve => {
+            models.assignment.findOne({
+                where: {
+                    id_helper: assignment.id_helper,
+                    attributed: 1
+                }
+            }).then(function(assignment_to_unattribute) {
+                if(assignment_to_unattribute !== null) { // Helper has already been assigned
+                    assignment_to_unattribute.update({
+                        attributed: 0
+                    }).then(function () {
+                        sendMailToHelperToNoticeHimHisAssignment(assignment);
+                        return resolve();
+                    });
+                }else { // Helper has never been assigned
+                    sendMailToHelperToNoticeHimHisAssignment(assignment);
+                    return resolve();
+                }
+            });
+        });
+    });
 
-    let data_helper = req.body.registerHelper.split(':');
-    let id_helper = data_helper[0];
-    let id_helper_post = data_helper[1];
+    Promise.all(assign_helper_actions).then(result => {
+        res.send(JSON.stringify({msg: "ok"}));
+    });
+};
 
+function sendMailToHelperToNoticeHimHisAssignment(assignment){
     models.assignment.findOne({
         where: {
-            id_helper: id_helper,
-            id_helper_post: id_helper_post
+            id_helper: assignment.id_helper,
+            id_helper_post: assignment.id_helper_post
         }
-    }).then(function(assignment_found){
-        if(assignment_found !== null){
-            // Step 1 : update attributed value in assignment for pair (id_helper,id_helper_post)
-            assignment_found.update({
+    }).then(function(assignment_to_attribute) {
+        if(assignment_to_attribute !== null) {
+            assignment_to_attribute.update({
                 attributed: 1
-            }).then(function(){
-                // Step 2 : delete tuple in assignment where id_helper = id_helper of req
-                models.assignment.destroy({
-                    where:{
-                        id_helper: id_helper,
-                        attributed: 0
+            }).then(function () {
+                models.helper.findOne({
+                    where: {
+                        login: assignment.id_helper
+                    },
+                    attributes: ['email']
+                }).then(function (helper_found) {
+                    if (helper_found !== null) {
+                        let local_email = helper_found.dataValues.email;
+                        models.helper_post.findOne({
+                            where: {
+                                id: assignment.id_helper_post
+                            },
+                            attributes: ['id_point_of_interest', 'description']
+                        }).then(function (helper_post_found) {
+                            if (helper_post_found !== null) {
+                                let description = helper_post_found.dataValues.description;
+                                models.point_of_interest.findOne({
+                                    where: {
+                                        id: helper_post_found.dataValues.id_point_of_interest
+                                    },
+                                    attributes: ['id_raid']
+                                }).then(function (point_of_interest_found) {
+                                    if (point_of_interest_found !== null) {
+                                        models.raid.findOne({
+                                            where: {
+                                                id: point_of_interest_found.dataValues.id_raid
+                                            },
+                                            attributes: ['name', 'date', 'edition', 'place']
+                                        }).then(function (raid_found) {
+                                            if (raid_found !== null) {
+                                                let local_name = raid_found.dataValues.name;
+                                                let local_date = raid_found.dataValues.date;
+                                                let local_edition = raid_found.dataValues.edition;
+                                                let local_place = raid_found.dataValues.place;
+                                                sender.sendMailToHelper({
+                                                    email: local_email,
+                                                    id_helper: assignment.id_helper,
+                                                    id_helper_post: assignment.id_helper_post,
+                                                    description: description,
+                                                    name: local_name,
+                                                    date: local_date,
+                                                    edition: local_edition,
+                                                    place: local_place
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
                     }
-                }).then(function(){
-                    // Step 3 : find helper in helper table with id_helper
-                    models.helper.findOne({
-                        where: {
-                            login: id_helper
-                        },
-                        attributes: ['email']
-                    }).then(function(helper_found){
-                        if(helper_found !== null){
-                            // Step 4 : get email of helper in helper_found
-                            let local_email = helper_found.dataValues.email;
-                            // Step 5 : get id_point_of_interest from helper_post
-                            models.helper_post.findOne({
-                                where:{
-                                    id:id_helper_post
-                                },
-                                attributes:['id_point_of_interest','description']
-                            }).then(function(helper_post_found){
-                                if(helper_post_found !== null){
-                                    let description = helper_post_found.dataValues.description;
-                                    // Step 6 : get id_raid from point_of_interest
-                                    models.point_of_interest.findOne({
-                                        where:{
-                                            id: helper_post_found.dataValues.id_point_of_interest
-                                        },
-                                        attributes:['id_raid']
-                                    }).then(function(point_of_interest_found){
-                                        if(point_of_interest_found !== null){
-                                            // Step 7 : get informations from raid
-                                            models.raid.findOne({
-                                                  where:{
-                                                      id:point_of_interest_found.dataValues.id_raid
-                                                  },
-                                                  attributes:['name','date','edition','place']
-                                            }).then(function(raid_found){
-                                                if(raid_found !== null){
-                                                    // Step 8 : get informations from raid
-                                                    let local_name = raid_found.dataValues.name;
-                                                    let local_date = raid_found.dataValues.date;
-                                                    let local_edition = raid_found.dataValues.edition;
-                                                    let local_place = raid_found.dataValues.place;
-                                                    // Step 9 : send mail to helper
-                                                    sender.sendMailToHelper(id_helper,id_helper_post,description,local_email,local_name,local_date,local_edition,local_place);
-                                                    // Step 10 : redirect to /manageteam/helper
-                                                    res.redirect('/manageteam/helper');
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    });
                 });
             });
         }
     });
-};
-
-exports.manageOrganizer = function(req, res) {
-    const user = connected_user(req.sessionID);
-    console.log("Not yet implemented");
 }
+
+exports.sendMail = function (req, res) {
+    const user = connected_user(req.sessionID);
+    if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.id)})){
+        return res.redirect('/dashboard');
+    }
+
+    let mails = req.body.mails;
+    mails.map(mail =>{
+        if(mail !== ""){
+            sender.sendMail({
+                email: mail,
+                organizer: req.body.organizer,
+                message: req.body.message,
+                subject: req.body.subject,
+                raid_name: req.body.raid_name
+            });
+        }
+    });
+    res.send(JSON.stringify({msg: "ok"}));
+};

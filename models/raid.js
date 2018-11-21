@@ -31,6 +31,10 @@ module.exports = function(sequelize, DataTypes) {
     lng: {
       type: "DOUBLE",
       allowNull: true
+    },
+    hashtag: {
+      type: DataTypes.STRING(30),
+      allowNull: true
     }
   }, {
     tableName: 'raid'

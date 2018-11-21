@@ -31,6 +31,10 @@ module.exports = function(sequelize, DataTypes) {
         model: 'raid',
         key: 'id'
       }
+    },
+    distance: {
+      type: DataTypes.STRING(15),
+      allowNull: true
     }
   }, {
     tableName: 'course'
