@@ -118,6 +118,9 @@ app.route('/editraid/:id/map')
 app.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
+app.route('/editraid/setStartTime')
+    .post(/*checkAuth, */raid.setStartTime);
+
 
 //routes dedicated to the helpers
 app.route('/team/:raid_id/invitehelpers')
@@ -131,7 +134,7 @@ app.route('/helper/:id/home')
     .get(helper.displayHome);
 
 app.route('/helper/participantPassage')
-    .post(/*checkAuth, */helper.participantPassage); //TODO : Décommenter la ligne une fois le dev terminé
+    .post(helper.participantPassage); //TODO : Décommenter la ligne une fois le dev terminé
 
 
 //Routes dedicated to the participants

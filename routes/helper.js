@@ -199,9 +199,7 @@ exports.participantPassage = function(req, res){
             }
         }).then(function (course_found) {
             if(course_found !== null){
-                let time = Date.parse("January 01, 1970 "+stages_found[stages_found.length-1].time);
-
-                time = Date.parse(date)-(Date.parse(date)-time);
+                let time = new Date();
                 
                 models.stage.create({
                     id_participant: idParticipant,

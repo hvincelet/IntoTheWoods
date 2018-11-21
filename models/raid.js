@@ -31,6 +31,10 @@ module.exports = function(sequelize, DataTypes) {
     lng: {
       type: "DOUBLE",
       allowNull: true
+    },
+    startTime: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     tableName: 'raid'
