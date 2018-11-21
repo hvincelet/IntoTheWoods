@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<body>
+	Page de Live
+	<% if(typeof activity !== "undefined") { %>
+    <div class="form-group">
+        <label for="register-run" class="col-sm-2 control-label">Postes</label>
+        <div class="col-sm-10">
+            <select id="register-run" name="registerRun" multiple class="form-control">
+                <% activity.forEach(function(item){ %>
+                  <option value='<%-item.id%>'> <%-item.description%> </option>
+                <% }); %>
+            </select>
+        </div>
+    </div>
+    <% } %>
+
+	<div class="raids_container">
+
+	</div>
+	<script type="text/javascript">
+		funtion updates() {
+	    	$.getJSON("fetch.php", function(data) {
+		        $("ul").empty();
+
+		        $.each(data.result, function() {
+
+		        	$("ul").append("<li>Name: "+this['name']+"</li><li>Age: "+this['age']+"</li><li>Company: "+this['company']+"</li><br />");
+
+		        });
+
+	    	});
+	    }
+	</script>
+</body>
