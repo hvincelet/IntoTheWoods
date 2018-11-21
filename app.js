@@ -127,6 +127,15 @@ intothewoods.route('/editraid/:id/map')
 intothewoods.route('/editraid/:id/sendMessage')
     .post(checkAuth, organizer.sendMail);
 
+intothewoods.route('/editraid/:id/updatepoi')
+    .post(checkAuth, raid.savePoi);
+
+intothewoods.route('/editraid/:id/removeOrganizer')
+    .post(checkAuth, organizer.remove);
+
+intothewoods.route('/editraid/:id/removeHelper')
+    .post(checkAuth, helper.remove);
+
 intothewoods.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 

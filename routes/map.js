@@ -1,4 +1,4 @@
-const pages_path = "../views/pages/";
+const pages_path = __dirname+"/../views/pages/";
 const models = require('../models');
 
 const sports = models.sport;

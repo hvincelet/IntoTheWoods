@@ -1,5 +1,5 @@
 const jdenticon = require('jdenticon');
-const pages_path = "../views/pages/";
+const pages_path = __dirname+"/../views/pages/";
 const models = require('../models');
 const crypto = require('crypto');
 const sender = require('./sender');
@@ -183,32 +183,41 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
         return res.redirect('/dashboard');
     }
 
-    // TODO Check if invited organizer is already in team
-
     let invited_organizer = req.body.mail;
     if(invited_organizer !== user.login){
-        models.organizer.findOne({
-            where: {email: invited_organizer}
-        }).then(function (organizer) {
-            if(organizer){
-                models.team.create({
-                    id_raid: req.params.raid_id,
-                    id_organizer: invited_organizer
-                }).then(function (organizer_add_to_team) {
-                    if(organizer_add_to_team){
-                        // send mail
-                        sender.inviteOrganizer({
-                            email: invited_organizer,
-                            organizer: user.first_name + " " + user.last_name,
-                            raid: req.body.raid
-                        });
-                        res.send(JSON.stringify({msg: "ok"}));
-                    }else {
-                        res.send(JSON.stringify({msg: "not-added"}));
-                    }
-                })
+        models.team.findOne({
+            where: {
+                id_organizer: invited_organizer,
+                id_raid: req.params.raid_id
+            }
+        }).then(function (organizer_found) {
+            if(organizer_found){
+                res.send(JSON.stringify({msg: "already-in-team"}));
             }else{
-                res.send(JSON.stringify({msg: "no-account"}));
+                models.organizer.findOne({
+                    where: {email: invited_organizer}
+                }).then(function (organizer) {
+                    if(organizer){
+                        models.team.create({
+                            id_raid: req.params.raid_id,
+                            id_organizer: invited_organizer
+                        }).then(function (organizer_add_to_team) {
+                            if(organizer_add_to_team){
+                                // send mail
+                                sender.inviteOrganizer({
+                                    email: invited_organizer,
+                                    organizer: user.first_name + " " + user.last_name,
+                                    raid: req.body.raid
+                                });
+                                res.send(JSON.stringify({msg: "ok"}));
+                            }else {
+                                res.send(JSON.stringify({msg: "not-added"}));
+                            }
+                        });
+                    }else{
+                        res.send(JSON.stringify({msg: "no-account"}));
+                    }
+                });
             }
         });
     }else{
@@ -269,10 +278,9 @@ function sendMailToHelperToNoticeHimHisAssignment(assignment){
                             where: {
                                 id: assignment.id_helper_post
                             },
-                            attributes: ['id_point_of_interest', 'description']
+                            attributes: ['id_point_of_interest', 'description', 'title']
                         }).then(function (helper_post_found) {
                             if (helper_post_found !== null) {
-                                let description = helper_post_found.dataValues.description;
                                 models.point_of_interest.findOne({
                                     where: {
                                         id: helper_post_found.dataValues.id_point_of_interest
@@ -295,7 +303,8 @@ function sendMailToHelperToNoticeHimHisAssignment(assignment){
                                                     email: local_email,
                                                     id_helper: assignment.id_helper,
                                                     id_helper_post: assignment.id_helper_post,
-                                                    description: description,
+                                                    title: helper_post_found.dataValues.title,
+                                                    description: helper_post_found.dataValues.description,
                                                     name: local_name,
                                                     date: local_date,
                                                     edition: local_edition,
@@ -333,4 +342,23 @@ exports.sendMail = function (req, res) {
         }
     });
     res.send(JSON.stringify({msg: "ok"}));
+};
+
+exports.remove = function (req, res) {
+    const user = connected_user(req.sessionID);
+    if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.id)})){
+        return res.redirect('/dashboard');
+    }
+
+    let organizer_id = req.body.organizer_id;
+    let raid_id = req.params.id;
+
+    models.team.destroy({
+        where: {
+            id_raid: raid_id,
+            id_organizer: organizer_id
+        }
+    }).then(function () {
+        res.send(JSON.stringify({msg: "ok"}));
+    });
 };

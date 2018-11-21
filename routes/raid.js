@@ -308,7 +308,7 @@ exports.displayRaid = function (req, res) {
                     let helper_post_model = models.helper_post;
                     helper_post_model.belongsTo(poi_model, {foreignKey:"id_point_of_interest"});
                     helper_post_model.findAll({
-                        attributes: ["title", "nb_helper", "description"],
+                        attributes: ["id", "title", "nb_helper", "description"],
                         include:{
                             model:poi_model,
                             where:{
@@ -318,6 +318,7 @@ exports.displayRaid = function (req, res) {
                     }).then(function(helper_posts){
                         helper_posts.forEach(function(helper_post){
                             poi.push({
+                                id: helper_post.dataValues.id,
                                 name: helper_post.dataValues.title,
                                 nb_helper: helper_post.dataValues.nb_helper,
                                 description: helper_post.dataValues.description
@@ -344,5 +345,33 @@ exports.displayRaid = function (req, res) {
             });
         });
 
+    });
+};
+
+exports.savePoi = function (req, res) {
+    let user = connected_user(req.sessionID);
+    //console.log(JSON.parse(req.body.pois));
+    const save_poi_actions = req.body.pois.map(poi =>{
+        return new Promise(resolve => {
+            models.helper_post.findOne({
+                where: {
+                    id: poi.id
+                }
+            }).then(function (helper_post_found) {
+                if(helper_post_found !== null){
+                    helper_post_found.update({
+                        title: poi.name,
+                        description: poi.description,
+                        nb_helper: poi.number_helper
+                    }).then(function () {
+                        return resolve();
+                    });
+                }
+            });
+        });
+    });
+
+    Promise.all(save_poi_actions).then(result => {
+        res.send(JSON.stringify({msg: "ok"}));
     });
 };

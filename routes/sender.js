@@ -53,6 +53,7 @@ exports.sendMailToHelper = function(data){
     let content = ejs.render(ejsTemplate, {
         id_helper: data.id_helper,
         id_helper_post: data.id_helper_post,
+        title: data.title,
         description: data.description,
         name: data.name,
         date: data.date,
