@@ -153,6 +153,10 @@ intothewoods.route('/editraid/:id/removeHelper')
 intothewoods.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
+app.route('/editraid/setStartTime')
+    .post(/*checkAuth, */raid.setStartTime);
+
+
 //routes dedicated to the helpers
 intothewoods.route('/team/:raid_id/invitehelpers')
     .post(checkAuth, helper.inviteHelper);
@@ -172,7 +176,6 @@ intothewoods.route('/helper/check_in')
 
 intothewoods.route('/helper/participantPassage')
     .post(helper.participantPassage);
-
 
 //Routes dedicated to the participants
 intothewoods.route('/participant/register')
