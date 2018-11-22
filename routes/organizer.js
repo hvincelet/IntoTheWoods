@@ -43,6 +43,13 @@ exports.displayLogScreen = function (req, res) {
     if (user) {
         return res.redirect("/");
     }
+    if(req.query.new_password === '1') {
+        return res.render(pages_path + "login.ejs", {
+            pageTitle: "Connexion",
+            new_password: "Votre mot de passe a bien été modifié."
+        });
+    }
+
     res.render(pages_path + "login.ejs", {
         pageTitle: "Connexion"
     });

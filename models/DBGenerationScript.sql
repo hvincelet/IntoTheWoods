@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`organizer` (
   `password` BLOB(128) NULL,
   `active` TINYINT(1) NULL,
   `picture` TEXT NULL,
+  `reset_password_id` VARCHAR(30) NULL,
   PRIMARY KEY (`email`))
 ENGINE = InnoDB;
 
