@@ -231,13 +231,13 @@ exports.displayRaid = function (req, res) {
                 }) === index;
             });
 
-            const storeHelperActions = unique_assignments_array.map((assignment, index) => {
+            const storeHelperActions = unique_assignments_array.map((assignment) => {
                 return new Promise((resolve, reject) => {
                     if (assignment.dataValues.helper_post === null && assignment.dataValues.title !== "Backup") {
                         return resolve();
                     }
                     helper_model.findOne({
-                        attributes: ['login', 'email', 'last_name', 'first_name'],
+                        attributes: ['login', 'email', 'last_name', 'first_name', 'backup'],
                         where: {
                             login: assignment.dataValues.id_helper
                         }
@@ -250,6 +250,7 @@ exports.displayRaid = function (req, res) {
                             email: helper_found.dataValues.email,
                             last_name: helper_found.dataValues.last_name,
                             first_name: helper_found.dataValues.first_name,
+                            backup: helper_found.dataValues.backup,
                             assignment: []
                         };
                         assignments_by_id_helper.forEach(function (assignment_by_id_helper) {
@@ -280,7 +281,6 @@ exports.displayRaid = function (req, res) {
                 let sport_model = models.sport;
 
                 course_model.belongsTo(sport_model, {foreignKey: 'id_sport'});
-                const Sequelize = require('sequelize');
                 course_model.findAll({
                     attributes: ['order_num'],
                     include: [{

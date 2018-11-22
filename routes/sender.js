@@ -38,6 +38,39 @@ exports.sendMailToOrganizer = function(email, password_hash){
     });
 };
 
+exports.sendResetPasswordMail = function(email, reset_password_session_id){
+    let transporter = nodemailer.createTransport({
+        service: config.service,
+        auth: {
+            user: config.login,
+            pass: config.password
+        }
+    });
+
+    let ejsTemplate = fs.readFileSync(__dirname + '/../views/pages/contents/email/reset_password.ejs','utf-8');
+    let content = ejs.render(ejsTemplate, {
+        email: email,
+        reset_password_session_id: reset_password_session_id
+    },{
+        vars: ["email", "reset_password_session_id"]
+    });
+
+    let mailOptions = {
+        from: "Into the Woods",
+        to: email,
+        subject: "Création d'un nouveau mot de passe",
+        html: content
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            console.log(error);
+        }else{
+            console.log('Email sent: ' + info.response);
+        }
+    });
+};
+
 exports.sendMailToHelper = function(data){
 
     let transporter = nodemailer.createTransport({
