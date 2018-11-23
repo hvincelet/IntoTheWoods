@@ -1,6 +1,9 @@
 const pages_path = __dirname+"/../views/pages/helpers/";
 const models = require('../models');
 const sender = require('./sender');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+const date = require('date-and-time');
 
 exports.inviteHelper = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -62,63 +65,126 @@ exports.inviteHelper = function (req, res) {
     res.send(JSON.stringify({status: helper_invite_status}));
 };
 
-exports.displayRegister = function(req, res){
+exports.displayRegister = function(req, res) {
     let raid_id = req.query.raid;
-    let get_post_clean = [];
+    if (raid_id !== undefined) {
+        let get_post_clean = [];
 
-    let raid_model = models.raid;
-    let point_of_interest_model = models.point_of_interest;
-    let helper_post_model = models.helper_post;
+        let raid_model = models.raid;
+        let point_of_interest_model = models.point_of_interest;
+        let helper_post_model = models.helper_post;
 
-    point_of_interest_model.belongsTo(raid_model, {foreignKey: 'id_raid'});
-    helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
+        point_of_interest_model.belongsTo(raid_model, {foreignKey: 'id_raid'});
+        helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
-    helper_post_model.findAll({
-      include: [{
-          model: point_of_interest_model,
-          include: [{
-              model: raid_model,
-              where: {
-                  id: raid_id
-              },
-              attributes: ['name', 'edition']
-          }]
-      }],attributes: ['id', 'title', 'nb_helper']
-    }).then(function(helper_posts_found){
-        if(helper_posts_found !== null){
-            helper_posts_found.forEach(function(helper_post, index, helper_posts_array){
-                models.assignment.findAndCountAll({
+        helper_post_model.findAll({
+            include: [{
+                model: point_of_interest_model,
+                include: [{
+                    model: raid_model,
                     where: {
-                        id_helper_post: helper_post.dataValues.id,
-                        attributed: 1
-                    }
-                }).then(function(all_assignement){
-                    if(helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0){
-                        get_post_clean.push({'id':helper_post.dataValues.id,'title':helper_post.dataValues.title});
-                    }
-                    if (index === helper_posts_array.length - 1) {
-                        res.render(pages_path + "helper_register.ejs", {
-                            pageTitle: "Inscription Bénévole",
-                            activity: get_post_clean,
-                            raid: {
-                                name: helper_post.dataValues.point_of_interest.raid.name,
-                                edition: helper_post.dataValues.point_of_interest.raid.edition
-                            }
-                        });
+                        id: raid_id
+                    },
+                    attributes: ['name', 'edition']
+                }]
+            }], attributes: ['id', 'title', 'nb_helper']
+        }).then(function (helper_posts_found) {
+            if (helper_posts_found !== null) {
+                helper_posts_found.forEach(function (helper_post, index, helper_posts_array) {
+                    models.assignment.findAndCountAll({
+                        where: {
+                            id_helper_post: helper_post.dataValues.id,
+                            attributed: 1
+                        }
+                    }).then(function (all_assignement) {
+                        if (helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0) {
+                            get_post_clean.push({
+                                'id': helper_post.dataValues.id,
+                                'title': helper_post.dataValues.title
+                            });
+                        }
+                        if (index === helper_posts_array.length - 1) {
+                            res.render(pages_path + "helper_register.ejs", {
+                                pageTitle: "Inscription Bénévole",
+                                activity: get_post_clean,
+                                raid: {
+                                    name: helper_post.dataValues.point_of_interest.raid.name,
+                                    edition: helper_post.dataValues.point_of_interest.raid.edition
+                                }
+                            });
+                        }
+                    });
+                });
+            } else {
+                res.render(pages_path + "helper_register.ejs", {
+                    pageTitle: "Inscription Bénévole",
+                    activity: get_post_clean,
+                    raid: {
+                        name: helper_post.dataValues.point_of_interest.raid.name,
+                        edition: helper_post.dataValues.point_of_interest.raid.edition
                     }
                 });
-            });
-        }else{
-            res.render(pages_path + "helper_register.ejs", {
-                pageTitle: "Inscription Bénévole",
-                activity: get_post_clean,
-                raid: {
-                    name: helper_post.dataValues.point_of_interest.raid.name,
-                    edition: helper_post.dataValues.point_of_interest.raid.edition
+            }
+        });
+    }else{
+        let point_of_interest_model = models.point_of_interest;
+        let helper_post_model = models.helper_post;
+        let raid_model = models.raid;
+
+        point_of_interest_model.belongsTo(raid_model, {foreignKey: 'id_raid'});
+        helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
+
+        let today = new Date();
+        let in_two_months = date.addMonths(today, 2);
+        raid_model.findAll({
+            attributes: ['id', 'name', 'edition', 'date', 'place'],
+            where: {
+                date: {
+                    [Op.gte]: today.toISOString().split('T')[0],
+                    [Op.lte]: in_two_months.toISOString().split('T')[0]
                 }
-            });
-        }
-    });
+            }
+        }).then(function (raids_found) {
+            if(raids_found){
+                let raids = [];
+                let get_poi_actions = raids_found.map(raid => {
+                    return new Promise(resolve => {
+                        helper_post_model.findAll({
+                            include: [{
+                                model: point_of_interest_model,
+                                include: [{
+                                    model: raid_model,
+                                    where: {
+                                        id: raid.id
+                                    },
+                                    attributes: ['name', 'edition']
+                                }]
+                            }], attributes: ['id', 'title', 'nb_helper']
+                        }).then(function (helper_post_found) {
+                            if(helper_post_found !== null){
+                                if(helper_post_found[0].point_of_interest !== null){
+                                    raids.push({id: raid.id, name: raid.name, edition: raid.edition, date: raid.date, place: raid.place});
+                                }
+                            }
+                            return resolve();
+                        });
+                    });
+                });
+
+                Promise.all(get_poi_actions).then(result => {
+                    res.render(pages_path + "../visitors/register_helper.ejs", {
+                        pageTitle: "Inscription Bénévole",
+                        raid_list: raids
+                    });
+                });
+            }else{
+                res.render(pages_path + "../visitors/register_helper.ejs", {
+                    pageTitle: "Inscription Bénévole",
+                    raid_list: []
+                });
+            }
+        });
+    }
 };
 
 exports.register = function (req, res) {

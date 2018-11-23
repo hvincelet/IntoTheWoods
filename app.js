@@ -78,7 +78,7 @@ const helper = require('./routes/helper');
 
 //routes dedicated to register and connection
 intothewoods.route('/')
-    .get(organizer.displayHome);
+    .get(misc.displayHome);
 
 intothewoods.route('/login')
     .get(organizer.displayLogScreen)

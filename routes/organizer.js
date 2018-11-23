@@ -5,30 +5,6 @@ const crypto = require('crypto');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
 
-exports.displayHome = function (req, res) {
-    models.raid.findAll({
-        attributes: ['id', 'name', 'date', 'edition', 'place']
-    }).then(function (raids_found) {
-        let raids = [];
-        raids_found.forEach(function (raid) {
-            raids.push({
-                id: raid.dataValues.id,
-                name: raid.dataValues.name,
-                date: raid.dataValues.date,
-                edition: raid.dataValues.edition,
-                place: raid.dataValues.place
-            });
-        });
-        const user = connected_user(req.sessionID);
-        res.render(pages_path + "contents/homepage.ejs", {
-            pageTitle: "Accueil",
-            page: "homepage",
-            raids: raids,
-            user: user
-        });
-    });
-};
-
 exports.dashboard = function (req, res) {
     const user = connected_user(req.sessionID);
     res.render(pages_path + "template.ejs", {
@@ -353,12 +329,23 @@ exports.remove = function (req, res) {
     let organizer_id = req.body.organizer_id;
     let raid_id = req.params.id;
 
-    models.team.destroy({
+    // TODO Check if there is more than one member in team
+    models.team.findAll({
         where: {
-            id_raid: raid_id,
-            id_organizer: organizer_id
+            id_raid: raid_id
         }
-    }).then(function () {
-        res.send(JSON.stringify({msg: "ok"}));
+    }).then(function (organizers_in_team) {
+        if(organizers_in_team.length > 1){
+            models.team.destroy({
+                where: {
+                    id_raid: raid_id,
+                    id_organizer: organizer_id
+                }
+            }).then(function () {
+                res.send(JSON.stringify({msg: "ok"}));
+            });
+        }else{
+            res.send(JSON.stringify({msg: "only_one_organizer"}));
+        }
     });
 };
