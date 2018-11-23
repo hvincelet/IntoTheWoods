@@ -27,10 +27,11 @@ $REMOVE_MODAL.on('show.bs.modal', function (event) {
     let modal = $(this);
     modal.find('span.userName').text(userName);
     modal.find('span.userMail').text(userMail);
-    modal.find('span.userType').text(type);
     if(type === "Helpers"){
+        modal.find('span.userType').text("bénévoles");
         $("#confirmRemove-button").attr("onclick","removeHelper('"+deleteButton.data('login')+"', '"+userName+"')");
     }else{
+        modal.find('span.userType').text("organisat·eurs·rices");
         $("#confirmRemove-button").attr("onclick","removeOrganizer('"+userMail+"', '"+userName+"')");
     }
 
@@ -313,13 +314,16 @@ function removeOrganizer(id, name){
                 $MESSAGE_MODAL_TITLE.html("L'organisat·eur·rice a bien été supprimé·e");
                 $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
                 $MESSAGE_MODAL_CONTENT.html("L'organisat·eur·rice "+name+" a bien été supprimé·e de l'équipe organisatrice de ce raid.");
-                $MESSAGE_MODAL.modal('show');
+            }else if(msg === "only_one_organizer"){
+                $MESSAGE_MODAL_TITLE.html("L'organisat·eur·rice n'a pas pu être supprimé·e");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Vous êtes le/la seul·e organisat·eur·rice de ce raid.<br/>Impossible de vous supprimer dans ce cas.");
             }else{
                 $MESSAGE_MODAL_TITLE.html("L'organisat·eur·rice n'a pas pu être supprimé·e");
                 $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
                 $MESSAGE_MODAL_CONTENT.html("L'organisat·eur·rice "+name+" n'a pas pu être supprimé·e de l'équipe organisatrice de ce raid.<br/>Merci de réessayer dans quelques instants.");
-                $MESSAGE_MODAL.modal('show');
             }
+            $MESSAGE_MODAL.modal('show');
         },
         error: function (response) {
             let msg = JSON.parse(response).msg;

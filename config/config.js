@@ -7,7 +7,7 @@ module.exports = {
         database: 'intoTheWoodsDB',
         host: 'localhost',
         dialect: 'mysql',
-        logging: false, // True for logging sequelize message
+        logging: true, // true for logging sequelize message
         no_login: false,
         define: {
             timestamps: false

@@ -80,7 +80,7 @@ const participant = require('./routes/participant');
 
 //routes dedicated to register and connection
 intothewoods.route('/')
-    .get(organizer.displayHome);
+    .get(misc.displayHome);
 
 intothewoods.route('/login')
     .get(organizer.displayLogScreen)
