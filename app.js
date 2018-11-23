@@ -78,10 +78,14 @@ const participant = require('./routes/participant');
 /*             Routes             */
 /**********************************/
 
-//routes dedicated to register and connection
+// Misc routes
+intothewoods.route('/termsandpolicy')
+    .get(misc.cgu);
+
 intothewoods.route('/')
     .get(misc.displayHome);
 
+// Routes dedicated to register and connection
 intothewoods.route('/login')
     .get(organizer.displayLogScreen)
     .post(organizer.idVerification);
@@ -95,13 +99,6 @@ intothewoods.route('/register')
 
 intothewoods.route('/validate')
     .get(organizer.validate); // /validate?id={email}&hash={password_hash}
-
-intothewoods.route('/resetpassword')
-    .post(misc.forgotten_password)
-    .get(misc.display_change_password);
-
-intothewoods.route('/newpassword')
-    .post(misc.register_new_password);
 
 //routes dedicated to the raids' pages
 intothewoods.route('/dashboard')
@@ -190,7 +187,7 @@ intothewoods.route('/termsandpolicy')
 
 //bad url route
 intothewoods.use(function (req, resp, next) {
-    resp.render(__dirname + "/views/pages/404.ejs", {
+    resp.render("pages/404.ejs", {
         "pageTitle": "Erreur 404"
     });
 });

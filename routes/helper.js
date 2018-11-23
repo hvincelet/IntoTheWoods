@@ -116,14 +116,7 @@ exports.displayRegister = function(req, res) {
                     });
                 });
             } else {
-                res.render(pages_path + "helper_register.ejs", {
-                    pageTitle: "Inscription Bénévole",
-                    activity: get_post_clean,
-                    raid: {
-                        name: helper_post.dataValues.point_of_interest.raid.name,
-                        edition: helper_post.dataValues.point_of_interest.raid.edition
-                    }
-                });
+                return res.redirect('/helper/register');
             }
         });
     }else{
@@ -143,7 +136,7 @@ exports.displayRegister = function(req, res) {
                     [Op.gte]: today.toISOString().split('T')[0],
                     [Op.lte]: in_two_months.toISOString().split('T')[0]
                 }
-            }
+            }, order: ['name']
         }).then(function (raids_found) {
             if(raids_found){
                 let raids = [];
@@ -173,13 +166,13 @@ exports.displayRegister = function(req, res) {
 
                 Promise.all(get_poi_actions).then(result => {
                     res.render(pages_path + "../visitors/register_helper.ejs", {
-                        pageTitle: "Inscription Bénévole",
+                        pageTitle: "Inscription bénévoles",
                         raid_list: raids
                     });
                 });
             }else{
                 res.render(pages_path + "../visitors/register_helper.ejs", {
-                    pageTitle: "Inscription Bénévole",
+                    pageTitle: "Inscription bénévoles",
                     raid_list: []
                 });
             }

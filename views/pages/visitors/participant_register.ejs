@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<% include ../partials/head %>
+<body>
+<div class="page login-page wood-background">
+    <div class="container">
+        <div class="form-outer text-center d-flex align-items-center">
+            <div class="form-inner">
+                <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
+                <p>Bienvenue sur Into the Woods ! Vous êtes sur le point de vous inscrire en tant que coureu·r·se sur le raid <%=raid.name%>.<br/>
+                    Merci de remplir le formulaire et de lire et accepter les termes et conditions d'utilisation du service.</p>
+                <% if(typeof errorMessage !== "undefined") { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+                        <%= errorMessage %>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                <% } %>
+                <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Inscription sur l'édition <%=raid.edition%> du raid "<%=raid.name%>"</h3>
+                <form id="helper_form" class="text-left form-validate" style="max-width: none !important;">
+                    <div class="form-group-material">
+                        <input id="register-userfn" type="text" name="registerUserFn" required data-msg="Merci d'entrer votre prénom" class="input-material">
+                        <label for="register-userfn" class="label-material">Prénom</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="register-userln" type="text" name="registerUserLn" required data-msg="Merci d'entrer votre nom" class="input-material">
+                        <label for="register-userln" class="label-material">Nom</label>
+                    </div>
+                    <div class="form-group-material">
+                        <input id="register-email" type="email" name="registerEmail" required data-msg="Merci d'entrer votre adresse e-mail" class="input-material">
+                        <label for="register-email" class="label-material">Adresse e-mail</label>
+                    </div>
+                    <div class="form-group terms-conditions text-center">
+                        <input id="register-agree" name="registerAgree" type="checkbox" required value="1" data-msg="Votre accord est obligatoire" class="form-control-custom">
+                        <label for="register-agree">J'accepte <a href="/termsandpolicy" target="_blank">les termes et les conditions d'utilisation</a></label>
+                    </div>
+                    <div class="form-group text-center">
+                        <input type="hidden" name="wishes" id="wishes_list">
+                        <input id="register" type="button" value="S'inscrire" class="btn btn-primary">
+                    </div>
+                </form>
+            </div>
+            <div class="copyrights text-center">
+                <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+                <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageDialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageDialog">Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-3 text-center align-middle my-auto" id="messageIconDialog"></div>
+                    <div class="col-lg-9 align-middle my-auto" id="messageContentDialog"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $('#register').click(function (){
+        let $MESSAGE_MODAL = $('#messageModal');
+        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+
+        $.ajax({
+            type: 'POST',
+            url: '/participant/register',
+            data: {
+                registerEmail: $('#register-email').val(),
+                registerUserLn: $('#register-userln').val(),
+                registerUserFn: $('#register-userfn').val(),
+                raid: <%= raid.id %>
+            },
+            success: function (response) {
+                msg = JSON.parse(response).msg;
+                if(msg === "ok"){
+                    $MESSAGE_MODAL_TITLE.html("Inscription validée !");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Vous avez bien été inscrit sur ce raid.<br/>" +
+                        "Vous allez recevoir dans quelques instants un mail confirmant votre inscription.<br/>" +
+                        "<small>Si vous ne le recevez pas, rapprochez vous de l'organisateur de ce raid afin de savoir si votre inscription a bien été prise en compte.</small>");
+                }else{
+                    $MESSAGE_MODAL_TITLE.html("Erreur...");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
+                        "Merci de recharger la page et de réessayer.");
+                }
+                $MESSAGE_MODAL.modal('show');
+            },
+            error: function (response) {
+                let msg = JSON.parse(response).msg;
+                $MESSAGE_MODAL_TITLE.html("Erreur...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
+                    "Merci de recharger la page et de réessayer.");
+                $MESSAGE_MODAL.modal('show');
+            }
+        });
+    });
+</script>
+<% include ../partials/footer %>
+</body>
+</html>
