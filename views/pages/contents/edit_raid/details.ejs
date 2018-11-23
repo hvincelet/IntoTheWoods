@@ -147,7 +147,7 @@ helpers.map( (helper, index) => {
                                     <td class="pt-3-half" contenteditable="false" width="20%">
                                         <div class="form-check" style="text-align: left;">
                                             <% helper.assignment.map((post, index) =>{ %>
-                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>-<%=post.id%>" type="radio" value="<%=post.id%>" name="<%=helpers_id[helper.email]%>" <% if(parseInt(post.attributed) === 1){ %>checked<% } %>>
+                                                <input class="form-control-custom post-check" id="<%=helpers_id[helper.email]%>-<%=post.id%>" type="radio" value="<%=post.id%>" name="<%=helpers_id[helper.email]%>" <% if(post.attributed === 1){ %>checked<% } %>>
                                                 <label for="<%=helpers_id[helper.email]%>-<%=post.id%>" id="<%=helpers_id[helper.email]%>-<%=post.id%>-label"><%=post.description%></label>
                                                 <% if (index !== helper.assignment.length - 1){ %>
                                                     <br/>

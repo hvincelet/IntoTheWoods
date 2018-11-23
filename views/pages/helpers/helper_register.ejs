@@ -31,6 +31,17 @@
                         <input id="register-email" type="email" name="registerEmail" required data-msg="Merci d'entrer votre adresse e-mail" class="input-material">
                         <label for="register-email" class="label-material">Adresse e-mail</label>
                     </div>
+                    <div>
+                        <input class="form-control-custom post-check" id="backup" name="backup" type="radio">
+                        <label for="backup">
+                            Renfort
+                            <small>
+                                <br/>Vous ne participerez pas au raid en tant que bénévole.
+                                <br/>Vous serez peut-être appelé(e) à un poste par un organisateur
+                            </small>
+                        </label>
+                    </div>
+                    <input type="text" name="idRaid" hidden value="<%= raid.id %>">
                     <% if(typeof activity !== "undefined") { %>
                     <div class="form-group">
                         <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Indiquez vos voeux</h3>
