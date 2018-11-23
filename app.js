@@ -71,15 +71,20 @@ const raid = require('./routes/raid');
 const map = require('./routes/map');
 const misc = require('./routes/misc');
 const helper = require('./routes/helper');
+const participant = require('./routes/participant');
 
 /**********************************/
 /*             Routes             */
 /**********************************/
 
-//routes dedicated to register and connection
+// Misc routes
+intothewoods.route('/termsandpolicy')
+    .get(misc.cgu);
+
 intothewoods.route('/')
     .get(misc.displayHome);
 
+// Routes dedicated to register and connection
 intothewoods.route('/login')
     .get(organizer.displayLogScreen)
     .post(organizer.idVerification);
@@ -137,7 +142,6 @@ intothewoods.route('/editraid/:id/removeHelper')
 intothewoods.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
-
 //routes dedicated to the helpers
 intothewoods.route('/team/:raid_id/invitehelpers')
     .post(checkAuth, helper.inviteHelper);
@@ -152,10 +156,10 @@ intothewoods.route('/helper/assign')
 intothewoods.route('/helper/:id/home')
     .get(helper.displayHome);
 
-
-
-intothewoods.route('/termsandpolicy')
-    .get(misc.cgu);
+// Routes dedicated to participant
+intothewoods.route('/participant/register')
+    .get(participant.displayRegister)
+    .post(participant.register);
 
 //bad url route
 intothewoods.use(function (req, resp, next) {

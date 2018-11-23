@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<% include ../partials/head %>
+<body>
+<div class="page page-full wood-background">
+    <header class="header">
+        <nav class="navbar">
+            <div class="container-fluid">
+                <div class="navbar-holder d-flex align-items-center justify-content-between">
+                    <div class="navbar-header">
+                        <a href="/" class="navbar-brand">
+                            <div class="brand-text d-none d-md-inline-block"><strong class="text-primary">Into the Woods</strong></div>
+                        </a>
+                    </div>
+                    <ul class="nav-menu list-unstyled d-flex flex-md-row align-items-md-center">
+                        <li class="nav-item"><a href="/login" class="nav-link logout"> <span class="d-none d-sm-inline-block">Se connecter en tant qu'organisat·eur·rice</span><i class="fas fa-sign-in-alt"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="card-group" style="margin-top: 5%;width: 100%;">
+                <div class="card transparent-card">
+                    <div class="card-body">
+                        <h4 class="card-title">Inscription coureu·rs·ses</h4>
+                        <% if(raid_list.length > 0){ %>
+                            <p class="card-text">
+                                Bonjour, la liste ci-dessous affiche une liste des raids commençant dans moins de deux mois par ordre alphabétique.<br/>
+                                Si vous souhaitez vous inscrire dans l'un deux, cliquez simplement sur le bouton s'inscrire en face de son nom.
+                            </p>
+                            <table id="table"
+                                   class="table table-bordered table-responsive-md table-striped text-center">
+                                <tr>
+                                    <th class="text-center">Nom</th>
+                                    <th class="text-center">Édition</th>
+                                    <th class="text-center">Date</th>
+                                    <th class="text-center">Lieu</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+
+                                <% raid_list.forEach(function (raid) { %>
+                                    <tr>
+                                        <td class="pt-3-half"><%= raid.name %></td>
+                                        <td class="pt-3-half"><%= raid.edition %></td>
+                                        <td class="pt-3-half"><%= raid.date %></td>
+                                        <td class="pt-3-half"><%= raid.place %></td>
+                                        <td class="pt-3-half"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0" onclick="window.location='/participant/register?raid=<%= raid.id %>'">Inscription</button></td>
+                                    </tr>
+                                <% }); %>
+                            </table>
+                        <%} else { %>
+                            <p class="card-text">
+                                Bonjour, il n'y actuellement pas de raid dont l'inscription en tant que coureu·r·se est ouverte.<br/>
+                                Merci de revenir dans quelques jours.
+                            </p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="login-page">
+    <div class="copyrights text-center">
+        <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+        <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+    </div>
+</div>
+<% include ../partials/footer %>
+</body>
+</html>
