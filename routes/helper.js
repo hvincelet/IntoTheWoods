@@ -1,9 +1,6 @@
-const pages_path = __dirname+"/../views/pages/helpers/";
+const pages_path = "../views/pages/helpers/";
 const models = require('../models');
 const sender = require('./sender');
-const Sequelize = require('sequelize');
-const Op = Sequelize.Op;
-const date = require('date-and-time');
 
 exports.inviteHelper = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -65,119 +62,60 @@ exports.inviteHelper = function (req, res) {
     res.send(JSON.stringify({status: helper_invite_status}));
 };
 
-exports.displayRegister = function(req, res) {
-    let raid_id = req.query.raid;
-    if (raid_id !== undefined) {
-        let get_post_clean = [];
+exports.displayRegister = function(req, res){
+    const raid_id = req.query.raid;
+    let get_post_clean = [];
 
-        let raid_model = models.raid;
-        let point_of_interest_model = models.point_of_interest;
-        let helper_post_model = models.helper_post;
+    let point_of_interest_model = models.point_of_interest;
+    let helper_post_model = models.helper_post;
 
-        point_of_interest_model.belongsTo(raid_model, {foreignKey: 'id_raid'});
-        helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
+    helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
+    models.raid.findByPk(raid_id).then(function(raid_found){
         helper_post_model.findAll({
-            include: [{
-                model: point_of_interest_model,
-                include: [{
-                    model: raid_model,
-                    where: {
-                        id: raid_id
-                    },
-                    attributes: ['name', 'edition']
-                }]
-            }], attributes: ['id', 'title', 'nb_helper']
-        }).then(function (helper_posts_found) {
-            if (helper_posts_found !== null) {
-                helper_posts_found.forEach(function (helper_post, index, helper_posts_array) {
+          include: [{
+              model: point_of_interest_model,
+              where: {
+                  id_raid: raid_id
+              }
+          }],attributes: ['id', 'title', 'nb_helper']
+        }).then(function(helper_posts_found){
+            if(helper_posts_found.length > 0){
+                helper_posts_found.forEach(function(helper_post, index, helper_posts_array){
                     models.assignment.findAndCountAll({
                         where: {
                             id_helper_post: helper_post.dataValues.id,
                             attributed: 1
                         }
-                    }).then(function (all_assignement) {
-                        if (helper_post.dataValues.point_of_interest != null && helper_post.dataValues.nb_helper - all_assignement.count > 0) {
-                            get_post_clean.push({
-                                'id': helper_post.dataValues.id,
-                                'title': helper_post.dataValues.title
-                            });
+                    }).then(function(all_assignement){
+                        if(helper_post.dataValues.point_of_interest !== null && helper_post.dataValues.nb_helper - all_assignement.count > 0){
+                            get_post_clean.push({'id':helper_post.dataValues.id,'title':helper_post.dataValues.title});
                         }
                         if (index === helper_posts_array.length - 1) {
                             res.render(pages_path + "helper_register.ejs", {
                                 pageTitle: "Inscription Bénévole",
                                 activity: get_post_clean,
                                 raid: {
-                                    name: helper_post.dataValues.point_of_interest.raid.name,
-                                    edition: helper_post.dataValues.point_of_interest.raid.edition
+                                    id: raid_found.dataValues.id,
+                                    name: raid_found.dataValues.name,
+                                    edition: raid_found.dataValues.edition
                                 }
                             });
                         }
                     });
                 });
-            } else {
-                return res.redirect('/helper/register');
-            }
-        });
-    }else{
-        let point_of_interest_model = models.point_of_interest;
-        let helper_post_model = models.helper_post;
-        let raid_model = models.raid;
-
-        point_of_interest_model.belongsTo(raid_model, {foreignKey: 'id_raid'});
-        helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
-
-        let today = new Date();
-        let in_two_months = date.addMonths(today, 2);
-        raid_model.findAll({
-            attributes: ['id', 'name', 'edition', 'date', 'place'],
-            where: {
-                date: {
-                    [Op.gte]: today.toISOString().split('T')[0],
-                    [Op.lte]: in_two_months.toISOString().split('T')[0]
-                }
-            }, order: ['name']
-        }).then(function (raids_found) {
-            if(raids_found){
-                let raids = [];
-                let get_poi_actions = raids_found.map(raid => {
-                    return new Promise(resolve => {
-                        helper_post_model.findAll({
-                            include: [{
-                                model: point_of_interest_model,
-                                include: [{
-                                    model: raid_model,
-                                    where: {
-                                        id: raid.id
-                                    },
-                                    attributes: ['name', 'edition']
-                                }]
-                            }], attributes: ['id', 'title', 'nb_helper']
-                        }).then(function (helper_post_found) {
-                            if(helper_post_found !== null){
-                                if(helper_post_found[0].point_of_interest !== null){
-                                    raids.push({id: raid.id, name: raid.name, edition: raid.edition, date: raid.date, place: raid.place});
-                                }
-                            }
-                            return resolve();
-                        });
-                    });
-                });
-
-                Promise.all(get_poi_actions).then(result => {
-                    res.render(pages_path + "../visitors/register_helper.ejs", {
-                        pageTitle: "Inscription bénévoles",
-                        raid_list: raids
-                    });
-                });
             }else{
-                res.render(pages_path + "../visitors/register_helper.ejs", {
-                    pageTitle: "Inscription bénévoles",
-                    raid_list: []
+                res.render(pages_path + "helper_register.ejs", {
+                    pageTitle: "Inscription Bénévole",
+                    activity: get_post_clean,
+                    raid: {
+                        name: raid_found.dataValues.name,
+                        edition: raid_found.dataValues.edition
+                    }
                 });
             }
         });
-    }
+    });
 };
 
 exports.register = function (req, res) {
@@ -186,7 +124,14 @@ exports.register = function (req, res) {
     const registerEmail = req.body.registerEmail;
     const registerUserLn = req.body.registerUserLn;
     const registerUserFn = req.body.registerUserFn;
-    let helperPostsWished = req.body.whishes;
+    let backup = req.body.backup;
+    if(backup === undefined) {
+        backup = 0;
+    }else{
+        backup = 1;
+    }
+    const id_raid = req.body.idRaid;
+    let helperPostsWished = JSON.parse(req.body.wishes);
 
     models.helper.findOne({
         where: {
@@ -207,17 +152,39 @@ exports.register = function (req, res) {
             login: id_helper,
             email: registerEmail,
             last_name: registerUserLn,
-            first_name: registerUserFn
+            first_name: registerUserFn,
+            backup: backup
         }).then(function () {
-            helperPostsWished.map(wish =>{
-                models.assignment.create({
-                    id_helper: id_helper,
-                    id_helper_post: wish.id,
-                    attributed: 0,
-                    order: wish.order
+            if (backup === 1) {
+                let helper_post_model = models.helper_post;
+                let poi_model = models.point_of_interest;
+                helper_post_model.belongsTo(poi_model, {foreignKey: "id_point_of_interest"});
+                helper_post_model.findAll({
+                    include: {
+                        model: poi_model,
+                        where: {
+                            id_raid: id_raid
+                        }
+                    }
+                }).then(function(helper_posts_found){
+                    helper_posts_found.map(function(helper_post){
+                        models.assignment.create({
+                            id_helper: id_helper,
+                            id_helper_post: helper_post.id,
+                            order_num: 1
+                        });
+                    });
                 });
-            });
-            res.send(JSON.stringify({msg: "ok"}));
+            }else{
+                helperPostsWished.map(wish =>{
+                    models.assignment.create({
+                        id_helper: id_helper,
+                        id_helper_post: wish.id,
+                        order_num: wish.order
+                    });
+                });
+            }
+            res.redirect("/helper/" + id_helper + "/home");
         });
     });
 };
@@ -230,7 +197,7 @@ exports.displayHome = function (req, res) {
         }
     }).then(function (assignments_found) {
         if (assignments_found !== null) {
-            const assignment_found = assignments_found.find(function(assignment){return parseInt(assignment.attributed) === 1;});
+            const assignment_found = assignments_found.find(function(assignment){return assignment.attributed === 1;});
             if (assignment_found === undefined){
                 res.render(pages_path + "helper_home.ejs", {
                     pageTitle: "Inscription Bénévole",

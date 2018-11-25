@@ -29,7 +29,7 @@ USE `intoTheWoodsDB` ;
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
-  `date` DATE NULL,
+  `date` DATETIME NULL,
   `edition` SMALLINT NULL,
   `place` TINYTEXT NULL,
   `lat` DOUBLE NULL,
@@ -222,8 +222,8 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`assignment` (
   `id_helper` VARCHAR(7) NOT NULL,
   `id_helper_post` INT UNSIGNED NOT NULL,
-  `attributed` INT UNSIGNED DEFAULT 0,
-  `order` INT UNSIGNED NOT NULL,
+  `attributed` INT(1) UNSIGNED DEFAULT 0,
+  `order_num` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id_helper`, `id_helper_post`),
   CONSTRAINT `id_helper`
     FOREIGN KEY (`id_helper`)

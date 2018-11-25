@@ -13,7 +13,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     date: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.DATE,
       allowNull: true
     },
     edition: {
