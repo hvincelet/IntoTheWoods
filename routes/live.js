@@ -8,6 +8,10 @@ exports.displayLive = function(req, res){
     
 }
 
+exports.getData = function(req, res){
+    
+}
+
 // Register new Helper default page
 exports.displayRegister = function(req, res){
 
