@@ -31,7 +31,7 @@ helpers.map( (helper, index) => {
                             </tr>
                             <tr>
                                 <td class="pt-3-half" contenteditable="false" width="40%"><%= raid.place %></td>
-                                <td class="pt-3-half" contenteditable="false" width="20%"><%= raid.date %></td>
+                                <td class="pt-3-half" contenteditable="false" width="20%"><%= raid.date.toLocaleString() %></td>
                                 <td class="pt-3-half" contenteditable="false" width="20%">
                                     <% courses.map( (course, index) => { %>
                                         <%= course.name %>

@@ -71,7 +71,7 @@ exports.displayRegister = function(req, res){
 
     helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
-    models.raid.findById(raid_id, {attributes:['id', 'name', 'edition']}).then(function(raid_found){
+    models.raid.findByPk(raid_id).then(function(raid_found){
         helper_post_model.findAll({
           include: [{
               model: point_of_interest_model,
@@ -167,14 +167,12 @@ exports.register = function (req, res) {
                         }
                     }
                 }).then(function(helper_posts_found){
-                    let count = 1;
                     helper_posts_found.map(function(helper_post){
                         models.assignment.create({
                             id_helper: id_helper,
                             id_helper_post: helper_post.id,
-                            order: count
+                            order_num: 1
                         });
-                        count += 1;
                     });
                 });
             }else{
@@ -182,7 +180,7 @@ exports.register = function (req, res) {
                     models.assignment.create({
                         id_helper: id_helper,
                         id_helper_post: wish.id,
-                        order: wish.order
+                        order_num: wish.order
                     });
                 });
             }
