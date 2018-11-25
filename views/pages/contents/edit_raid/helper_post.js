@@ -4,7 +4,7 @@ function loadHelperPost(helperPostArray) {
     helperPostArray.map(helperPost => {
         helperPostArrayToStore.push({
             id: helperPost.id,
-            description: helperPost.description,
+            title: helperPost.title,
             id_point_of_interest: helperPost.id_point_of_interest,
             nb_helper: helperPost.nb_helper,
             is_new: false
@@ -13,7 +13,7 @@ function loadHelperPost(helperPostArray) {
 }
 
 function editHelperPost(featureId) {
-    let description = $('#' + featureId + '_label').val();
+    let title = $('#' + featureId + '_label').val();
     let nbHelper = $('#' + featureId + '_nbHelper').val();
 
     let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
@@ -21,12 +21,12 @@ function editHelperPost(featureId) {
     });
 
     if (helperPostFound) {
-        helperPostFound.description = description;
+        helperPostFound.title = title;
         helperPostFound.nb_helper = nbHelper;
     } else {
         helperPostArrayToStore.push({
-            id_point_of_interest: parseInt(featureId.replace("new_point_of_interest_", "")),
-            description: description,
+            id_point_of_interest: parseInt(featureId.replace('point_of_interest_', '').replace('new_', '')),
+            title: title,
             nb_helper: nbHelper,
             is_new: true
         });
