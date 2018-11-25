@@ -56,32 +56,27 @@ exports.idVerification = function (req, res) {
             let team_model = models.team;
             let raid_model = models.raid;
 
-            raid_model.belongsTo(team_model, {foreignKey: 'id'});
+            team_model.belongsTo(raid_model, {foreignKey: 'id_raid'});
 
-            raid_model.findAll({
+            team_model.findAll({
                 include: [{
-                    model: team_model,
-                    where: {
-                        id_raid: Sequelize.col('raid.id'),
-                        id_organizer: user.login
-                        //date > date_of_the_day - one_month
-                    }
+                    model: raid_model
                 }],
-                attributes: ['id', 'name', 'edition', 'date', 'place', 'lat', 'lng']
-            }).then(function(raids_found){
-                if(raids_found){
-                    raids_found.forEach(function(tuple){
-                        user.raid_list.push({
-                            id: tuple.dataValues.id,
-                            name: tuple.dataValues.name,
-                            edition: tuple.dataValues.edition,
-                            date: tuple.dataValues.date,
-                            place: tuple.dataValues.place,
-                            lat: tuple.dataValues.lat,
-                            lng: tuple.dataValues.lng
-                        });
-                    });
+                where: {
+                    id_organizer: user.login
                 }
+            }).then(function(raids_found){
+                raids_found.map(tuple => {
+                    user.raid_list.push({
+                        id: tuple.dataValues.raid.dataValues.id,
+                        name: tuple.dataValues.raid.dataValues.name,
+                        edition: tuple.dataValues.raid.dataValues.edition,
+                        date: tuple.dataValues.raid.dataValues.date,
+                        place: tuple.dataValues.raid.dataValues.place,
+                        lat: tuple.dataValues.raid.dataValues.lat,
+                        lng: tuple.dataValues.raid.dataValues.lng
+                    });
+                });
                 connected_users.push(user);
             });
             return res.redirect('/dashboard');

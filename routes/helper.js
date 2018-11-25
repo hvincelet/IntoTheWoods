@@ -225,14 +225,12 @@ exports.register = function (req, res) {
                         }
                     }
                 }).then(function(helper_posts_found){
-                    let count = 1;
                     helper_posts_found.map(function(helper_post){
                         models.assignment.create({
                             id_helper: id_helper,
                             id_helper_post: helper_post.id,
-                            order: count
+                            order_num: 1
                         });
-                        count += 1;
                     });
                 });
             }else{
@@ -240,7 +238,7 @@ exports.register = function (req, res) {
                     models.assignment.create({
                         id_helper: id_helper,
                         id_helper_post: wish.id,
-                        order: wish.order
+                        order_num: wish.order
                     });
                 });
             }
@@ -257,7 +255,7 @@ exports.displayHome = function (req, res) {
         }
     }).then(function (assignments_found) {
         if (assignments_found !== null) {
-            const assignment_found = assignments_found.find(function(assignment){return parseInt(assignment.attributed) === 1;});
+            const assignment_found = assignments_found.find(function(assignment){return assignment.attributed === 1;});
             if (assignment_found === undefined){
                 res.render(pages_path + "helper_home.ejs", {
                     pageTitle: "Inscription Bénévole",
