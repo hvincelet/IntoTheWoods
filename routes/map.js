@@ -156,13 +156,13 @@ exports.storeMapData = function (req, res) {
                             if (pointOfInterest !== undefined){
                                 helper_post_created_promise = helper_posts.create({
                                     id_point_of_interest: pointOfInterest.serverId,
-                                    title: helper_post.title,
+                                    title: helper_post.description,
                                     nb_helper: helper_post.nb_helper
                                 });
                             } else {
                                 helper_post_created_promise = helper_posts.create({
                                     id_point_of_interest: helper_post.id_point_of_interest,
-                                    title: helper_post.title,
+                                    title: helper_post.description,
                                     nb_helper: helper_post.nb_helper
                                 });
                             }
@@ -201,7 +201,7 @@ exports.storeMapData = function (req, res) {
                             });
                         } else {
                             helper_posts.update({
-                                    title: helper_post.title,
+                                    title: helper_post.description,
                                     nb_Helper: helper_post.nb_helper
                                 },
                                 {where: {id: helper_post.id}}
@@ -304,17 +304,13 @@ function removeAssignmentsForThisPoi(poi_id, raid_id){
                                 // Helper with only one assignment (attributed or not) becomes a backup + send a mail
                                 helpers.findByPk(assignments_by_helper.helper_id).then(function(new_helper_backup){
                                     if(new_helper_backup.backup === 0) {
-                                        new_helper_backup.update({
-                                            backup: 1
-                                        }).then(function(){
-                                            raids.findByPk(raid_id).then(function(raid_found){
-                                                sender.sendNewBackupDueToPoiDeletionMail(new_helper_backup.dataValues.email, raid_found.dataValues.name, raid_found.dataValues.edition, assignments_by_helper.helper_post_name);
-                                                helper_posts_found.map(helper_post => {
-                                                    assignments.create({
-                                                        id_helper_post: helper_post.dataValues.id,
-                                                        id_helper: assignments_by_helper.helper_id,
-                                                        order_num: 1
-                                                    });
+                                        raids.findByPk(raid_id).then(function(raid_found){
+                                            sender.sendNewBackupDueToPoiDeletionMail(new_helper_backup.dataValues.email, raid_found.dataValues.name, raid_found.dataValues.edition, assignments_by_helper.helper_post_name);
+                                            helper_posts_found.map(helper_post => {
+                                                assignments.create({
+                                                    id_helper_post: helper_post.dataValues.id,
+                                                    id_helper: assignments_by_helper.helper_id,
+                                                    order_num: 1
                                                 });
                                             });
                                         });
