@@ -324,3 +324,40 @@ exports.sendNewBackupDueToPoiDeletionMail = function(email, raid_name, raid_edit
         }
     });
 };
+
+exports.sendNewBackupDueToPoiDeletionMail = function(email, raid_name, raid_edition, helper_post_name){
+    let transporter = nodemailer.createTransport({
+        service: config.service,
+        auth: {
+            user: config.login,
+            pass: config.password
+        }
+    });
+
+    let mailOptions = {
+        from: "Into the Woods",
+        to: email,
+        subject: "Vous devenez un bénévole de renfort",
+        html: ""
+    };
+
+    let ejsTemplate = fs.readFileSync(__dirname + '/../views/pages/contents/email/switchToBackup.ejs','utf-8');
+    let content = ejs.render(ejsTemplate, {
+        raid_name: raid_name,
+        raid_edition: raid_edition,
+        helper_post_name: helper_post_name
+    },{
+        vars: ["raid_name", "raid_edition", "helper_post_name"]
+    });
+
+    mailOptions['html'] = content;
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            console.log(error);
+            return "nok";
+        }else{
+            console.log('Email sent: ' + info.response);
+            return "ok";
+        }
+    });
+};
