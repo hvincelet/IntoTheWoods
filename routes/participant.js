@@ -4,7 +4,6 @@ const models = require('../models');
 
 // Register new participant default page
 exports.displayRegister = function(req, res){
-    let raid_id = req.query.raid;
     let get_raids_clean = [];
 
     let raid_model = models.raid;

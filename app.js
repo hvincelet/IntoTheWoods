@@ -149,7 +149,7 @@ app.route('/participant/:id/home')
 
 //Routes dedicated to the Live
 app.route('/live/:id')
-    .get(live.displayLive),
+    .get(live.displayLive)
     .post(live.getData);
 
 
