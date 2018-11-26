@@ -140,6 +140,8 @@ app.route('/helper/assign')
 app.route('/helper/:id/home')
     .get(helper.displayHome);
 
+app.route('/helper/check_in')
+    .post(helper.performCheckin);
 
 
 app.route('/termsandpolicy')

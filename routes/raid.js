@@ -47,7 +47,8 @@ exports.createRaid = function (req, res) {
 
         geocoder.search({q: req.body.raidPlace}) // allows to list all the locations corresponding to the city entered
             .then((response) => {
-                if (typeof response[0].lat !== undefined) {
+                console.log(response[0].lat);
+                if (response[0].lat !== undefined) {
                     raid_created.update({
                         place: response[0].display_name,
                         lat: response[0].lat,
