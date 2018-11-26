@@ -242,85 +242,104 @@ exports.storeMapData = function (req, res) {
 };
 
 function removeAssignmentsForThisPoi(poi_id, raid_id){
+    console.log("raid_id = " + raid_id + " poi_id = " + poi_id);
     assignments.findAll({
         include: [{
             model: helper_posts,
-            where: {
-                id_point_of_interest: poi_id
-            }
+            include: [{
+                model: point_of_interests,
+                where: {
+                    id_raid: raid_id
+                }
+            }]
         }]
     }).then(function(assignments_found){
         let assignments_by_helper_counter = [];
         const destroying_all_assignments = assignments_found.map(assignment => {
             return new Promise(resolve => {
+                if(assignment.dataValues.helper_post === null) return resolve();
                 let assignments_by_helper = assignments_by_helper_counter.find(assignment_by_helper => {
                     return assignment_by_helper.helper_id === assignment.dataValues.id_helper;
                 });
                 if(assignments_by_helper === undefined) {
-                    assignments_by_helper_counter.push({helper_id: assignment.dataValues.id_helper, count: 1, helper_post_name: assignment.dataValues.helper_post.dataValues.title});
-                }else{
+                    assignments_by_helper_counter.push({
+                        helper_id: assignment.dataValues.id_helper,
+                        count: 1,
+                        point_of_interest_id: assignment.dataValues.helper_post.dataValues.point_of_interest.dataValues.id,
+                        helper_post_name: assignment.dataValues.helper_post.dataValues.title
+                    });
+                }else if(assignment.dataValues.helper_post.dataValues.point_of_interest !== null){
                     assignments_by_helper.count += 1;
+                    assignments_by_helper.point_of_interest_id = assignment.dataValues.helper_post.dataValues.point_of_interest.dataValues.id;
                     assignments_by_helper.helper_post_name = assignment.dataValues.helper_post.dataValues.title;
                 }
-                assignments.destroy({
-                    where: {
-                        id_helper_post: assignment.dataValues.id_helper_post,
-                        id_helper: assignment.dataValues.id_helper
-                    }
-                }).then(function(){resolve()});
+                if(assignment.dataValues.helper_post.dataValues.id_point_of_interest === parseInt(poi_id)) {
+                    assignments.destroy({
+                        where: {
+                            id_helper_post: assignment.dataValues.id_helper_post,
+                            id_helper: assignment.dataValues.id_helper
+                        }
+                    }).then(function () {
+                        console.log("assignment destroyed (id_helper_post = " + assignment.dataValues.id_helper_post, + " id_helper = " + assignment.dataValues.id_helper + ")");
+                        return resolve();
+                    });
+                }else{
+                    return resolve();
+                }
             });
         });
         Promise.all(destroying_all_assignments).then(function(result){
-            const unique_assignments_array = assignments_found.filter(function (assignment, index, array) {
-                return array.findIndex(function (value) {
-                    return value.dataValues.id_helper_post === assignment.dataValues.id_helper_post;
-                }) === index;
-            });
-            const destroying_all_helper_posts = unique_assignments_array.map(assignment => {
-                return new Promise(resolve => {
-                    helper_posts.destroy({
-                        where: {
-                            id: assignment.id_helper_post
-                        }
-                    }).then(function(){resolve();});
-                });
-            });
-            Promise.all(destroying_all_helper_posts).then(result => {
-                point_of_interests.destroy({
+            console.log(assignments_by_helper_counter);
+            helper_posts.findOne({
+                where: {
+                    id_point_of_interest: poi_id
+                }
+            }).then(function(helper_post_to_destroy){
+                console.log("helper_post_to_destroy: ");
+                console.log(helper_post_to_destroy);
+                helper_posts.destroy({
                     where: {
-                        id: poi_id
+                        id: helper_post_to_destroy.dataValues.id
                     }
                 }).then(function(){
-                    helper_posts.findAll({
-                        include: [{
-                            model: point_of_interests,
-                            where: {
-                                id_raid: raid_id
-                            }
-                        }]
-                    }).then(function(helper_posts_found){
-                        assignments_by_helper_counter.map(assignments_by_helper => {
-                            if(assignments_by_helper.count === 1){
-                                // Helper with only one assignment (attributed or not) becomes a backup + send a mail
-                                helpers.findByPk(assignments_by_helper.helper_id).then(function(new_helper_backup){
-                                    if(new_helper_backup.backup === 0) {
-                                        new_helper_backup.update({
-                                            backup: 1
-                                        }).then(function(){
-                                            raids.findByPk(raid_id).then(function(raid_found){
-                                                sender.sendNewBackupDueToPoiDeletionMail(new_helper_backup.dataValues.email, raid_found.dataValues.name, raid_found.dataValues.edition, assignments_by_helper.helper_post_name);
-                                                helper_posts_found.map(helper_post => {
-                                                    assignments.create({
-                                                        id_helper_post: helper_post.dataValues.id,
-                                                        id_helper: assignments_by_helper.helper_id,
-                                                        order_num: 1
+                    console.log("helper_post destroyed (id = " + helper_post_to_destroy.dataValues.id + ")");
+                    point_of_interests.destroy({
+                        where: {
+                            id: poi_id
+                        }
+                    }).then(function(){
+                        console.log("point_of_interest destroyed (id = " + poi_id + ")");
+                        helper_posts.findAll({
+                            include: [{
+                                model: point_of_interests,
+                                where: {
+                                    id_raid: raid_id
+                                }
+                            }]
+                        }).then(function(helper_posts_found){
+                            assignments_by_helper_counter.map(assignments_by_helper => {
+                                if(assignments_by_helper.count === 1 && assignments_by_helper.point_of_interest_id === parseInt(poi_id)){
+                                    // Helper with only one assignment (attributed or not) becomes a backup + send a mail
+                                    helpers.findByPk(assignments_by_helper.helper_id).then(function(new_helper_backup){
+                                        if(new_helper_backup.backup === 0) {
+                                            new_helper_backup.update({
+                                                backup: 1
+                                            }).then(function(){
+                                                raids.findByPk(raid_id).then(function(raid_found){
+                                                    sender.sendNewBackupDueToPoiDeletionMail(new_helper_backup.dataValues.email, raid_found.dataValues.name, raid_found.dataValues.edition, assignments_by_helper.helper_post_name);
+                                                    helper_posts_found.map(helper_post => {
+                                                        assignments.create({
+                                                            id_helper_post: helper_post.dataValues.id,
+                                                            id_helper: assignments_by_helper.helper_id,
+                                                            order_num: 1
+                                                        });
                                                     });
                                                 });
                                             });
-                                        });
-                                    }
-                                });
-                            }
+                                        }
+                                    });
+                                }
+                            });
                         });
                     });
                 });

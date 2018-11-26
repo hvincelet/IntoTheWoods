@@ -78,8 +78,8 @@ exports.idVerification = function (req, res) {
                     });
                 });
                 connected_users.push(user);
+                return res.redirect('/dashboard');
             });
-            return res.redirect('/dashboard');
         } else {
             res.render(pages_path + "login.ejs", {
                 pageTitle: "Connexion",
@@ -205,32 +205,33 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
 
 
 exports.assignHelper = function(req, res) {
-    const assign_helper_actions =  req.body.assignments_array.map(assignment => {
-        return new Promise(resolve => {
-            models.assignment.findOne({
-                where: {
-                    id_helper: assignment.id_helper,
-                    attributed: 1
-                }
-            }).then(function(assignment_to_unattribute) {
-                if(assignment_to_unattribute !== null) { // Helper has already been assigned
-                    assignment_to_unattribute.update({
-                        attributed: 0
-                    }).then(function () {
+    if(req.body.assignments_array !== undefined) {
+        const assign_helper_actions = req.body.assignments_array.map(assignment => {
+            return new Promise(resolve => {
+                models.assignment.findOne({
+                    where: {
+                        id_helper: assignment.id_helper,
+                        attributed: 1
+                    }
+                }).then(function (assignment_to_unattribute) {
+                    if (assignment_to_unattribute !== null) { // Helper has already been assigned
+                        assignment_to_unattribute.update({
+                            attributed: 0
+                        }).then(function () {
+                            sendMailToHelperToNoticeHimHisAssignment(assignment);
+                            return resolve();
+                        });
+                    } else { // Helper has never been assigned
                         sendMailToHelperToNoticeHimHisAssignment(assignment);
                         return resolve();
-                    });
-                }else { // Helper has never been assigned
-                    sendMailToHelperToNoticeHimHisAssignment(assignment);
-                    return resolve();
-                }
+                    }
+                });
             });
         });
-    });
-
-    Promise.all(assign_helper_actions).then(result => {
-        res.send(JSON.stringify({msg: "ok"}));
-    });
+        Promise.all(assign_helper_actions).then(result => {
+            res.send(JSON.stringify({msg: "ok"}));
+        });
+    }
 };
 
 function sendMailToHelperToNoticeHimHisAssignment(assignment){
