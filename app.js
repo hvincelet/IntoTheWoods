@@ -1,24 +1,20 @@
-const env = process.argv[2];
-const https = require('https');
-const fs = require('fs');
 const express = require('express');
-const vhost = require('vhost');
 const favicon = require('serve-favicon');
-const express_lib = require('express');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
-const config = require('./config/config')[env];
+const config = require('./config/config').development;
+const app = express();
 
-// IntoTheWoods app
-const intothewoods = express();
+app.use(favicon(__dirname + '/views/img/favicon.png'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
-intothewoods.use(favicon(__dirname + '/views/img/favicon.png'));
-intothewoods.use(bodyParser.json());
-intothewoods.use(bodyParser.urlencoded({extended: true}));
-intothewoods.use("/views", express.static(__dirname + '/views'));
-intothewoods.set('view engine', 'ejs');
-intothewoods.use(session({
+// view engine setup
+app.use("/views", express.static(__dirname + '/views'));
+app.set('view engine', 'ejs');
+
+app.use(session({
     genid: (req) => {
         return uuid();
     },
@@ -26,6 +22,7 @@ intothewoods.use(session({
     resave: false,
     saveUninitialized: true
 }));
+
 
 global.connected_users = [];
 if (config.no_login) {
@@ -78,69 +75,56 @@ const participant = require('./routes/participant');
 /*             Routes             */
 /**********************************/
 
-// Misc routes
-intothewoods.route('/termsandpolicy')
-    .get(misc.cgu);
+//routes dedicated to register and connection
+app.route('/')
+    .get(organizer.displayHome);
 
-intothewoods.route('/')
-    .get(misc.displayHome);
-
-// Routes dedicated to register and connection
-intothewoods.route('/login')
+app.route('/login')
     .get(organizer.displayLogScreen)
     .post(organizer.idVerification);
 
-intothewoods.route('/logout')
+app.route('/logout')
     .get(organizer.logout);
 
-intothewoods.route('/register')
+app.route('/register')
     .get(organizer.displayRegister)
     .post(organizer.register);
 
-intothewoods.route('/validate')
+app.route('/validate')
     .get(organizer.validate); // /validate?id={email}&hash={password_hash}
 
 //routes dedicated to the raids' pages
-intothewoods.route('/dashboard')
+app.route('/dashboard')
     .get(checkAuth, organizer.dashboard);
 
-intothewoods.route('/createraid/start')
+app.route('/createraid/start')
     .get(checkAuth, raid.init);
 
-intothewoods.route('/createraid/description')
+app.route('/createraid/description')
     .get(checkAuth, raid.displayDescriptionForm)
     .post(checkAuth, raid.createRaid);
 
-intothewoods.route('/createraid/places')
+app.route('/createraid/places')
     .post(checkAuth, raid.getGeocodedResults);
 
-intothewoods.route('/createraid/sports')
+app.route('/createraid/sports')
     .get(checkAuth, raid.displaySportsTable)
     .post(checkAuth, raid.saveSportsRanking);
 
-intothewoods.route('/editraid')
+app.route('/editraid')
     .get(checkAuth, raid.displayAllRaids);
 
-intothewoods.route('/editraid/:id')
+app.route('/editraid/:id')
     .get(checkAuth, raid.displayRaid);
 
-intothewoods.route('/editraid/:id/map')
+app.route('/editraid/:id/map')
     .get(checkAuth, map.displayMap)
     .post(checkAuth, map.storeMapData);
 
-intothewoods.route('/editraid/:id/sendMessage')
+app.route('/editraid/:id/sendMessage')
     .post(checkAuth, organizer.sendMail);
 
-intothewoods.route('/editraid/:id/updatepoi')
-    .post(checkAuth, raid.savePoi);
-
-intothewoods.route('/editraid/:id/removeOrganizer')
-    .post(checkAuth, organizer.remove);
-
-intothewoods.route('/editraid/:id/removeHelper')
-    .post(checkAuth, helper.remove);
-
-intothewoods.route('/team/:raid_id/inviteorganizers')
+app.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
 app.route('/editraid/setStartTime')
@@ -148,19 +132,21 @@ app.route('/editraid/setStartTime')
 
 
 //routes dedicated to the helpers
-intothewoods.route('/team/:raid_id/invitehelpers')
+app.route('/team/:raid_id/invitehelpers')
     .post(checkAuth, helper.inviteHelper);
 
-intothewoods.route('/helper/register')
+app.route('/helper/register')
     .get(helper.displayRegister) // /helper/register?raid={raid_id}
     .post(helper.register);
 
-intothewoods.route('/helper/assign')
+app.route('/helper/assign')
     .post(checkAuth, organizer.assignHelper);
 
-intothewoods.route('/helper/:id/home')
+app.route('/helper/:id/home')
     .get(helper.displayHome);
 
+app.route('/helper/check_in')
+    .post(helper.performCheckin);
 app.route('/helper/participantPassage')
     .post(helper.participantPassage); //TODO : Décommenter la ligne une fois le dev terminé
 
@@ -186,40 +172,11 @@ intothewoods.route('/termsandpolicy')
     .get(misc.cgu);
 
 //bad url route
-intothewoods.use(function (req, resp, next) {
+app.use(function (req, resp, next) {
     resp.render("pages/404.ejs", {
         "pageTitle": "Erreur 404"
     });
 });
 
-// NOT MODIFY AFTER THIS LINE !
-if(env === "production"){
-    const credentials = {
-        key: fs.readFileSync('/etc/letsencrypt/live/runtonic.ovh/privkey.pem', 'utf8'),
-        cert: fs.readFileSync('/etc/letsencrypt/live/runtonic.ovh/cert.pem', 'utf8'),
-        ca: fs.readFileSync('/etc/letsencrypt/live/runtonic.ovh/chain.pem', 'utf8')
-    };
-
-    let app = module.exports = express();
-
-    //app.use(vhost('runtonic.ovh', runtonic)); // Serves top level doruntonic via Main server app
-    //app.use(vhost('www.runtonic.ovh', runtonic)); // Serves top level doruntonic via Main server app
-    app.use(vhost(config.server_host, intothewoods)); // Serves top level runtonic via Main server app
-
-    const httpServer = express_lib();
-    const httpsServer = https.createServer(credentials, app);
-
-    httpServer.get('*', function(req, res){
-        res.redirect('https://' + req.headers.host + req.url);
-    });
-
-    httpServer.listen(config.server_port_http);
-    console.log('HTTP Server running on '+config.server_host+':'+config.server_port_http);
-
-    httpsServer.listen(config.server_port_https, () => {
-        console.log('HTTPS Server running on '+config.server_host+':'+config.server_port_https);
-    });
-}else{
-    intothewoods.listen(config.server_port_http);
-    console.log('HTTP Server running on '+config.server_host+':'+config.server_port_http);
-}
+console.log('Listen on http://localhost:8080');
+app.listen(8080);
