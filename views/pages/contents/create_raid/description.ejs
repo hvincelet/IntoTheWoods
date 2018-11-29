@@ -1,7 +1,7 @@
 <div class="breadcrumb-holder">
     <div class="container-fluid">
         <ul class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="/dashboard">Accueil</a></li>
             <li class="breadcrumb-item active">Organiser un Raid</li>
             <li class="breadcrumb-item active">Fiche descriptive</li>
         </ul>
@@ -36,9 +36,9 @@
                             <div class="form-group row">
                                 <label class="col-sm-3">Date de l'événement :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidStartDate" name="raidStartDate" type="date"
+                                    <input id="raidStartDate" name="raidStartDate" type="datetime-local"
                                            placeholder="Date de début" class="form-control form-control-success"
-                                           min="<%= new Date().toISOString().split('T')[0] %>">
+                                           min="<%= new Date().toISOString() %>">
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -79,7 +79,7 @@
 </section>
 
 <script type="application/javascript">
-    if ( $('#raidStartDate')[0].type != 'date' ) $('#raidStartDate').datepicker();
+    //if ( $('#raidStartDate')[0].type != 'date' ) $('#raidStartDate').datepicker();
     $(document).ready(function () {
         $("#ajax").keyup(function () {
             if ($("#ajax").val().length >= 3) {

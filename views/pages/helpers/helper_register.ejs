@@ -18,7 +18,7 @@
                     </div>
                 <% } %>
                 <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Bénévolat sur l'édition <%=raid.edition%> du raid "<%=raid.name%>"</h3>
-                <form id="helper_form" class="text-left form-validate" method="post" action="/helper/register" style="max-width: none !important;">
+                <form id="helper_form" class="text-left form-validate" style="max-width: none !important;">
                     <div class="form-group-material">
                         <input id="register-userfn" type="text" name="registerUserFn" required data-msg="Merci d'entrer votre prénom" class="input-material">
                         <label for="register-userfn" class="label-material">Prénom</label>
@@ -31,6 +31,17 @@
                         <input id="register-email" type="email" name="registerEmail" required data-msg="Merci d'entrer votre adresse e-mail" class="input-material">
                         <label for="register-email" class="label-material">Adresse e-mail</label>
                     </div>
+                    <div>
+                        <input class="form-control-custom post-check" id="backup" name="backup" type="checkbox">
+                        <label for="backup">
+                            Renfort
+                            <small>
+                                <br/>Par défaut, vous ne participerez pas au raid.
+                                <br/>Néanmoins, vous serez peut-être appelé(e) à un poste par un organisateur
+                            </small>
+                        </label>
+                    </div>
+                    <input type="text" name="idRaid" hidden value="<%= raid.id %>">
                     <% if(typeof activity !== "undefined") { %>
                     <div class="form-group">
                         <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Indiquez vos voeux</h3>
@@ -113,6 +124,24 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageDialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageDialog">Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-3 text-center align-middle my-auto" id="messageIconDialog"></div>
+                    <div class="col-lg-9 align-middle my-auto" id="messageContentDialog"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script type="text/javascript">
     $(document).ready(function () {
         $('.select2-selection--single').select2({width: 'resolve'});
@@ -172,7 +201,7 @@
         let whishes = [];
 
         $('#table').find('tr').each(function () {
-            let index = $(this).find('td.row-number').html()
+            let index = $(this).find('td.row-number').text()
             let selected_wish = $(this).find('td .select2-selection__rendered').text();
 
             if($.isNumeric( index ) && parseInt(index) > 0){
@@ -190,7 +219,45 @@
         });
 
         $('#wishes_list').val( JSON.stringify(whishes) );
-        $('#helper_form').submit();
+
+        let $MESSAGE_MODAL = $('#messageModal');
+        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+
+        $.ajax({
+            type: 'POST',
+            url: '/helper/register',
+            data: {
+                registerEmail: $('#register-email').val(),
+                registerUserLn: $('#register-userln').val(),
+                registerUserFn: $('#register-userfn').val(),
+                whishes: whishes
+            },
+            success: function (response) {
+                msg = JSON.parse(response).msg;
+                if(msg === "ok"){
+                    $MESSAGE_MODAL_TITLE.html("Inscription validée !");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Vous avez bien été inscrit comme bénévole pour ce raid.<br/>" +
+                        "Vous recevrez un mail lorsqu'un poste vous aura été attribué par les organisat·eurs·rices.");
+                }else{
+                    $MESSAGE_MODAL_TITLE.html("Erreur...");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
+                        "Merci de recharger la page et de réessayer.");
+                }
+                $MESSAGE_MODAL.modal('show');
+            },
+            error: function (response) {
+                let msg = JSON.parse(response).msg;
+                $MESSAGE_MODAL_TITLE.html("Erreur...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
+                    "Merci de recharger la page et de réessayer.");
+                $MESSAGE_MODAL.modal('show');
+            }
+        });
     });
 </script>
 <% include ../partials/footer %>

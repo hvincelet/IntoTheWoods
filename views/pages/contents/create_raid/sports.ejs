@@ -1,7 +1,7 @@
 <div class="breadcrumb-holder">
     <div class="container-fluid">
         <ul class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="/dashboard">Accueil</a></li>
             <li class="breadcrumb-item active">Organiser un Raid</li>
             <li class="breadcrumb-item active">Sélection des sports</li>
         </ul>
@@ -120,7 +120,7 @@
         let sports = [];
 
         $('#table').find('tr').each(function () {
-            let index = $(this).find('td.row-number').html()
+            let index = $(this).find('td.row-number').text()
             let selected_sport = $(this).find('td .select2-selection__rendered').text();
 
             if($.isNumeric( index ) && parseInt(index) > 0){
@@ -133,7 +133,7 @@
                 sports.push({
                     order: index,
                     sport: sport_type,
-                    name: $(this).find('td.sport_name').html().replace('<br>', '')
+                    name: $(this).find('td.sport_name').text()
                 });
             }
         });

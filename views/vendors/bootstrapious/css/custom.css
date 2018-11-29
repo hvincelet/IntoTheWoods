@@ -73,3 +73,30 @@ footer.main-footer{
 .pt-3-half {
     padding-top: 1.4rem;
 }
+
+.page.page-full{
+    width: 100% !important;
+}
+
+.transparent-card{
+    background-color: rgba(225, 225, 225, 0.70);
+    margin: 0 2%;
+    /*opacity: .4;*/
+}
+.transparent-card .card-body .card-text{
+    color: black !important;
+}
+
+.card-text-margin{
+    padding-bottom: 10%;
+}
+
+.card-footer-bottom{
+    position: absolute;
+    bottom: 5px;
+    text-align: center !important;
+}
+
+.card table {
+    background-color: whitesmoke;
+}

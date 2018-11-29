@@ -1,13 +1,11 @@
 # Project IntoTheWoods
 To get code in your machine, please use following commands:
  * git clone https://github.com/hvincelet/IntoTheWoods.git
-
-When you want to update use them:
- * git add *
- * git commit -m "message"
- * git pull origin master
- * git push origin master
+ * cd IntoTheWoods
+ * npm install
+ * npm start
 
 > ### Notes
-> NodeJS is required for running this server.
-> node_modules folder is needed with Express library in it.
+> NodeJS is required for running this server.\
+> You need a SSL certificates for launching it in HTTPS. (You can use Let's Encrypt to get one free).\
+> You can specify server, database, certificates and other configuration parameters into config/config.js.

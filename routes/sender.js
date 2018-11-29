@@ -38,6 +38,39 @@ exports.sendMailToOrganizer = function(email, password_hash){
     });
 };
 
+exports.sendResetPasswordMail = function(email, reset_password_session_id){
+    let transporter = nodemailer.createTransport({
+        service: config.service,
+        auth: {
+            user: config.login,
+            pass: config.password
+        }
+    });
+
+    let ejsTemplate = fs.readFileSync(__dirname + '/../views/pages/contents/email/reset_password.ejs','utf-8');
+    let content = ejs.render(ejsTemplate, {
+        email: email,
+        reset_password_session_id: reset_password_session_id
+    },{
+        vars: ["email", "reset_password_session_id"]
+    });
+
+    let mailOptions = {
+        from: "Into the Woods",
+        to: email,
+        subject: "Création d'un nouveau mot de passe",
+        html: content
+    };
+
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            console.log(error);
+        }else{
+            console.log('Email sent: ' + info.response);
+        }
+    });
+};
+
 exports.sendMailToHelper = function(data){
 
     let transporter = nodemailer.createTransport({
@@ -53,13 +86,14 @@ exports.sendMailToHelper = function(data){
     let content = ejs.render(ejsTemplate, {
         id_helper: data.id_helper,
         id_helper_post: data.id_helper_post,
+        title: data.title,
         description: data.description,
         name: data.name,
         date: data.date,
         edition: data.edition,
         place: data.place
     },{
-        vars: ["id_helper","id_helper_post","description","name","date","edition","place"]
+        vars: ["id_helper","id_helper_post","title","description","name","date","edition","place"]
     });
 
     let mailOptions = {
@@ -174,6 +208,43 @@ exports.sendMail = function (data) {
         subject: data.subject
     },{
         vars: ["organizer", "message", "subject"]
+    });
+
+    mailOptions['html'] = content;
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            console.log(error);
+            return "nok";
+        }else{
+            console.log('Email sent: ' + info.response);
+            return "ok";
+        }
+    });
+};
+
+exports.sendNewBackupDueToPoiDeletionMail = function(email, raid_name, raid_edition, helper_post_name){
+    let transporter = nodemailer.createTransport({
+        service: config.service,
+        auth: {
+            user: config.login,
+            pass: config.password
+        }
+    });
+
+    let mailOptions = {
+        from: "Into the Woods",
+        to: email,
+        subject: "Vous devenez un bénévole de renfort",
+        html: ""
+    };
+
+    let ejsTemplate = fs.readFileSync(__dirname + '/../views/pages/contents/email/switchToBackup.ejs','utf-8');
+    let content = ejs.render(ejsTemplate, {
+        raid_name: raid_name,
+        raid_edition: raid_edition,
+        helper_post_name: helper_post_name
+    },{
+        vars: ["raid_name", "raid_edition", "helper_post_name"]
     });
 
     mailOptions['html'] = content;

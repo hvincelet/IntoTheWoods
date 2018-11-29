@@ -81,10 +81,11 @@ function setPointOfInterestFromCoordinates(coordinates) {
 }
 
 function updatePointOfInterestId(serverId) {
-
+    let index;
     pointOfInterestArrayToStore.map(pointOfInterest => {
         if (pointOfInterest.removed){
-            pointOfInterestArrayToStore.remove(pointOfInterest);
+            index = pointOfInterestArrayToStore.indexOf(pointOfInterest);
+            pointOfInterestArrayToStore.splice(index, 1);
         }
     });
 

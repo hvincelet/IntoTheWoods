@@ -222,7 +222,7 @@ closer.onclick = function () {
 };
 
 function showPopup(feature, header) {
-    let description = "";
+    let title = "";
     let nbHelper = 1;
 
     let helperPost = helperPostArrayToStore.find(function (helperPost) {
@@ -230,22 +230,22 @@ function showPopup(feature, header) {
     });
 
     if (helperPost !== undefined) {
-        description = helperPost.description;
+        title = helperPost.title;
         nbHelper = helperPost.nb_helper;
     }
 
     content.innerHTML = '<h6>' + header + '</h6>' +
         '<div class="input-group-sm">' +
-        '<input id="' + feature.getId() + '_label" type="text" class="form-control row-margin" placeholder="intitulé du poste" value=\"' + description + '\">' +
-        // '<textarea id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' + description + '</textarea>' +
+        '<input id="' + feature.getId() + '_label" type="text" class="form-control row-margin" placeholder="Intitulé du poste" value=\"' + title + '\">' +
+        // '<textarea id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' + title + '</textarea>' +
         '<div class="row">' +
         '<div class="col"><label>Nombre de bénévole :</label></div>' +
         '<div class="col-sm-4 input-group-sm"><input id="' + feature.getId() + '_nbHelper" type="number" value=\"' + nbHelper + '\" class="form-control" min="1"></div>' +
         '</div>' +
         '</div>' +
         '<div>' +
-        '<button id="type" class="btn btn-xs btn-danger" onclick="removePointOfInterest(\'' + feature.getId() + '\')">supprimer</button>' +
-        '<button id="type" class="btn btn-xs btn-default" onclick="editHelperPost(\'' + feature.getId() + '\')">enregistrer</button>' +
+        '<button id="type" style="margin-right: 5px;" class="btn btn-xs btn-danger" onclick="removePointOfInterest(\'' + feature.getId() + '\')">Supprimer</button>' +
+        '<button id="type" class="btn btn-xs btn-default" onclick="editHelperPost(\'' + feature.getId() + '\')">Enregistrer</button>' +
         '</div>';
     overlay.setPosition(feature.getGeometry().getCoordinates());
 

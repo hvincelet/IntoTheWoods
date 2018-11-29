@@ -1,7 +1,8 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>Into The Woods - Invitation au bénévolat du raid <%= name %></title>
+    <title>Vous devenez un bénévole de renfort</title>
     <link rel="icon" type="image/png" href="https://intothewoods.runtonic.ovh/views/img/favicon.png" />
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -35,12 +36,10 @@
     <div class="container">
         <div class="form-outer text-center d-flex align-items-center">
             <div class="form-inner">
-                <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
-                <p>Bonjour, vous êtes invité à participer en tant que bénévole à l'édition <%=edition%> du raid <%=name%>.<br/>
-                Si vous souhaitez participer, merci cliquer sur le bouton ci-dessous pour vous inscrire comme bénévole à
-                ce raid et sélectionner vos choix en terme de postes.</p>
-                <a href="https://intothewoods.runtonic.ovh/helper/register?raid=<%=id%>" class="btn btn-primary">M'inscrire en tant que bénévole</a><br/>
-                <small>Si le bouton ne fonctionne pas, utilisez le lien suivant : https://intothewoods.runtonic.ovh/helper/register?raid=<%=id%></small>
+                <div class="logo text-uppercase">Bonjour,</div>
+                <p>Le poste <b><%=helper_post_name%></b> pour lequel vous avez postulé au raid <b><%=raid_name + " " + raid_edition%></b> n'existe plus. Par conséquent, vous devenez un bénévole de renfort.
+                <br/>Les bénévoles de renfort ne participent pas à un raid sauf si l'un(e) des organisateurs-trices fait appel à eux.
+                    <br/>Vous serez ainsi prévenu(e) par mail si vous êtes assigné(e) à un autre poste</p>
             </div>
         </div>
     </div>

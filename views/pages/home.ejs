@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<% include partials/head %>
+<body>
+<div class="page page-full wood-background">
+    <header class="header">
+        <nav class="navbar">
+            <div class="container-fluid">
+                <div class="navbar-holder d-flex align-items-center justify-content-between">
+                    <div class="navbar-header">
+                        <a href="/" class="navbar-brand">
+                            <div class="brand-text d-none d-md-inline-block"><strong class="text-primary">Into the Woods</strong></div>
+                        </a>
+                    </div>
+                    <ul class="nav-menu list-unstyled d-flex flex-md-row align-items-md-center">
+                        <li class="nav-item"><a href="/login" class="nav-link logout"> <span class="d-none d-sm-inline-block">Se connecter en tant qu'organisat·eur·rice</span><i class="fas fa-sign-in-alt"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="card-group" style="margin-top: 10%;width: 100%;">
+                <div class="card transparent-card">
+                    <div class="card-body">
+                        <h4 class="card-title">M'inscrire en tant que bénévole</h4>
+                        <p class="card-text card-text-margin">
+                            S'inscrire en tant que bénévole sur un Raid.<br/>
+                            Une liste de tous les Raids à venir sera affichée afin de pouvoir vous inscrire en tant que bénévole sur le raid de votre choix.
+                        </p>
+                        <p class="card-footer-bottom"><button class="btn btn-primary btn-rounded btn-sm" onclick="javascript:window.location='/helper/register';">Inscription bénévolats</button></p>
+                    </div>
+                </div>
+                <div class="card transparent-card">
+                    <div class="card-body">
+                        <h4 class="card-title">M'inscrire en tant que coureu·r·se</h4>
+                        <p class="card-text card-text-margin">
+                            S'inscrire en tant que coureu·r·se sur un Raid.<br/>
+                            Une liste de tous les Raids à venir sera affichée afin de pouvoir vous inscrire en tant que coureu·r·se sur le raid de votre choix.
+                        </p>
+                        <p class="card-footer-bottom"><button class="btn btn-primary btn-rounded btn-sm" onclick="javascript:window.location='/participant/register';">Inscription courses</button></p>
+                    </div>
+                </div>
+                <div class="card transparent-card">
+                    <div class="card-body">
+                        <h4 class="card-title">Accéder au suivi d'un raid en cours</h4>
+                        <p class="card-text card-text-margin">
+                            Une liste de tous les Raids actuellement en cours sera affichée.<br/>
+                            En accédant au suivi de l'un de ses raids vous aurez accès aux classements du raid ainsi qu'aux différents postes concernant le raid disponibles sur les réseaux sociaux.
+                        </p>
+                        <p class="card-footer-bottom"><button class="btn btn-primary btn-rounded btn-sm">Accès suivi raids</button></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="login-page">
+    <div class="copyrights text-center">
+        <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+        <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+    </div>
+</div>
+<% include partials/footer %>
+</body>
+</html>
