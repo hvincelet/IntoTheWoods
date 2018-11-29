@@ -24,7 +24,7 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(45),
       allowNull: true
     },
-    order: {
+    order_num: {
       type: DataTypes.INTEGER(10).UNSIGNED,
       allowNull: false
     }

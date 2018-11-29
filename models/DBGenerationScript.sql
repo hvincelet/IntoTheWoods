@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`assignment` (
   `id_helper` VARCHAR(7) NOT NULL,
   `id_helper_post` INT UNSIGNED NOT NULL,
   `attributed` VARCHAR(45) NULL,
-  `order` INT UNSIGNED NOT NULL,
+  `order_num` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id_helper`, `id_helper_post`),
   CONSTRAINT `id_helper`
     FOREIGN KEY (`id_helper`)

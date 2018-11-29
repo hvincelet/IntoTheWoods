@@ -149,13 +149,13 @@ intothewoods.route('/termsandpolicy')
     .get(misc.cgu);
 
 // routes dedicated to the team' pages
-app.route('/manageteam') // manage helper and organizer of raid
-    .get(organizer.manageTeam);
-app.route('/manageteam/helper') // manage helper of raid
-    .get(organizer.manageHelper)
-    .post(organizer.assignHelper);
-app.route('/manageteam/organizer') // manage organizer of raid
-    .get(organizer.manageOrganizer);
+//intothewoods.route('/manageteam') // manage helper and organizer of raid
+//    .get(organizer.manageTeam);
+//intothewoods.route('/manageteam/helper') // manage helper of raid
+//    .get(organizer.manageHelper)
+//    .post(organizer.assignHelper);
+//intothewoods.route('/manageteam/organizer') // manage organizer of raid
+//    .get(organizer.manageOrganizer);
 
 //bad url route
 intothewoods.use(function (req, resp, next) {
