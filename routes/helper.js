@@ -175,7 +175,8 @@ exports.displayHome = function(req, res){
 exports.participantPassage = function(req, res){
     let idParticipant = req.body.idParticipant;
     let idRaid = req.body.idRaid;
-    let date = req.body.date;
+
+    let dateLastStage;
 
     let orderRun;
 
@@ -184,33 +185,65 @@ exports.participantPassage = function(req, res){
             id_participant: idParticipant
         }
     }).then(function (stages_found) {
-        if (stages_found !== null) {
+        if (stages_found !== null && stages_found.length >= 1) {
             orderRun = stages_found.length + 1;
+
+            dateLastStage = stages_found[stages_found.length-1].timeEntered;
+
+            insertStage(orderRun, dateLastStage, idParticipant, idRaid);
         }
         else{
             orderRun = 1;
+            models.raid.findOne({
+                attributes: ['startTime'],
+                where: {
+                    id: idRaid
+                }
+            }).then(function (raid_found) {
+                console.log(raid_found)
+                if (raid_found !== null) {
+                    console.log("test")
+                    dateLastStage = raid_found.startTime;
+                    console.log(dateLastStage);
+
+                    insertStage(orderRun, dateLastStage, idParticipant, idRaid);
+                }
+                else{
+                    console.log("erreur");
+                }
+            });
         }
-        
-        models.course.findOne({
-            attributes: ['id'],
-            where: {
-                id_raid: idRaid,
-                order_num: orderRun
-            }
-        }).then(function (course_found) {
-            if(course_found !== null){
-                let time = new Date();
-                
-                models.stage.create({
-                    id_participant: idParticipant,
-                    id_course: course_found.id,
-                    time: time
-                });
-            }
-            else{
-                console.log("erreur");
-                //TODO : renvoyer un message d'erreur
-            }
-        });
     });
 };
+
+insertStage = function(orderRun, dateLastStage, idParticipant, idRaid){
+    let dateTime = new Date();
+
+    console.log("dateTime "+dateTime);
+    console.log("dateLastStage "+dateLastStage);
+    let time = new Date(dateTime - dateLastStage);
+
+    models.course.findOne({
+        attributes: ['id'],
+        where: {
+            id_raid: idRaid,
+            order_num: orderRun
+        }
+    }).then(function (course_found) {
+        if(course_found !== null){
+            dateTime = dateTime - dateTime.getTimezoneOffset()*60*1000;
+            console.log(time);
+
+            models.stage.create({
+                id_participant: idParticipant,
+                id_course: course_found.id,
+                time: time.toLocaleTimeString(),
+                timeEntered: dateTime
+            });
+        }
+        else{
+            console.log("erreur");
+            //TODO : renvoyer un message d'erreur
+        }
+    });
+}
