@@ -143,6 +143,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`stage` (
   `id_participant` INT UNSIGNED NOT NULL,
   `id_course` INT UNSIGNED NOT NULL,
   `time` TIME NULL,
+  `timeEntered` DATETIME NULL,
   PRIMARY KEY (`id_participant`, `id_course`),
   CONSTRAINT `id_participant`
     FOREIGN KEY (`id_participant`)

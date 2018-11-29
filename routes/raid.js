@@ -624,8 +624,6 @@ exports.setStartTime = function(req, res){
         }
     }).then(function (raid_found) {
         if (raid_found !== null) {
-            console.log(raid_found);
-            console.log(Date.now());
             models.raid.update(
                 {
                     startTime: Date.now()
