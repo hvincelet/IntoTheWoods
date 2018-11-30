@@ -79,6 +79,10 @@ exports.createRaid = function (req, res) {
 };
 
 exports.displaySportsTable = function (req, res) {
+    let user = connected_user(req.sessionID);
+    if(req.query.idraid !== undefined){
+        user.idCurrentRaid = req.query.idraid;
+    }
     const sports = [];
     models.sport.findAll({
         order: ['name']
@@ -86,7 +90,6 @@ exports.displaySportsTable = function (req, res) {
         sports_found.forEach(function (sport) {
             sports.push({name: sport.dataValues.name, id: sport.dataValues.id});
         });
-        const user = connected_user(req.sessionID);
         res.render(pages_path + "template.ejs", {
             pageTitle: "Création d'un Raid",
             page: "create_raid/sports",
@@ -94,7 +97,6 @@ exports.displaySportsTable = function (req, res) {
             user: user
         });
     });
-
 };
 
 exports.saveSportsRanking = function (req, res) {
@@ -168,11 +170,24 @@ exports.displayAllRaids = function (req, res) {
 exports.displayRaid = function (req, res) {
     const user = connected_user(req.sessionID);
     const raid = user.raid_list.find(function (raid) {
-        return raid.id == req.params.id
+        return raid.id === parseInt(req.params.id);
     });
     if (!raid) {
         return res.redirect('/dashboard');
     }
+
+    /***************************/
+    /* DEBUG RAID NOT FINISHED */
+    /***************************/
+    models.course.findOne({
+        where: {
+            id_raid: req.params.id
+        }
+    }).then(function (course_found) {
+        if(course_found === null){
+            return res.redirect('/createraid/sports?idraid='+req.params.id);
+        }
+    });
 
     /************************/
     /*    Organizer infos   */
