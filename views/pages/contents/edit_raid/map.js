@@ -1,8 +1,8 @@
-/***************************************************************/
-/***************************************************************/
-/***                    Map Instantiation                    ***/
-/***************************************************************/
-/***************************************************************/
+/***************************************************************
+ ***************************************************************
+ ***                    Map Instantiation                    ***
+ ***************************************************************
+ ***************************************************************/
 
 let raster = new ol.layer.Tile({
     source: new ol.source.OSM()
@@ -54,11 +54,11 @@ let map = new ol.Map({
     })
 });
 
-/***************************************************************/
-/***************************************************************/
-/***                      Draw & Modify                      ***/
-/***************************************************************/
-/***************************************************************/
+/***************************************************************
+ ***************************************************************
+ ***                      Draw & Modify                      ***
+ ***************************************************************
+ ***************************************************************/
 
 let currentFeatureEditing = "none";
 
@@ -152,48 +152,48 @@ function storeDataToDB() {
         });
     });
 
-    // Promise.all(store_point_of_interest_actions)
-    //     .then(result => {
-    const store_course_actions = courseArrayToStore.map(courseToStore => {
-        return new Promise((resolve, reject) => {
-            if (source.getFeatureById("course_" + courseToStore.id) !== null) {
-                courseToStore['track_point_array'] = source.getFeatureById("course_" + courseToStore.id).getGeometry().getCoordinates();
-            }
-            return resolve();
+    Promise.all(store_point_of_interest_actions)
+        .then(result => {
+            const store_course_actions = courseArrayToStore.map(courseToStore => {
+                return new Promise((resolve, reject) => {
+                    if (source.getFeatureById("course_" + courseToStore.id) !== null) {
+                        courseToStore['track_point_array'] = source.getFeatureById("course_" + courseToStore.id).getGeometry().getCoordinates();
+                    }
+                    return resolve();
+                });
+            });
+
+            Promise.all(store_course_actions)
+                .then(result => {
+                    let data = {
+                        pointOfInterestArray: pointOfInterestArrayToStore,
+                        courseArray: courseArrayToStore,
+                        helperPostArray: helperPostArrayToStore,
+                        idRaid: raid.id
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        url: '/editraid/' + raid.id + '/map',
+                        data: data,
+                        success: function (response) {
+                            updateFeaturesId(response);
+                        },
+                        error: function (response) {
+                        }
+                    });
+                });
         });
-    });
-    //
-    // Promise.all(store_course_actions)
-    //     .then(result => {
-    let data = {
-        pointOfInterestArray: pointOfInterestArrayToStore,
-        courseArray: courseArrayToStore,
-        helperPostArray: helperPostArrayToStore,
-        idRaid: raid.id
-    };
-    $.ajax({
-        type: 'POST',
-        url: '/editraid/' + raid.id + '/map',
-        data: data,
-        success: function (response) {
-            updateFeaturesId(response);
-        },
-        error: function (response) {
-        }
-    });
-    //         });
-    // });
 }
 
 function updateFeaturesId(data) {
     updatePointOfInterestId(data.pointOfInterestServerIdArray);
 }
 
-/***************************************************************/
-/***************************************************************/
-/***                        Interaction                      ***/
-/***************************************************************/
-/***************************************************************/
+/***************************************************************
+ ***************************************************************
+ ***                        Interaction                      ***
+ ***************************************************************
+ ***************************************************************/
 
 map.on('click', function (event) {
     let selectedFeatures = map.getFeaturesAtPixel(event.pixel);
@@ -209,11 +209,11 @@ map.on('click', function (event) {
     }
 });
 
-/***************************************************************/
-/***************************************************************/
-/***                           Popup                         ***/
-/***************************************************************/
-/***************************************************************/
+/***************************************************************
+ ***************************************************************
+ ***                           Popup                         ***
+ ***************************************************************
+ ***************************************************************/
 
 closer.onclick = function () {
     overlay.setPosition(undefined);
@@ -222,7 +222,7 @@ closer.onclick = function () {
 };
 
 function showPopup(feature, header) {
-    let description = "";
+    let title = "";
     let nbHelper = 1;
 
     let helperPost = helperPostArrayToStore.find(function (helperPost) {
@@ -230,32 +230,32 @@ function showPopup(feature, header) {
     });
 
     if (helperPost !== undefined) {
-        description = helperPost.description;
+        title = helperPost.title;
         nbHelper = helperPost.nb_helper;
     }
 
     content.innerHTML = '<h6>' + header + '</h6>' +
         '<div class="input-group-sm">' +
-        '<input id="' + feature.getId() + '_label" type="text" class="form-control row-margin" placeholder="intitulé du poste" value=\"' + description + '\">' +
-        // '<textarea id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' + description + '</textarea>' +
+        '<input id="' + feature.getId() + '_label" type="text" class="form-control row-margin" placeholder="Intitulé du poste" value=\"' + title + '\">' +
+        // '<textarea id="' + feature.getId() + '_label" type="text" class="form-control" placeholder="intitulé du poste">' + title + '</textarea>' +
         '<div class="row">' +
         '<div class="col"><label>Nombre de bénévole :</label></div>' +
         '<div class="col-sm-4 input-group-sm"><input id="' + feature.getId() + '_nbHelper" type="number" value=\"' + nbHelper + '\" class="form-control" min="1"></div>' +
         '</div>' +
         '</div>' +
         '<div>' +
-        '<button id="type" class="btn btn-xs btn-danger" onclick="removePointOfInterest(\'' + feature.getId() + '\')">supprimer</button>' +
-        '<button id="type" class="btn btn-xs btn-default" onclick="editHelperPost(\'' + feature.getId() + '\')">enregistrer</button>' +
+        '<button id="type" style="margin-right: 5px;" class="btn btn-xs btn-danger" onclick="removePointOfInterest(\'' + feature.getId() + '\')">Supprimer</button>' +
+        '<button id="type" class="btn btn-xs btn-default" onclick="editHelperPost(\'' + feature.getId() + '\')">Enregistrer</button>' +
         '</div>';
     overlay.setPosition(feature.getGeometry().getCoordinates());
 
 }
 
-/***************************************************************/
-/***************************************************************/
-/***                       Help Tooltip                      ***/
-/***************************************************************/
-/***************************************************************/
+/***************************************************************
+ ***************************************************************
+ ***                       Help Tooltip                      ***
+ ***************************************************************
+ ***************************************************************/
 
 let helpTooltipElement;
 let helpTooltip;
@@ -299,11 +299,11 @@ function updateHelpTooltipOverlay(msg) {
     helpTooltipElement.innerHTML = msg;
 }
 
-/***************************************************************/
-/***************************************************************/
-/***                     Measure Tooltip                     ***/
-/***************************************************************/
-/***************************************************************/
+/***************************************************************
+ ***************************************************************
+ ***                     Measure Tooltip                     ***
+ ***************************************************************
+ ***************************************************************/
 
 let measureTooltipElement;
 let measureTooltip;
@@ -348,11 +348,11 @@ function createMeasureTooltip() {
     map.addOverlay(measureTooltip);
 }
 
-/***************************************************************/
-/***************************************************************/
-/***                         Top Panel                       ***/
-/***************************************************************/
-/***************************************************************/
+/***************************************************************
+ ***************************************************************
+ ***                         Top Panel                       ***
+ ***************************************************************
+ ***************************************************************/
 
 let editing = false;
 

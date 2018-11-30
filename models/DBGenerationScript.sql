@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`organizer` (
   `password` BLOB(128) NULL,
   `active` TINYINT(1) NULL,
   `picture` TEXT NULL,
+  `reset_password_id` VARCHAR(30) NULL,
   PRIMARY KEY (`email`))
 ENGINE = InnoDB;
 
@@ -202,7 +203,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`helper_post` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_point_of_interest` INT UNSIGNED NULL,
+  `id_point_of_interest` INT UNSIGNED NOT NULL,
   `title` VARCHAR(128) NULL,
   `description` VARCHAR(1024) NULL,
   `nb_helper` INT DEFAULT 1,
@@ -220,8 +221,8 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`assignment` (
   `id_helper` VARCHAR(7) NOT NULL,
   `id_helper_post` INT UNSIGNED NOT NULL,
-  `attributed` VARCHAR(45) NULL,
-  `order` INT UNSIGNED NOT NULL,
+  `attributed` INT(1) UNSIGNED DEFAULT 0,
+  `order_num` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id_helper`, `id_helper_post`),
   CONSTRAINT `id_helper`
     FOREIGN KEY (`id_helper`)

@@ -25,7 +25,6 @@ exports.displayDescriptionForm = function (req, res) {
 };
 
 exports.createRaid = function (req, res) {
-
     models.raid.create({
         name: req.body.raidName,
         edition: req.body.raidEdition,
@@ -34,10 +33,6 @@ exports.createRaid = function (req, res) {
         lat: 0.0,
         lng: 0.0
     }).then(function (raid_created) {
-        models.helper_post.create({
-            title: "Backup",
-            nb_helper: -1
-        });
         let user = connected_user(req.sessionID);
         user.idCurrentRaid = raid_created.dataValues.id;
         models.team.create({
@@ -47,7 +42,7 @@ exports.createRaid = function (req, res) {
 
         geocoder.search({q: req.body.raidPlace}) // allows to list all the locations corresponding to the city entered
             .then((response) => {
-                if (typeof response[0].lat !== undefined) {
+                if (response[0].lat !== undefined) {
                     raid_created.update({
                         place: response[0].display_name,
                         lat: response[0].lat,
@@ -78,6 +73,10 @@ exports.createRaid = function (req, res) {
 };
 
 exports.displaySportsTable = function (req, res) {
+    let user = connected_user(req.sessionID);
+    if(req.query.idraid !== undefined){
+        user.idCurrentRaid = req.query.idraid;
+    }
     const sports = [];
     models.sport.findAll({
         order: ['name']
@@ -85,7 +84,6 @@ exports.displaySportsTable = function (req, res) {
         sports_found.forEach(function (sport) {
             sports.push({name: sport.dataValues.name, id: sport.dataValues.id});
         });
-        const user = connected_user(req.sessionID);
         res.render(pages_path + "template.ejs", {
             pageTitle: "Création d'un Raid",
             page: "create_raid/sports",
@@ -93,7 +91,6 @@ exports.displaySportsTable = function (req, res) {
             user: user
         });
     });
-
 };
 
 exports.saveSportsRanking = function (req, res) {
@@ -112,11 +109,7 @@ exports.saveSportsRanking = function (req, res) {
     });
 
     Promise.all(save_sports_actions).then(result => {
-        models.raid.findOne({
-            attributes: ['id', 'name', 'date', 'edition', 'place', 'lat', 'lng'],
-            where: {id: user.idCurrentRaid}
-            //models.raid.findByPk(user.idCurrentRaid)
-        }).then(function (unique_raid_found) {
+        models.raid.findByPk(user.idCurrentRaid).then(function (unique_raid_found) {
             user.raid_list.push({
                 id: user.idCurrentRaid,
                 name: unique_raid_found.dataValues.name,
@@ -167,11 +160,24 @@ exports.displayAllRaids = function (req, res) {
 exports.displayRaid = function (req, res) {
     const user = connected_user(req.sessionID);
     const raid = user.raid_list.find(function (raid) {
-        return raid.id == req.params.id
+        return raid.id === parseInt(req.params.id);
     });
     if (!raid) {
         return res.redirect('/dashboard');
     }
+
+    /***************************/
+    /* DEBUG RAID NOT FINISHED */
+    /***************************/
+    models.course.findOne({
+        where: {
+            id_raid: req.params.id
+        }
+    }).then(function (course_found) {
+        if(course_found === null){
+            return res.redirect('/createraid/sports?idraid='+req.params.id);
+        }
+    });
 
     /************************/
     /*    Organizer infos   */
@@ -226,7 +232,8 @@ exports.displayRaid = function (req, res) {
                         id_raid: req.params.id
                     }
                 }]
-            }]
+            }],
+            order: [['order_num', 'ASC']]
         }).then(function (assignment_found) {
             const unique_assignments_array = assignment_found.filter(function (assignment, index, array) {
                 return array.findIndex(function (value) {
@@ -234,13 +241,13 @@ exports.displayRaid = function (req, res) {
                 }) === index;
             });
 
-            const storeHelperActions = unique_assignments_array.map((assignment, index) => {
+            const storeHelperActions = unique_assignments_array.map((assignment) => {
                 return new Promise((resolve, reject) => {
-                    if (assignment.dataValues.helper_post === null) {
+                    if (assignment.dataValues.helper_post === null && assignment.dataValues.title !== "Backup") {
                         return resolve();
                     }
                     helper_model.findOne({
-                        attributes: ['login', 'email', 'last_name', 'first_name'],
+                        attributes: ['login', 'email', 'last_name', 'first_name', 'backup'],
                         where: {
                             login: assignment.dataValues.id_helper
                         }
@@ -253,6 +260,7 @@ exports.displayRaid = function (req, res) {
                             email: helper_found.dataValues.email,
                             last_name: helper_found.dataValues.last_name,
                             first_name: helper_found.dataValues.first_name,
+                            backup: helper_found.dataValues.backup,
                             assignment: []
                         };
                         assignments_by_id_helper.forEach(function (assignment_by_id_helper) {
@@ -283,7 +291,6 @@ exports.displayRaid = function (req, res) {
                 let sport_model = models.sport;
 
                 course_model.belongsTo(sport_model, {foreignKey: 'id_sport'});
-                const Sequelize = require('sequelize');
                 course_model.findAll({
                     attributes: ['order_num'],
                     include: [{
@@ -311,7 +318,7 @@ exports.displayRaid = function (req, res) {
                     let helper_post_model = models.helper_post;
                     helper_post_model.belongsTo(poi_model, {foreignKey:"id_point_of_interest"});
                     helper_post_model.findAll({
-                        attributes: ["title", "nb_helper", "description"],
+                        attributes: ["id", "title", "nb_helper", "description"],
                         include:{
                             model:poi_model,
                             where:{
@@ -321,6 +328,7 @@ exports.displayRaid = function (req, res) {
                     }).then(function(helper_posts){
                         helper_posts.forEach(function(helper_post){
                             poi.push({
+                                id: helper_post.dataValues.id,
                                 name: helper_post.dataValues.title,
                                 nb_helper: helper_post.dataValues.nb_helper,
                                 description: helper_post.dataValues.description
@@ -347,5 +355,33 @@ exports.displayRaid = function (req, res) {
             });
         });
 
+    });
+};
+
+exports.savePoi = function (req, res) {
+    let user = connected_user(req.sessionID);
+    //console.log(JSON.parse(req.body.pois));
+    const save_poi_actions = req.body.pois.map(poi =>{
+        return new Promise(resolve => {
+            models.helper_post.findOne({
+                where: {
+                    id: poi.id
+                }
+            }).then(function (helper_post_found) {
+                if(helper_post_found !== null){
+                    helper_post_found.update({
+                        title: poi.name,
+                        description: poi.description,
+                        nb_helper: poi.number_helper
+                    }).then(function () {
+                        return resolve();
+                    });
+                }
+            });
+        });
+    });
+
+    Promise.all(save_poi_actions).then(result => {
+        res.send(JSON.stringify({msg: "ok"}));
     });
 };

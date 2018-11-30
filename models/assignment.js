@@ -21,10 +21,11 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     attributed: {
-      type: DataTypes.STRING(45),
-      allowNull: true
+      type: DataTypes.INTEGER(1).UNSIGNED,
+      allowNull: true,
+      defaultValue: '0'
     },
-    order: {
+    order_num: {
       type: DataTypes.INTEGER(10).UNSIGNED,
       allowNull: false
     }

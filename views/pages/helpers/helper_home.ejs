@@ -2,49 +2,74 @@
 <html lang="fr">
 <% include ../partials/head %>
 <body>
-<div class="page login-page wood-background">
-    <div class="container">
-        <div class="form-outer text-center d-flex align-items-center">
-            <div class="form-inner">
-                <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
-                <p>Bienvenue sur Into the Woods, vous êtes sur le point de rejoindre votre poste.<br/>
-                   Pour cela, suivez l'itinéraire sur la carte ci-dessous et valider lorsque vous y êtes.</p>
-                <% if(typeof errorMessage !== "undefined") { %>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
-                        <%= errorMessage %>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+<div class="page page-full">
+    <% if(typeof errorMessage !== "undefined") { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+            <%= errorMessage %>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <% }else{ %>
+
+        <style>
+            #panel-right {
+                top: 65px;
+                right: 10px;
+                position: absolute;
+                z-index: 1;
+            }
+        </style>
+
+        <div class="container-fluid" style="padding: 0;">
+            <link rel="stylesheet"
+                  href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.2.0/css/ol.css"
+                  type="text/css">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card no-margin-top">
+                        <div class="card-header d-flex align-items-center">
+                            <h2>Itinéraire jusqu'à votre poste</h2>
+                            <button class="btn btn-default" onclick="redirectGoogleMaps()" style="right: 10px; position: absolute;"><i class="fab fa-google"></i> Ouvrir dans Google Maps </button>
+                        </div>
+                        <div class="card-body" style="padding-right: 0px; padding-left: 0px; padding-top: 0px">
+                            <div id="map" style="width: 100%; height: 100%;">
+                                <div id="panel-right">
+                                    <button id="checkin-button" class="btn btn-lg btn-success" onclick="performCheckin()"><i class="fas fa-user-check"></i> Check-in</button>
+                                </div>
+                            </div>
+
+                            <div style="padding: 1rem 1.25rem;">
+                                <h2>
+                                    Intitulé du poste
+                                </h2>
+                                <p>
+                                    Début du Raid
+                                </p>
+                                <label>
+                                    Decription du poste
+                                </label>
+                            </div>
+
+                            <script>
+                                const assignment = <%- JSON.stringify(assignment) %>;
+                                const helper = <%- JSON.stringify(helper) %>;
+                                const helper_post = <%- JSON.stringify(helper_post) %>;
+                                const point_of_interest = <%- JSON.stringify(point_of_interest) %>;
+                            </script>
+                            <script src="https://ignf.github.io/geoportal-access-lib/latest/dist/GpServices.js"></script>
+                            <script src="/views/pages/helpers/map.js"></script>
+                        </div>
                     </div>
-                <% }else{ %>
-                 <div class="container-fluid">
-                     <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.2.0/css/ol.css" type="text/css">
-                     <div class="row">
-                         <div class="col-lg-12">
-                             <div class="card">
-                                 <div class="card-header d-flex align-items-center">
-                                     <h4>Itinéraire jusqu'à votre poste</h4>
-                                 </div>
-                                 <div class="card-body">
-                                     <div id="map"></div>
-                                     <script> const assignment = <%- JSON.stringify(assignment) %>; </script>
-                                     <script> const helper = <%- JSON.stringify(helper) %>; </script>
-                                     <script> const helper_post = <%- JSON.stringify(helper_post) %>; </script>
-                                     <script> const point_of_interest = <%- JSON.stringify(point_of_interest) %>; </script>
-                                     <script src="https://ignf.github.io/geoportal-access-lib/latest/dist/GpServices.js"></script>
-                                     <script src="/views/pages/contents/map_helper/map.js"></script>
-                                 </div>
-                             </div>
-                         </div>
-                     </div>
-                 </div>
-                <% } %>
-            </div>
-            <div class="copyrights text-center">
-                <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
-                <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+                </div>
             </div>
         </div>
+    <% } %>
+</div>
+<div class="login-page">
+    <div class="copyrights text-center">
+        <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+        <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
     </div>
 </div>
 <% include ../partials/footer %>

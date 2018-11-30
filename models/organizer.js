@@ -26,6 +26,10 @@ module.exports = function(sequelize, DataTypes) {
     picture: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    reset_password_id: {
+      type: DataTypes.STRING(30),
+      allowNull: true
     }
   }, {
     tableName: 'organizer'
