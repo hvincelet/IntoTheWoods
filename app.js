@@ -1,4 +1,4 @@
-const env = process.argv[2];
+global.env = process.argv[2];
 const https = require('https');
 const fs = require('fs');
 const express = require('express');
@@ -8,7 +8,7 @@ const express_lib = require('express');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
-const config = require('./config/config')[env];
+const config = require('./config/config')[global.env];
 
 // IntoTheWoods app
 const intothewoods = express();
