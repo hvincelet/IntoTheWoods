@@ -1,11 +1,18 @@
 const pages_path = __dirname+"/../views/pages/";
 const models = require('../models');
+const sender = require('./sender');
 
+const raids = models.raid;
 const sports = models.sport;
 const courses = models.course;
 const track_points = models.track_point;
 const point_of_interests = models.point_of_interest;
 const helper_posts = models.helper_post;
+const assignments = models.assignment;
+const helpers = models.helper;
+assignments.belongsTo(helper_posts, {foreignKey: "id_helper_post"});
+assignments.belongsTo(helpers, {foreignKey: "id_helper"});
+helper_posts.belongsTo(point_of_interests, {foreignKey: "id_point_of_interest"});
 
 exports.displayMap = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -115,11 +122,9 @@ exports.storeMapData = function (req, res) {
                         return resolve();
                     }).catch(err => console.log(err));
                 } else if (pointOfInterest.removed === 'true') {
-                    return point_of_interests.destroy({
-                        where: {
-                            id: pointOfInterest.id.replace('remove_', '')
-                        }
-                    });
+                    const poi_id = pointOfInterest.id.replace('remove_', '');
+                    removeAssignmentsForThisPoi(poi_id, req.body.idRaid);
+                    return resolve();
                 } else {
                     point_of_interests.findByPk(pointOfInterest.id)
                         .then(function (pointOfInterest_found) {
@@ -147,23 +152,56 @@ exports.storeMapData = function (req, res) {
                             let pointOfInterest = pointOfInterestServerIdArray.find(function (client_server_Id) {
                                 return client_server_Id.clientId === helper_post.id_point_of_interest;
                             });
-
+                            let helper_post_created_promise;
                             if (pointOfInterest !== undefined){
-                                helper_posts.create({
+                                helper_post_created_promise = helper_posts.create({
                                     id_point_of_interest: pointOfInterest.serverId,
-                                    title: helper_post.description,
+                                    title: helper_post.title,
                                     nb_helper: helper_post.nb_helper
                                 });
                             } else {
-                                helper_posts.create({
+                                helper_post_created_promise = helper_posts.create({
                                     id_point_of_interest: helper_post.id_point_of_interest,
-                                    title: helper_post.description,
+                                    title: helper_post.title,
                                     nb_helper: helper_post.nb_helper
                                 });
                             }
+                            helper_post_created_promise.then(function(new_helper_post_created){
+                                assignments.findAll({
+                                    include: [{
+                                        model: helper_posts,
+                                        include: [{
+                                            model: point_of_interests,
+                                            where: {
+                                                id_raid: req.body.idRaid
+                                            }
+                                        }]
+                                    }]
+                                }).then(function(assignments_found){
+                                    const unique_assignments_array = assignments_found.filter(function (assignment, index, array) {
+                                        return array.findIndex(function (value) {
+                                            return value.dataValues.id_helper === assignment.dataValues.id_helper;
+                                        }) === index;
+                                    });
+                                    unique_assignments_array.map(assignment => {
+                                        helpers.findByPk(assignment.dataValues.id_helper).then(function(helper_found){
+                                            if(helper_found.dataValues.backup === 1){
+                                                const max_order = Math.max.apply(Math, assignments_found.map(function(a) {
+                                                    return (a.dataValues.id_helper === assignment.dataValues.id_helper) ? a.dataValues.order_num : 0;
+                                                }));
+                                                assignments.create({
+                                                    id_helper: helper_found.dataValues.login,
+                                                    id_helper_post: new_helper_post_created.dataValues.id,
+                                                    order_num: max_order + 1
+                                                });
+                                            }
+                                        });
+                                    });
+                                });
+                            });
                         } else {
                             helper_posts.update({
-                                    title: helper_post.description,
+                                    title: helper_post.title,
                                     nb_Helper: helper_post.nb_helper
                                 },
                                 {where: {id: helper_post.id}}
@@ -202,3 +240,110 @@ exports.storeMapData = function (req, res) {
         });
     }
 };
+
+function removeAssignmentsForThisPoi(poi_id, raid_id){
+    console.log("raid_id = " + raid_id + " poi_id = " + poi_id);
+    assignments.findAll({
+        include: [{
+            model: helper_posts,
+            include: [{
+                model: point_of_interests,
+                where: {
+                    id_raid: raid_id
+                }
+            }]
+        }]
+    }).then(function(assignments_found){
+        let assignments_by_helper_counter = [];
+        const destroying_all_assignments = assignments_found.map(assignment => {
+            return new Promise(resolve => {
+                if(assignment.dataValues.helper_post === null) return resolve();
+                let assignments_by_helper = assignments_by_helper_counter.find(assignment_by_helper => {
+                    return assignment_by_helper.helper_id === assignment.dataValues.id_helper;
+                });
+                if(assignments_by_helper === undefined) {
+                    assignments_by_helper_counter.push({
+                        helper_id: assignment.dataValues.id_helper,
+                        count: 1,
+                        point_of_interest_id: assignment.dataValues.helper_post.dataValues.point_of_interest.dataValues.id,
+                        helper_post_name: assignment.dataValues.helper_post.dataValues.title
+                    });
+                }else if(assignment.dataValues.helper_post.dataValues.point_of_interest !== null){
+                    assignments_by_helper.count += 1;
+                    assignments_by_helper.point_of_interest_id = assignment.dataValues.helper_post.dataValues.point_of_interest.dataValues.id;
+                    assignments_by_helper.helper_post_name = assignment.dataValues.helper_post.dataValues.title;
+                }
+                if(assignment.dataValues.helper_post.dataValues.id_point_of_interest === parseInt(poi_id)) {
+                    assignments.destroy({
+                        where: {
+                            id_helper_post: assignment.dataValues.id_helper_post,
+                            id_helper: assignment.dataValues.id_helper
+                        }
+                    }).then(function () {
+                        console.log("assignment destroyed (id_helper_post = " + assignment.dataValues.id_helper_post, + " id_helper = " + assignment.dataValues.id_helper + ")");
+                        return resolve();
+                    });
+                }else{
+                    return resolve();
+                }
+            });
+        });
+        Promise.all(destroying_all_assignments).then(function(result){
+            console.log(assignments_by_helper_counter);
+            helper_posts.findOne({
+                where: {
+                    id_point_of_interest: poi_id
+                }
+            }).then(function(helper_post_to_destroy){
+                console.log("helper_post_to_destroy: ");
+                console.log(helper_post_to_destroy);
+                helper_posts.destroy({
+                    where: {
+                        id: helper_post_to_destroy.dataValues.id
+                    }
+                }).then(function(){
+                    console.log("helper_post destroyed (id = " + helper_post_to_destroy.dataValues.id + ")");
+                    point_of_interests.destroy({
+                        where: {
+                            id: poi_id
+                        }
+                    }).then(function(){
+                        console.log("point_of_interest destroyed (id = " + poi_id + ")");
+                        helper_posts.findAll({
+                            include: [{
+                                model: point_of_interests,
+                                where: {
+                                    id_raid: raid_id
+                                }
+                            }]
+                        }).then(function(helper_posts_found){
+                            assignments_by_helper_counter.map(assignments_by_helper => {
+                                if(assignments_by_helper.count === 1 && assignments_by_helper.point_of_interest_id === parseInt(poi_id)){
+                                    // Helper with only one assignment (attributed or not) becomes a backup + send a mail
+                                    helpers.findByPk(assignments_by_helper.helper_id).then(function(new_helper_backup){
+                                        if(new_helper_backup.backup === 0) {
+                                            new_helper_backup.update({
+                                                backup: 1
+                                            }).then(function(){
+                                                raids.findByPk(raid_id).then(function(raid_found){
+                                                    sender.sendNewBackupDueToPoiDeletionMail(new_helper_backup.dataValues.email, raid_found.dataValues.name, raid_found.dataValues.edition, assignments_by_helper.helper_post_name);
+                                                    helper_posts_found.map(helper_post => {
+                                                        assignments.create({
+                                                            id_helper_post: helper_post.dataValues.id,
+                                                            id_helper: assignments_by_helper.helper_id,
+                                                            order_num: 1
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+}

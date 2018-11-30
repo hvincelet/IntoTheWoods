@@ -25,7 +25,6 @@ exports.displayDescriptionForm = function (req, res) {
 };
 
 exports.createRaid = function (req, res) {
-
     models.raid.create({
         name: req.body.raidName,
         edition: req.body.raidEdition,
@@ -43,7 +42,7 @@ exports.createRaid = function (req, res) {
 
         geocoder.search({q: req.body.raidPlace}) // allows to list all the locations corresponding to the city entered
             .then((response) => {
-                if (typeof response[0].lat !== "undefined") {
+                if (response[0].lat !== undefined) {
                     raid_created.update({
                         place: response[0].display_name,
                         lat: response[0].lat,
@@ -108,11 +107,7 @@ exports.saveSportsRanking = function (req, res) {
     });
 
     Promise.all(save_sports_actions).then(result => {
-        models.raid.findOne({
-            attributes: ['id', 'name', 'date', 'edition', 'place', 'lat', 'lng'],
-            where: {id: user.idCurrentRaid}
-            //models.raid.findByPk(user.idCurrentRaid)
-        }).then(function (unique_raid_found) {
+        models.raid.findByPk(user.idCurrentRaid).then(function (unique_raid_found) {
             user.raid_list.push({
                 id: user.idCurrentRaid,
                 name: unique_raid_found.dataValues.name,
@@ -223,7 +218,7 @@ exports.displayRaid = function (req, res) {
                     }
                 }]
             }],
-            order: ['order']
+            order: [['order_num', 'ASC']]
         }).then(function (assignment_found) {
             const unique_assignments_array = assignment_found.filter(function (assignment, index, array) {
                 return array.findIndex(function (value) {

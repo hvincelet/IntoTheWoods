@@ -31,7 +31,7 @@ exports.inviteHelper = function (req, res) {
                     model: assignment_model,
                     include: [{
                         model: helper_post_model,
-                        include:[{
+                        include: [{
                             model: point_of_interest_model,
                             where: {
                                 id_raid: req.params.id
@@ -39,8 +39,8 @@ exports.inviteHelper = function (req, res) {
                         }]
                     }]
                 }]
-            }).then(function(helper_found){
-                if(!helper_found){
+            }).then(function (helper_found) {
+                if (!helper_found) {
                     sender.inviteHelper({
                         email: helper_email,
                         raid: req.body.raid
@@ -50,11 +50,11 @@ exports.inviteHelper = function (req, res) {
                         status: "ok"
                     });
                 }
-                if(index === helper_emails.length - 1) {
+                if (index === helper_emails.length - 1) {
                     res.send(JSON.stringify({status: helper_invite_status}));
                 }
             });
-        }else{
+        } else {
             helper_invite_status.push({
                 id: helper_email,
                 status: "mail-is-login"
@@ -65,7 +65,7 @@ exports.inviteHelper = function (req, res) {
     res.send(JSON.stringify({status: helper_invite_status}));
 };
 
-exports.displayRegister = function(req, res) {
+exports.displayRegister = function (req, res) {
     let raid_id = req.query.raid;
     if (raid_id !== undefined) {
         let get_post_clean = [];
@@ -75,7 +75,7 @@ exports.displayRegister = function(req, res) {
 
         helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
-        models.raid.findById(raid_id, {attributes:['id', 'name', 'edition']}).then(function(raid_found){
+        models.raid.findByPk(raid_id).then(function(raid_found){
             helper_post_model.findAll({
                 include: [{
                     model: point_of_interest_model,
@@ -85,30 +85,34 @@ exports.displayRegister = function(req, res) {
                 }],attributes: ['id', 'title', 'nb_helper']
             }).then(function(helper_posts_found){
                 if(helper_posts_found !== null && helper_posts_found.length > 0){
-                    helper_posts_found.map(helper_post => {
-                        models.assignment.findAndCountAll({
-                            where: {
-                                id_helper_post: helper_post.id,
-                                attributed: 1
-                            }
-                        }).then(function(all_assignement){
-                            if(helper_post.point_of_interest !== null && helper_post.nb_helper - all_assignement.count > 0){
-                                get_post_clean.push({
-                                    'id':helper_post.id,
-                                    'title':helper_post.title
-                                });
-                            }
+                    const get_all_helper_posts = helper_posts_found.map(helper_post => {
+                        return new Promise(resolve => {
+                            models.assignment.findAndCountAll({
+                                where: {
+                                    id_helper_post: helper_post.id,
+                                    attributed: 1
+                                }
+                            }).then(function(all_assignement){
+                                if(helper_post.point_of_interest !== null && helper_post.nb_helper - all_assignement.count > 0){
+                                    get_post_clean.push({
+                                        'id':helper_post.id,
+                                        'title':helper_post.title
+                                    });
+                                }
+                                return resolve();
+                            });
                         });
                     });
-
-                    res.render(pages_path + "helper_register.ejs", {
-                        pageTitle: "Inscription Bénévole",
-                        activity: get_post_clean,
-                        raid: {
-                            id: raid_found.id,
-                            name: raid_found.name,
-                            edition: raid_found.edition
-                        }
+                    Promise.all(get_all_helper_posts).then(function(result){
+                        res.render(pages_path + "helper_register.ejs", {
+                            pageTitle: "Inscription Bénévole",
+                            activity: get_post_clean,
+                            raid: {
+                                id: raid_found.id,
+                                name: raid_found.name,
+                                edition: raid_found.edition
+                            }
+                        });
                     });
                 }else{
                     return res.redirect('/helper/register');
@@ -225,14 +229,12 @@ exports.register = function (req, res) {
                         }
                     }
                 }).then(function(helper_posts_found){
-                    let count = 1;
                     helper_posts_found.map(function(helper_post){
                         models.assignment.create({
                             id_helper: id_helper,
                             id_helper_post: helper_post.id,
-                            order: count
+                            order_num: 1
                         });
-                        count += 1;
                     });
                 });
             }else{
@@ -240,11 +242,11 @@ exports.register = function (req, res) {
                     models.assignment.create({
                         id_helper: id_helper,
                         id_helper_post: wish.id,
-                        order: wish.order
+                        order_num: wish.order
                     });
                 });
             }
-            res.redirect("/helper/" + id_helper + "/home");
+            res.send(JSON.stringify({msg: "ok"}));
         });
     });
 };
@@ -257,8 +259,10 @@ exports.displayHome = function (req, res) {
         }
     }).then(function (assignments_found) {
         if (assignments_found !== null) {
-            const assignment_found = assignments_found.find(function(assignment){return parseInt(assignment.attributed) === 1;});
-            if (assignment_found === undefined){
+            const assignment_found = assignments_found.find(function (assignment) {
+                return parseInt(assignment.attributed) === 1;
+            });
+            if (assignment_found === undefined) {
                 res.render(pages_path + "helper_home.ejs", {
                     pageTitle: "Inscription Bénévole",
                     errorMessage: "Vous n'avez pas encore été attribué à un poste."
@@ -269,20 +273,20 @@ exports.displayHome = function (req, res) {
                     where: {
                         login: assignment_found.id_helper
                     }
-                }).then(function(helper_found){
-                    if (helper_found !== null){
+                }).then(function (helper_found) {
+                    if (helper_found !== null) {
                         models.helper_post.findOne({
                             where: {
                                 id: assignment_found.id_helper_post
                             }
-                        }).then(function(helper_post_found){
-                            if (helper_post_found !== null){
+                        }).then(function (helper_post_found) {
+                            if (helper_post_found !== null) {
                                 models.point_of_interest.findOne({
                                     where: {
                                         id: helper_post_found.id_point_of_interest
                                     }
-                                }).then(function(point_of_interest_found){
-                                    if (point_of_interest_found !== null){
+                                }).then(function (point_of_interest_found) {
+                                    if (point_of_interest_found !== null) {
                                         res.render(pages_path + "helper_home.ejs", {
                                             pageTitle: "Parcours Bénévole",
                                             assignment: assignment_found,
@@ -305,6 +309,18 @@ exports.displayHome = function (req, res) {
             });
         }
     });
+};
+
+exports.performCheckin = function (req, res) {
+    helpers.findByPk(req.body.helper_login)
+        .then(helper_found => {
+            helper_found.update({
+                check_in: JSON.parse(req.body.check_in) ? 1 : 0
+            }).then(function () {
+                res.send(JSON.stringify({msg: req.body.check_in}));
+            });
+
+        });
 };
 
 exports.remove = function (req, res) {

@@ -163,10 +163,14 @@ intothewoods.route('/helper/assign')
 intothewoods.route('/helper/:id/home')
     .get(helper.displayHome);
 
+intothewoods.route('/helper/check_in')
+    .post(helper.performCheckin);
+
 // Routes dedicated to participant
 intothewoods.route('/participant/register')
     .get(participant.displayRegister)
     .post(participant.register);
+
 
 //bad url route
 intothewoods.use(function (req, resp, next) {

@@ -81,6 +81,14 @@ function setPointOfInterestFromCoordinates(coordinates) {
 }
 
 function updatePointOfInterestId(serverId) {
+    let index;
+    pointOfInterestArrayToStore.map(pointOfInterest => {
+        if (pointOfInterest.removed){
+            index = pointOfInterestArrayToStore.indexOf(pointOfInterest);
+            pointOfInterestArrayToStore.splice(index, 1);
+        }
+    });
+
     serverId.map(pointOfInterestServerId => {
         let feature = vector.getSource().getFeatureById("new_point_of_interest_" + pointOfInterestServerId.clientId);
         feature.setId("point_of_interest_" + pointOfInterestServerId.serverId);
