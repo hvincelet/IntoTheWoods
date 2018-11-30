@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
-<!--<% include ../partials/head %>-->
+<% include ../partials/head %>
 <body>
-<div class="page login-page" style="height:100%;">
+<div class="page page-full">
     <% if(typeof errorMessage !== "undefined") { %>
         <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
             <%= errorMessage %>
@@ -21,16 +21,16 @@
             }
         </style>
 
-        <div class="container-fluid">
+        <div class="container-fluid" style="padding: 0;">
             <link rel="stylesheet"
                   href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.2.0/css/ol.css"
                   type="text/css">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="card">
+                    <div class="card no-margin-top">
                         <div class="card-header d-flex align-items-center">
                             <h2>Itinéraire jusqu'à votre poste</h2>
-                            <button class="btn" onclick="redirectGoogleMaps()" style="right: 10px; position: absolute;"><i class="fab fa-google"></i> Ouvrir dans Google Maps </button>
+                            <button class="btn btn-default" onclick="redirectGoogleMaps()" style="right: 10px; position: absolute;"><i class="fab fa-google"></i> Ouvrir dans Google Maps </button>
                         </div>
                         <div class="card-body" style="padding-right: 0px; padding-left: 0px; padding-top: 0px">
                             <div id="map" style="width: 100%; height: 100%;">
@@ -39,7 +39,7 @@
                                 </div>
                             </div>
 
-                            <div>
+                            <div style="padding: 1rem 1.25rem;">
                                 <h2>
                                     Intitulé du poste
                                 </h2>
@@ -65,6 +65,12 @@
             </div>
         </div>
     <% } %>
+</div>
+<div class="login-page">
+    <div class="copyrights text-center">
+        <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+        <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+    </div>
 </div>
 <% include ../partials/footer %>
 </body>

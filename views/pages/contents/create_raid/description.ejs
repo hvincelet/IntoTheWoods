@@ -36,7 +36,7 @@
                             <div class="form-group row">
                                 <label class="col-sm-3">Date de l'événement :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidStartDate" name="raidStartDate" type="datetime-local"
+                                    <input id="raidStartDate" name="raidStartDate" type="date"
                                            placeholder="Date de début" class="form-control form-control-success"
                                            min="<%= new Date().toISOString() %>">
                                 </div>
@@ -79,7 +79,7 @@
 </section>
 
 <script type="application/javascript">
-    //if ( $('#raidStartDate')[0].type != 'date' ) $('#raidStartDate').datepicker();
+    if ( $('#raidStartDate')[0].type != 'date' ) $('#raidStartDate').datepicker();
     $(document).ready(function () {
         $("#ajax").keyup(function () {
             if ($("#ajax").val().length >= 3) {

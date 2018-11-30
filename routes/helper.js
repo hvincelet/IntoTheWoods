@@ -4,6 +4,7 @@ const sender = require('./sender');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const date = require('date-and-time');
+const helpers = models.helper;
 
 exports.inviteHelper = function (req, res) {
     const user = connected_user(req.sessionID);
