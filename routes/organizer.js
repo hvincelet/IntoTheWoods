@@ -17,7 +17,7 @@ exports.dashboard = function (req, res) {
 exports.displayLogScreen = function (req, res) {
     const user = connected_user(req.sessionID);
     if (user) {
-        return res.redirect("/");
+        return res.redirect("/dashboard");
     }
     if(req.query.new_password === '1') {
         return res.render(pages_path + "login.ejs", {
