@@ -43,7 +43,7 @@
                     </div>
                     <input type="text" name="idRaid" hidden value="<%= raid.id %>">
                     <% if(typeof activity !== "undefined") { %>
-                    <div class="form-group">
+                    <div class="form-group" id="whishes_table">
                         <h3 class="card-header text-center font-weight-bold text-uppercase py-4">Indiquez vos voeux</h3>
                         <div class="card-body">
                             <div class="table-editable">
@@ -147,6 +147,15 @@
         $('.select2-selection--single').select2({width: 'resolve'});
     });
 
+    $('#backup').change(function () {
+        let table = $('#whishes_table');
+        if(this.checked){
+            table.css('display', 'none');
+        }else{
+            table.css('display', '');
+        }
+    });
+
     var $TABLE = $('#table');
     var $HIDDEN_TABLE = $('#hidden-table');
     var nbrow = $TABLE.length;
@@ -201,13 +210,11 @@
         let whishes = [];
 
         if($("#backup:checked").length > 0){
-            let i = 1;
             list.map(item => {
                 whishes.push({
-                    order: i,
+                    order: 1,
                     id: item.id
                 });
-                i++;
             });
         }else{
             $('#table').find('tr').each(function () {
