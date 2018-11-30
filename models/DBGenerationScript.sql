@@ -29,7 +29,7 @@ USE `intoTheWoodsDB` ;
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
-  `date` DATETIME NULL,
+  `date` DATE NULL,
   `edition` SMALLINT NULL,
   `place` TINYTEXT NULL,
   `lat` DOUBLE NULL,

@@ -200,23 +200,34 @@
 
         let whishes = [];
 
-        $('#table').find('tr').each(function () {
-            let index = $(this).find('td.row-number').text()
-            let selected_wish = $(this).find('td .select2-selection__rendered').text();
-
-            if($.isNumeric( index ) && parseInt(index) > 0){
-                let wish = 0;
-                list.forEach(function (item) {
-                    if(item.name === selected_wish){
-                        wish = item.id;
-                    }
-                });
+        if($("#backup:checked").length > 0){
+            let i = 1;
+            list.map(item => {
                 whishes.push({
-                    order: index,
-                    id: wish
+                    order: i,
+                    id: item.id
                 });
-            }
-        });
+                i++;
+            });
+        }else{
+            $('#table').find('tr').each(function () {
+                let index = $(this).find('td.row-number').text()
+                let selected_wish = $(this).find('td .select2-selection__rendered').text();
+
+                if($.isNumeric( index ) && parseInt(index) > 0){
+                    let wish = 0;
+                    list.forEach(function (item) {
+                        if(item.name === selected_wish){
+                            wish = item.id;
+                        }
+                    });
+                    whishes.push({
+                        order: index,
+                        id: wish
+                    });
+                }
+            });
+        }
 
         $('#wishes_list').val( JSON.stringify(whishes) );
 
