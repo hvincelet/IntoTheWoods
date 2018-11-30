@@ -221,10 +221,16 @@
                             wish = item.id;
                         }
                     });
-                    whishes.push({
-                        order: index,
-                        id: wish
+                    let already_added = whishes.some(function (element) {
+                        return element.id === wish;
                     });
+
+                    if(!already_added){
+                        whishes.push({
+                            order: index,
+                            id: wish
+                        });
+                    }
                 }
             });
         }
