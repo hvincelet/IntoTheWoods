@@ -188,18 +188,9 @@ exports.participantPassage = function(req, res){
         if (stages_found !== null && stages_found.length >= 1) {
             orderRun = stages_found.length + 1;
 
-            dateLastStage = stages_found[stages_found.length-1].timeEntered;
+            dateLastStage = new Date(stages_found[stages_found.length-1].timeEntered+"UTC");
 
-            let dateTime = Date.now();
-
-            console.log("dateLastStage: "+dateLastStage.getTime());
-            console.log("dateTime: "+dateTime);
-            console.log("dateLastStage: "+(new Date(dateLastStage)).toString());
-            console.log("dateTime: "+(new Date(dateTime)).toString());
-            console.log("result: "+ (dateTime-dateLastStage));
-
-            //dateTime = dateTime.getTime() + dateTime.getTimezoneOffset()*60*1000;
-            //dateLastStage = dateLastStage.getTime() + dateLastStage.getTimezoneOffset()*60*1000;
+            let dateTime = new Date();
 
             let time = new Date(dateTime - dateLastStage);
 
@@ -211,25 +202,12 @@ exports.participantPassage = function(req, res){
                 attributes: ['startTime'],
                 where: {
                     id: idRaid
-                },
-                raw:true
+                }
             }).then(function (raid_found) {
-                console.log(raid_found)
                 if (raid_found !== null) {
-                    console.log("test")
-                    dateLastStage = raid_found.startTime;
-                    //dateLastStage = dateLastStage.getTime();
+                    dateLastStage = new Date(raid_found.startTime+"UTC");
 
-                    let dateTime = Date.now();
-
-                    console.log("dateLastStage: "+dateLastStage);
-                    console.log("dateTime: "+dateTime);
-                    console.log("dateLastStage: "+(new Date(dateLastStage)).toString());
-                    console.log("dateTime: "+(new Date(dateTime)).toString());
-                    console.log("result: "+ (dateTime-dateLastStage));
-
-                    //dateTime = dateTime.getTime() + dateTime.getTimezoneOffset()*60*1000;
-                    //dateLastStage = dateLastStage.getTime() + dateLastStage.getTimezoneOffset()*60*1000;
+                    let dateTime = new Date();
 
                     let time = new Date(dateTime - dateLastStage);
 
@@ -253,14 +231,11 @@ insertStage = function(orderRun, time, idParticipant, idRaid){
         }
     }).then(function (course_found) {
         if(course_found !== null){
-            console.log(time);
-            console.log(time.toLocaleTimeString());
-
             models.stage.create({
                 id_participant: idParticipant,
                 id_course: course_found.id,
-                time: time.toLocaleTimeString(),
-                timeEntered: Date.now()
+                time: time.getUTCHours()+":"+time.getUTCMinutes()+":"+time.getUTCSeconds(),
+                timeEntered: new Date()
             });
         }
         else{

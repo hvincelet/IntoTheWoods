@@ -34,8 +34,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     startTime: {
       type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
+      allowNull: true
     }
   }, {
     tableName: 'raid'

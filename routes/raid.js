@@ -344,25 +344,29 @@ exports.displayRaid = function(req, res) {
 
 exports.setStartTime = function(req, res){
     let idRaid = req.body.idRaid;
+    console.log(idRaid);
 
     models.raid.findOne({
         where: {
             id: idRaid
         }
     }).then(function (raid_found) {
-        if (raid_found !== null /*&& raid_found.startTime == null*/) {
-            let time = new Date();
-            models.raid.update(
-                {
-                    startTime: time
-                },
-                {where: {
-                    id: idRaid
-                }
-            });
-        }
-        else if(raidraid_found.startTime != null){
-            console.log("L'heure de début de la course a déjà été renseigné.")
+        if (raid_found !== null) {
+            if(raid_found.startTime != null){
+                console.log("L'heure de début de la course a déjà été renseigné.")
+            }
+            else{
+                let time = new Date();
+                models.raid.update(
+                    {
+                        startTime: time
+                    },
+                    {where: {
+                        id: idRaid
+                    }
+                });
+            }
+            
         }
         else{
             console.log("erreur");
