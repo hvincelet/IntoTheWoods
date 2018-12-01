@@ -193,7 +193,6 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`helper` (
   `last_name` VARCHAR(30) NULL,
   `first_name` VARCHAR(30) NULL,
   `check_in` TINYINT(1) NOT NULL DEFAULT 0,
-  `backup` TINYINT(1) NULL,
   `email` TINYTEXT NULL,
   PRIMARY KEY (`login`))
 ENGINE = InnoDB;

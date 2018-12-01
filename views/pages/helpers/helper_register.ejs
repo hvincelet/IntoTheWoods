@@ -114,6 +114,7 @@
                     <div class="form-group text-center">
                         <input type="hidden" name="wishes" id="wishes_list">
                         <input id="register" type="button" value="S'inscrire" class="btn btn-primary">
+                        <br/><a href="/" class="signup">Retourners à la page d'accueil</a>
                     </div>
                 </form>
             </div>
@@ -267,9 +268,15 @@
                         "Vous recevrez un mail lorsqu'un poste vous aura été attribué par les organisat·eurs·rices.");
                 }else{
                     $MESSAGE_MODAL_TITLE.html("Erreur...");
-                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                    $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
-                        "Merci de recharger la page et de réessayer.");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                    if(msg === "already_register"){
+                        $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
+                            "L'adresse e-mail est déjà associée à un bénévole pour ce raid...");
+                    }else{
+                        $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
+                            "Merci de recharger la page et de réessayer.");
+                    }
+
                 }
                 $MESSAGE_MODAL.modal('show');
             },

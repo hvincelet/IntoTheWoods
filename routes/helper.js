@@ -182,73 +182,57 @@ exports.displayRegister = function (req, res) {
 };
 
 exports.register = function (req, res) {
-
-    let id_helper = Math.random().toString(36).substr(2, 7);
     const registerEmail = req.body.registerEmail;
     const registerUserLn = req.body.registerUserLn;
     const registerUserFn = req.body.registerUserFn;
-    let backup = req.body.backup;
-    if(backup === undefined) {
-        backup = 0;
-    }else{
-        backup = 1;
-    }
     const id_raid = req.body.idRaid;
-    let helperPostsWished = req.body.whishes;
+    const helperPostsWished = req.body.whishes;
 
-    models.helper.findOne({
-        where: {
-            login: id_helper
-        }
+    const helpers = models.helper;
+    const assignments = models.assignment;
+
+    helpers.findOne({
+        where: {email: registerEmail}
     }).then(function (helper_found) {
-        while(helper_found !== null) {
-            id_helper = Math.random().toString(36).substr(2, 7);
-            models.helper.findOne({
-                where: {
-                    login: id_helper
+        if(helper_found !== null){
+            assignments.findOne({ where: {id_helper: helper_found.login} }).then(function (assignment_for_this_raid_found) {
+                if(assignment_for_this_raid_found !== null){
+                    return res.send(JSON.stringify({msg: "already_register"}));
                 }
-            }).then(function(test_helper) {
-                helper_found = test_helper;
+            });
+        }else{
+            let id_helper = Math.random().toString(36).substr(2, 7);
+            helpers.findOne({ where: {login: id_helper } }).then(function (helper_exist) {
+               while (helper_exist !== null){
+                   id_helper = Math.random().toString(36).substr(2, 7);
+                   helpers.findOne({ where: {login: id_helper }}).then(function (test_helper) {
+                       helper_found = test_helper;
+                   });
+               }
+
+               helpers.create({
+                   login: id_helper,
+                   email: registerEmail,
+                   last_name: registerUserLn,
+                   first_name: registerUserFn
+               }).then(function () {
+
+                   let create_assignment_actions = helperPostsWished.map(wish => {
+                       return new Promise(resolve => {
+                           assignments.create({
+                               id_helper: id_helper,
+                               id_helper_post: wish.id,
+                               order_num: wish.order
+                           }).then(function () { return resolve(); });
+                       });
+                   });
+
+                   Promise.all(create_assignment_actions).then(result => {
+                       return res.send(JSON.stringify({msg: "ok"}));
+                   });
+               });
             });
         }
-        models.helper.create({
-            login: id_helper,
-            email: registerEmail,
-            last_name: registerUserLn,
-            first_name: registerUserFn,
-            backup: backup
-        }).then(function () {
-            if (backup === 1) {
-                let helper_post_model = models.helper_post;
-                let poi_model = models.point_of_interest;
-                helper_post_model.belongsTo(poi_model, {foreignKey: "id_point_of_interest"});
-                helper_post_model.findAll({
-                    include: {
-                        model: poi_model,
-                        where: {
-                            id_raid: id_raid
-                        }
-                    }
-                }).then(function(helper_posts_found){
-                    helper_posts_found.map(function(helper_post){
-                        models.assignment.create({
-                            id_helper: id_helper,
-                            id_helper_post: helper_post.id,
-                            order_num: 1
-                        });
-                    });
-                });
-            }else{
-                helperPostsWished.map(wish =>{
-                    models.assignment.create({
-                        id_helper: id_helper,
-                        id_helper_post: wish.id,
-                        order_num: wish.order
-                    });
-                });
-            }
-            res.send(JSON.stringify({msg: "ok"}));
-        });
     });
 };
 
