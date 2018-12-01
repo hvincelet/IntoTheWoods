@@ -26,8 +26,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     timeEntered: {
       type: DataTypes.DATE,
-      allowNull: true,
-      defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
+      allowNull: true
     }
   }, {
     tableName: 'stage'

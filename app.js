@@ -155,7 +155,7 @@ intothewoods.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
 app.route('/editraid/setStartTime')
-    .post(/*checkAuth, */raid.setStartTime);
+    .post(checkAuth, raid.setStartTime);
 
 
 //routes dedicated to the helpers
