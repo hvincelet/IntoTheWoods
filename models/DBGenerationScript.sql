@@ -14,7 +14,7 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 CREATE USER 'gluser2018'@'localhost' IDENTIFIED BY 'glpass2018';
 GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'localhost' IDENTIFIED BY 'glpass2018' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'148.60.%.%' IDENTIFIED BY 'glpass2018' WITH GRANT OPTION;
---ALTER USER 'gluser2018'@'localhost' IDENTIFIED WITH mysql_native_password BY 'glpass2018';
+-- ALTER USER 'gluser2018'@'localhost' IDENTIFIED WITH mysql_native_password BY 'glpass2018';
 -- sequelize-auto -o "./models" -d intoTheWoodsDB -h localhost -u gluser2018 -x glpass2018 -e mysql
 
 -- -----------------------------------------------------
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`stage` (
   `id_participant` INT UNSIGNED NOT NULL,
   `id_course` INT UNSIGNED NOT NULL,
   `time` TIME NULL,
-  `timeEntered` DATETIME NULL,
+  `timeEntered` TIMESTAMP NULL,
   PRIMARY KEY (`id_participant`, `id_course`),
   CONSTRAINT `id_participant`
     FOREIGN KEY (`id_participant`)

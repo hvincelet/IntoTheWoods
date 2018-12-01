@@ -176,7 +176,7 @@ exports.participantPassage = function(req, res){
     let idParticipant = req.body.idParticipant;
     let idRaid = req.body.idRaid;
 
-    let dateLastStage;
+    let dateLastStage = 0;
 
     let orderRun;
 
@@ -190,7 +190,20 @@ exports.participantPassage = function(req, res){
 
             dateLastStage = stages_found[stages_found.length-1].timeEntered;
 
-            insertStage(orderRun, dateLastStage, idParticipant, idRaid);
+            let dateTime = Date.now();
+
+            console.log("dateLastStage: "+dateLastStage.getTime());
+            console.log("dateTime: "+dateTime);
+            console.log("dateLastStage: "+(new Date(dateLastStage)).toString());
+            console.log("dateTime: "+(new Date(dateTime)).toString());
+            console.log("result: "+ (dateTime-dateLastStage));
+
+            //dateTime = dateTime.getTime() + dateTime.getTimezoneOffset()*60*1000;
+            //dateLastStage = dateLastStage.getTime() + dateLastStage.getTimezoneOffset()*60*1000;
+
+            let time = new Date(dateTime - dateLastStage);
+
+            insertStage(orderRun, time, idParticipant, idRaid);
         }
         else{
             orderRun = 1;
@@ -198,15 +211,29 @@ exports.participantPassage = function(req, res){
                 attributes: ['startTime'],
                 where: {
                     id: idRaid
-                }
+                },
+                raw:true
             }).then(function (raid_found) {
                 console.log(raid_found)
                 if (raid_found !== null) {
                     console.log("test")
                     dateLastStage = raid_found.startTime;
-                    console.log(dateLastStage);
+                    //dateLastStage = dateLastStage.getTime();
 
-                    insertStage(orderRun, dateLastStage, idParticipant, idRaid);
+                    let dateTime = Date.now();
+
+                    console.log("dateLastStage: "+dateLastStage);
+                    console.log("dateTime: "+dateTime);
+                    console.log("dateLastStage: "+(new Date(dateLastStage)).toString());
+                    console.log("dateTime: "+(new Date(dateTime)).toString());
+                    console.log("result: "+ (dateTime-dateLastStage));
+
+                    //dateTime = dateTime.getTime() + dateTime.getTimezoneOffset()*60*1000;
+                    //dateLastStage = dateLastStage.getTime() + dateLastStage.getTimezoneOffset()*60*1000;
+
+                    let time = new Date(dateTime - dateLastStage);
+
+                    insertStage(orderRun, time, idParticipant, idRaid);
                 }
                 else{
                     console.log("erreur");
@@ -216,12 +243,7 @@ exports.participantPassage = function(req, res){
     });
 };
 
-insertStage = function(orderRun, dateLastStage, idParticipant, idRaid){
-    let dateTime = new Date();
-
-    console.log("dateTime "+dateTime);
-    console.log("dateLastStage "+dateLastStage);
-    let time = new Date(dateTime - dateLastStage);
+insertStage = function(orderRun, time, idParticipant, idRaid){
 
     models.course.findOne({
         attributes: ['id'],
@@ -231,14 +253,14 @@ insertStage = function(orderRun, dateLastStage, idParticipant, idRaid){
         }
     }).then(function (course_found) {
         if(course_found !== null){
-            dateTime = dateTime - dateTime.getTimezoneOffset()*60*1000;
             console.log(time);
+            console.log(time.toLocaleTimeString());
 
             models.stage.create({
                 id_participant: idParticipant,
                 id_course: course_found.id,
                 time: time.toLocaleTimeString(),
-                timeEntered: dateTime
+                timeEntered: Date.now()
             });
         }
         else{
