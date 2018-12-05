@@ -20,7 +20,7 @@
             <li><a href="/createraid/start" <% if (page.includes("create_raid")){%> class="active" <%}%> > <i class="icon-form"></i>Organiser un Raid</a>
                 <% if (page.includes("create_raid")){%>
                     <ul class="list-unstyled">
-                        <li><a href="#" <% if (page.includes("create_raid/start")){%> style="border-left: 2px solid #379392;" <%}%>>Initialisation</a></li>
+                        <li><a href="#" <% if (page.includes("create_raid/start") || page.includes("create_raid/from_exist")){%> style="border-left: 2px solid #379392;" <%}%>>Initialisation</a></li>
                         <li><a href="#" <% if (page.includes("create_raid/description")){%> style="border-left: 2px solid #379392;" <%}%>>Description</a></li>
                         <li><a href="#" <% if (page.includes("create_raid/sports")){%> style="border-left: 2px solid #379392;" <%}%>>Sélection des sports</a></li>
                         <li><a href="#" <% if (page.includes("create_raid/summary")){%> style="border-left: 2px solid #379392;" <%}%>>Validation</a></li>

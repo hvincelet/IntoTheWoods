@@ -113,6 +113,9 @@ intothewoods.route('/dashboard')
 intothewoods.route('/createraid/start')
     .get(checkAuth, raid.init);
 
+intothewoods.route('/createraid/from_exist')
+    .get(checkAuth, raid.from_exist);
+
 intothewoods.route('/createraid/description')
     .get(checkAuth, raid.displayDescriptionForm)
     .post(checkAuth, raid.createRaid);
