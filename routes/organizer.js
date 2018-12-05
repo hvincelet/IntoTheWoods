@@ -332,7 +332,6 @@ exports.remove = function (req, res) {
     let organizer_id = req.body.organizer_id;
     let raid_id = req.params.id;
 
-    // TODO Check if there is more than one member in team
     models.team.findAll({
         where: {
             id_raid: raid_id
