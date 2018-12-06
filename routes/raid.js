@@ -586,3 +586,30 @@ exports.allowregister = function (req, res) {
         });
     }
 };
+
+exports.starttime = function (req, res) {
+    let user = connected_user(req.sessionID);
+    const raid = user.raid_list.find(function (raid) {
+        return raid.id === parseInt(req.params.id);
+    });
+    if (!raid) {
+        return res.redirect('/dashboard');
+    }else {
+        models.raid.findOne({
+            where: {
+                id: raid.id
+            }
+        }).then(function (raid_found) {
+            if(raid_found === null){
+                return res.send(JSON.stringify({msg: "not-found"}));
+            }else{
+                raid_found.update({
+                    start_time: req.body.start_time
+                }).then(function () {
+                    raid.start_time = req.body.start_time;
+                    return res.send(JSON.stringify({msg: "ok"}));
+                });
+            }
+        });
+    }
+};

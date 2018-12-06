@@ -44,7 +44,7 @@ link += '://'+server['host']+':'+server['port'];
             <div class="form-inner">
                 <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
                 <p>Bonjour, suite à votre demande de bénévolat sur notre site Into The Woods, nous avons le plaisir de vous confirmer votre participation en tant que bénévole.<br/>
-                    Vous participerez donc au raid <b><%=name%> édition <%=edition%></b> le <b><%=date%></b> à <b><%=place%></b> en tant que bénévole sur le poste <b><u><%=title%></u></b>.<br/>
+                    Vous participerez donc au raid <b><%=name%> édition <%=edition%></b> le <b><%=date%> <%if(time !== ""){%><%=time%><%}%></b> à <b><%=place%></b> en tant que bénévole sur le poste <b><u><%=title%></u></b>.<br/>
                     <% if(description !== null && description.length > 0){%>
                         Description du poste : <b><u><%=description%></u></b>
                     <%}%>

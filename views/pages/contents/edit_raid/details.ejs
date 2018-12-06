@@ -44,6 +44,12 @@ helpers.map( (helper, index) => {
                             </tr>
                         </table>
 
+                        <input type="time" id="start_time" size="3" class="text-center" <%if(raid.start_time !== null){%>value="<%=raid.start_time%>"<% } %>>
+                        <label for="start_time">Heure de départ du raid <small>(Exemple: 09:30)</small></label>
+                        <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="saveStartTime();">Enregistrer</button>
+                        <br/>
+
+
                         <% if (pois.length > 0 ) { %>
                             <input id="allow_register" name="allow_register" type="checkbox" class="form-control-custom"
                             <%if(parseInt(raid.allow_register) === 1){%> checked <%}%> >
@@ -184,7 +190,7 @@ helpers.map( (helper, index) => {
             let $MESSAGE_MODAL_TITLE = $('#messageDialog');
             let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
             let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
-            let status = this.checked?"authorisées":"interdites";
+            let status = this.checked?"autorisées":"interdites";
             $.ajax({
                 type: 'POST',
                 url: '/editraid/<%=raid.id%>/allowregister',
