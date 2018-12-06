@@ -285,6 +285,8 @@ exports.saveSportsRanking = function (req, res) {
                         });
                     }
                 });
+            }else{
+                return res.redirect('/editraid/' + user.idCurrentRaid + '/map');
             }
         });
     });
@@ -526,28 +528,61 @@ exports.displayRaid = function (req, res) {
 
 exports.savePoi = function (req, res) {
     let user = connected_user(req.sessionID);
-    //console.log(JSON.parse(req.body.pois));
-    const save_poi_actions = req.body.pois.map(poi =>{
-        return new Promise(resolve => {
-            models.helper_post.findOne({
-                where: {
-                    id: poi.id
-                }
-            }).then(function (helper_post_found) {
-                if(helper_post_found !== null){
-                    helper_post_found.update({
-                        title: poi.name,
-                        description: poi.description,
-                        nb_helper: poi.number_helper
-                    }).then(function () {
-                        return resolve();
-                    });
-                }
+    const raid = user.raid_list.find(function (raid) {
+        return raid.id === parseInt(req.params.id);
+    });
+    if (!raid) {
+        return res.redirect('/dashboard');
+    }else {
+        const save_poi_actions = req.body.pois.map(poi =>{
+            return new Promise(resolve => {
+                models.helper_post.findOne({
+                    where: {
+                        id: poi.id
+                    }
+                }).then(function (helper_post_found) {
+                    if(helper_post_found !== null){
+                        helper_post_found.update({
+                            title: poi.name,
+                            description: poi.description,
+                            nb_helper: poi.number_helper
+                        }).then(function () {
+                            return resolve();
+                        });
+                    }
+                });
             });
         });
-    });
 
-    Promise.all(save_poi_actions).then(result => {
-        res.send(JSON.stringify({msg: "ok"}));
+        Promise.all(save_poi_actions).then(result => {
+            res.send(JSON.stringify({msg: "ok"}));
+        });
+    }
+};
+
+exports.allowregister = function (req, res) {
+    let user = connected_user(req.sessionID);
+    const raid = user.raid_list.find(function (raid) {
+        return raid.id === parseInt(req.params.id);
     });
+    if (!raid) {
+        return res.redirect('/dashboard');
+    }else {
+        models.raid.findOne({
+            where: {
+                id: raid.id
+            }
+        }).then(function (raid_found) {
+            if(raid_found === null){
+                return res.send(JSON.stringify({msg: "not-found"}));
+            }else{
+                raid_found.update({
+                    allow_register: parseInt(req.body.status)
+                }).then(function () {
+                    raid.allow_register = parseInt(req.body.status);
+                    return res.send(JSON.stringify({msg: "ok"}));
+                });
+            }
+        });
+    }
 };

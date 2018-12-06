@@ -137,6 +137,9 @@ intothewoods.route('/editraid/:id/map')
     .get(checkAuth, map.displayMap)
     .post(checkAuth, map.storeMapData);
 
+intothewoods.route('/editraid/:id/allowregister')
+    .post(checkAuth, raid.allowregister);
+
 intothewoods.route('/editraid/:id/sendMessage')
     .post(checkAuth, organizer.sendMail);
 

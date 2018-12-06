@@ -74,7 +74,9 @@ exports.idVerification = function (req, res) {
                         date: tuple.dataValues.raid.dataValues.date,
                         place: tuple.dataValues.raid.dataValues.place,
                         lat: tuple.dataValues.raid.dataValues.lat,
-                        lng: tuple.dataValues.raid.dataValues.lng
+                        lng: tuple.dataValues.raid.dataValues.lng,
+                        start_time: tuple.dataValues.raid.start_time,
+                        allow_register: tuple.dataValues.raid.allow_register
                     });
                 });
                 connected_users.push(user);
@@ -202,7 +204,6 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
         res.send(JSON.stringify({msg: "mail-is-login"}));
     }
 };
-
 
 exports.assignHelper = function(req, res) {
     if(req.body.assignments_array !== undefined) {

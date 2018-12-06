@@ -1,3 +1,10 @@
+// Prevent change page during editing
+$(window).bind('beforeunload', function(e) {
+    if(editing){
+        return "Êtes-vous sûr de vouloir quitter le mode édition ?";
+    }
+});
+
 /***************************************************************
  ***************************************************************
  ***                    Map Instantiation                    ***

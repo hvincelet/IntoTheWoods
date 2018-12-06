@@ -43,6 +43,12 @@ helpers.map( (helper, index) => {
                                 </td>
                             </tr>
                         </table>
+
+                        <% if (pois.length > 0 ) { %>
+                            <input id="allow_register" name="allow_register" type="checkbox" class="form-control-custom"
+                            <%if(parseInt(raid.allow_register) === 1){%> checked <%}%> >
+                            <label for="allow_register">Autoriser les inscriptions des bénévoles ?</label>
+                        <% } %>
                     </div>
                 </div>
             </div>
@@ -173,6 +179,41 @@ helpers.map( (helper, index) => {
     // JS for line-throught on radio button non-checked
     var assignment = [];
     $(document).ready(function () {
+        $('#allow_register:checkbox').change(function () {
+            let $MESSAGE_MODAL = $('#messageModal');
+            let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+            let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+            let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+            let status = this.checked?"authorisées":"interdites";
+            $.ajax({
+                type: 'POST',
+                url: '/editraid/<%=raid.id%>/allowregister',
+                data: {
+                    status: this.checked?1:0
+                },
+                success: function (response) {
+                    msg = JSON.parse(response).msg;
+                    if(msg === "ok"){
+                        $MESSAGE_MODAL_TITLE.html("Inscription " + status);
+                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                        $MESSAGE_MODAL_CONTENT.html("Les inscriptions sont désormais " + status + ".");
+                    }else{
+                        $MESSAGE_MODAL_TITLE.html("Impossible d'effectuer cette action");
+                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                        $MESSAGE_MODAL_CONTENT.html("Une erreur est survenue... Impossible de sauvegarder le statut.<br/>Raffraichissez la page et rééssayez.");
+                    }
+                    $MESSAGE_MODAL.modal('show');
+                },
+                error: function (response) {
+                    let msg = JSON.parse(response).msg;
+                    $MESSAGE_MODAL_TITLE.html("Impossible d'effectuer cette action");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Une erreur est survenue... Impossible de sauvegarder le statut.<br/>Raffraichissez la page et rééssayez.");
+                    $MESSAGE_MODAL.modal('show');
+                }
+            });
+        });
+
         <% helpers.forEach(function (helper) { %>
         $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').change(function () {
             let val = this.value;
@@ -184,7 +225,6 @@ helpers.map( (helper, index) => {
             }else{
                 assignment.push({id_helper: "<%=helper.login%>", id_helper_post: val});
             }
-            console.log(assignment);
             $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').each(function () {
                 let label = this.id+"-label";
                 if(this.value !== val){

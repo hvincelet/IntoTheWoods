@@ -45,12 +45,12 @@ link += '://'+server['host']+':'+server['port'];
                 <div class="logo text-uppercase"><strong class="text-primary">Into the Woods</strong></div>
                 <p>Bonjour, suite à votre demande de bénévolat sur notre site Into The Woods, nous avons le plaisir de vous confirmer votre participation en tant que bénévole.<br/>
                     Vous participerez donc au raid <b><%=name%> édition <%=edition%></b> le <b><%=date%></b> à <b><%=place%></b> en tant que bénévole sur le poste <b><u><%=title%></u></b>.<br/>
-                    <% if(description.length > 0){%>
-                        Description du poste : <%=description%>
-                    <%};%>
+                    <% if(description !== null && description.length > 0){%>
+                        Description du poste : <b><u><%=description%></u></b>
+                    <%}%>
                     <br/>
                     Pour rejoindre votre poste le jour de l'événement, veuillez vous rendre sur Into the Woods par ce lien : <br/></p>
-                <button onclick="location.href=<%= link %>/helper/<%=id_helper%>/home" class="btn btn-primary">Me rendre à mon poste</button>
+                <a href="<%= link %>/helper/<%=id_helper%>/home" class="btn btn-primary">Me rendre à mon poste</a>
                 <small>Si le bouton ne fonctionne pas, utilisez le lien suivant : <%= link %>/helper/<%=id_helper%>/home</small>
             </div>
         </div>
