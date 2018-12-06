@@ -140,6 +140,9 @@ intothewoods.route('/editraid/:id/map')
 intothewoods.route('/editraid/:id/allowregister')
     .post(checkAuth, raid.allowregister);
 
+intothewoods.route('/editraid/:id/starttime')
+    .post(checkAuth, raid.starttime);
+
 intothewoods.route('/editraid/:id/sendMessage')
     .post(checkAuth, organizer.sendMail);
 

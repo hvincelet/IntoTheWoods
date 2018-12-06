@@ -117,11 +117,12 @@ exports.sendMailToHelper = function(data){
         description: data.description,
         name: data.name,
         date: data.date,
+        time: data.time,
         edition: data.edition,
         place: data.place,
         server: server_info
     },{
-        vars: ["id_helper","id_helper_post","title","description","name","date","edition","place", "server"]
+        vars: ["id_helper","id_helper_post","title","description","name","date","time","edition","place", "server"]
     });
 
     let mailOptions = {
