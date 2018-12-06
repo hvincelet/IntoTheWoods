@@ -77,48 +77,52 @@ exports.displayRegister = function (req, res) {
         helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
         models.raid.findByPk(raid_id).then(function(raid_found){
-            helper_post_model.findAll({
-                include: [{
-                    model: point_of_interest_model,
-                    where: {
-                        id_raid: raid_id
-                    }
-                }],attributes: ['id', 'title', 'nb_helper']
-            }).then(function(helper_posts_found){
-                if(helper_posts_found !== null && helper_posts_found.length > 0){
-                    const get_all_helper_posts = helper_posts_found.map(helper_post => {
-                        return new Promise(resolve => {
-                            models.assignment.findAndCountAll({
-                                where: {
-                                    id_helper_post: helper_post.id,
-                                    attributed: 1
-                                }
-                            }).then(function(all_assignement){
-                                if(helper_post.point_of_interest !== null && helper_post.nb_helper - all_assignement.count > 0){
-                                    get_post_clean.push({
-                                        'id':helper_post.id,
-                                        'title':helper_post.title
-                                    });
-                                }
-                                return resolve();
+            if(raid_found.allow_register !== 1){
+                return res.redirect('/helper/register');
+            }else{
+                helper_post_model.findAll({
+                    include: [{
+                        model: point_of_interest_model,
+                        where: {
+                            id_raid: raid_id
+                        }
+                    }],attributes: ['id', 'title', 'nb_helper']
+                }).then(function(helper_posts_found){
+                    if(helper_posts_found !== null && helper_posts_found.length > 0){
+                        const get_all_helper_posts = helper_posts_found.map(helper_post => {
+                            return new Promise(resolve => {
+                                models.assignment.findAndCountAll({
+                                    where: {
+                                        id_helper_post: helper_post.id,
+                                        attributed: 1
+                                    }
+                                }).then(function(all_assignement){
+                                    if(helper_post.point_of_interest !== null && helper_post.nb_helper - all_assignement.count > 0){
+                                        get_post_clean.push({
+                                            'id':helper_post.id,
+                                            'title':helper_post.title
+                                        });
+                                    }
+                                    return resolve();
+                                });
                             });
                         });
-                    });
-                    Promise.all(get_all_helper_posts).then(function(result){
-                        res.render(pages_path + "helper_register.ejs", {
-                            pageTitle: "Inscription Bénévole",
-                            activity: get_post_clean,
-                            raid: {
-                                id: raid_found.id,
-                                name: raid_found.name,
-                                edition: raid_found.edition
-                            }
+                        Promise.all(get_all_helper_posts).then(function(result){
+                            res.render(pages_path + "helper_register.ejs", {
+                                pageTitle: "Inscription Bénévole",
+                                activity: get_post_clean,
+                                raid: {
+                                    id: raid_found.id,
+                                    name: raid_found.name,
+                                    edition: raid_found.edition
+                                }
+                            });
                         });
-                    });
-                }else{
-                    return res.redirect('/helper/register');
-                }
-            });
+                    }else{
+                        return res.redirect('/helper/register');
+                    }
+                });
+            }
         });
     }else{
         let point_of_interest_model = models.point_of_interest;
@@ -129,47 +133,25 @@ exports.displayRegister = function (req, res) {
         helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
         let today = new Date();
-        let in_two_months = date.addMonths(today, 2);
+        //let in_two_months = date.addMonths(today, 2);
         raid_model.findAll({
             attributes: ['id', 'name', 'edition', 'date', 'place'],
             where: {
                 date: {
-                    [Op.gte]: today.toISOString().split('T')[0],
-                    [Op.lte]: in_two_months.toISOString().split('T')[0]
-                }
+                    [Op.gte]: today.toISOString().split('T')[0]
+                },
+                allow_register: 1
             }, order: ['name']
         }).then(function (raids_found) {
             if(raids_found){
                 let raids = [];
-                let get_poi_actions = raids_found.map(raid => {
-                    return new Promise(resolve => {
-                        helper_post_model.findAll({
-                            include: [{
-                                model: point_of_interest_model,
-                                include: [{
-                                    model: raid_model,
-                                    where: {
-                                        id: raid.id
-                                    },
-                                    attributes: ['name', 'edition']
-                                }]
-                            }], attributes: ['id', 'title', 'nb_helper']
-                        }).then(function (helper_post_found) {
-                            if(helper_post_found !== null){
-                                if(helper_post_found[0].point_of_interest !== null){
-                                    raids.push({id: raid.id, name: raid.name, edition: raid.edition, date: raid.date, place: raid.place});
-                                }
-                            }
-                            return resolve();
-                        });
-                    });
+                raids_found.map(raid => {
+                    raids.push({id: raid.id, name: raid.name, edition: raid.edition, date: raid.date, place: raid.place});
                 });
 
-                Promise.all(get_poi_actions).then(result => {
-                    res.render(pages_path + "../visitors/register_helper.ejs", {
-                        pageTitle: "Inscription bénévoles",
-                        raid_list: raids
-                    });
+                res.render(pages_path + "../visitors/register_helper.ejs", {
+                    pageTitle: "Inscription bénévoles",
+                    raid_list: raids
                 });
             }else{
                 res.render(pages_path + "../visitors/register_helper.ejs", {
@@ -182,74 +164,83 @@ exports.displayRegister = function (req, res) {
 };
 
 exports.register = function (req, res) {
-
-    let id_helper = Math.random().toString(36).substr(2, 7);
     const registerEmail = req.body.registerEmail;
     const registerUserLn = req.body.registerUserLn;
     const registerUserFn = req.body.registerUserFn;
-    let backup = req.body.backup;
-    if(backup === undefined) {
-        backup = 0;
-    }else{
-        backup = 1;
-    }
     const id_raid = req.body.idRaid;
-    let helperPostsWished = req.body.whishes;
+    const helperPostsWished = req.body.whishes;
 
-    models.helper.findOne({
-        where: {
-            login: id_helper
-        }
+    const helpers = models.helper;
+    const assignments = models.assignment;
+    const hp = models.helper_post;
+    const poi = models.point_of_interest;
+
+    assignments.belongsTo(hp, {foreignKey: 'id_helper_post'});
+    hp.belongsTo(poi, {foreignKey: 'id_point_of_interest'});
+
+
+    helpers.findOne({
+        where: {email: registerEmail}
     }).then(function (helper_found) {
-        while(helper_found !== null) {
-            id_helper = Math.random().toString(36).substr(2, 7);
-            models.helper.findOne({
-                where: {
-                    login: id_helper
+        if(helper_found !== null){
+            assignments.findOne({
+                include: [{
+                    model: hp,
+                    attributes: ['id_point_of_interest'],
+                    include: [{
+                        model:poi,
+                        attributes: ['id_raid'],
+                        where: { id_raid: id_raid}
+                    }]
+                }],
+                attributes: ['id_helper'],
+                where: {id_helper: helper_found.login}
+            }).then(function (assignment_for_this_raid_found) {
+                if(assignment_for_this_raid_found.helper_post !== null){
+                    return res.send(JSON.stringify({msg: "already_register"}));
+                }else{
+                    create_helper();
                 }
-            }).then(function(test_helper) {
-                helper_found = test_helper;
             });
+        }else{
+            create_helper();
         }
-        models.helper.create({
-            login: id_helper,
-            email: registerEmail,
-            last_name: registerUserLn,
-            first_name: registerUserFn,
-            backup: backup
-        }).then(function () {
-            if (backup === 1) {
-                let helper_post_model = models.helper_post;
-                let poi_model = models.point_of_interest;
-                helper_post_model.belongsTo(poi_model, {foreignKey: "id_point_of_interest"});
-                helper_post_model.findAll({
-                    include: {
-                        model: poi_model,
-                        where: {
-                            id_raid: id_raid
-                        }
-                    }
-                }).then(function(helper_posts_found){
-                    helper_posts_found.map(function(helper_post){
-                        models.assignment.create({
-                            id_helper: id_helper,
-                            id_helper_post: helper_post.id,
-                            order_num: 1
-                        });
-                    });
-                });
-            }else{
-                helperPostsWished.map(wish =>{
-                    models.assignment.create({
-                        id_helper: id_helper,
-                        id_helper_post: wish.id,
-                        order_num: wish.order
-                    });
+    });
+
+
+    function create_helper() {
+        let id_helper = Math.random().toString(36).substr(2, 7);
+        helpers.findOne({ where: {login: id_helper } }).then(function (helper_exist) {
+            while (helper_exist !== null){
+                id_helper = Math.random().toString(36).substr(2, 7);
+                helpers.findOne({ where: {login: id_helper }}).then(function (test_helper) {
+                    helper_found = test_helper;
                 });
             }
-            res.send(JSON.stringify({msg: "ok"}));
+
+            helpers.create({
+                login: id_helper,
+                email: registerEmail,
+                last_name: registerUserLn,
+                first_name: registerUserFn
+            }).then(function () {
+
+                let create_assignment_actions = helperPostsWished.map(wish => {
+                    return new Promise(resolve => {
+                        assignments.create({
+                            id_helper: id_helper,
+                            id_helper_post: wish.id,
+                            order_num: wish.order
+                        }).then(function () { return resolve(); });
+                    });
+                });
+
+                Promise.all(create_assignment_actions).then(result => {
+                    return res.send(JSON.stringify({msg: "ok"}));
+                });
+            });
         });
-    });
+    }
 };
 
 exports.displayHome = function (req, res) {

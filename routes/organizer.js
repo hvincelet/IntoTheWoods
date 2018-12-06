@@ -67,14 +67,18 @@ exports.idVerification = function (req, res) {
                 }
             }).then(function(raids_found){
                 raids_found.map(tuple => {
+                    let date = tuple.dataValues.raid.dataValues.date.split('-');
+                    let local_date = date[2]+'/'+date[1]+'/'+date[0];
                     user.raid_list.push({
                         id: tuple.dataValues.raid.dataValues.id,
                         name: tuple.dataValues.raid.dataValues.name,
                         edition: tuple.dataValues.raid.dataValues.edition,
-                        date: tuple.dataValues.raid.dataValues.date,
+                        date: local_date,
                         place: tuple.dataValues.raid.dataValues.place,
                         lat: tuple.dataValues.raid.dataValues.lat,
-                        lng: tuple.dataValues.raid.dataValues.lng
+                        lng: tuple.dataValues.raid.dataValues.lng,
+                        start_time: tuple.dataValues.raid.start_time,
+                        allow_register: tuple.dataValues.raid.allow_register
                     });
                 });
                 connected_users.push(user);
@@ -203,7 +207,6 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
     }
 };
 
-
 exports.assignHelper = function(req, res) {
     if(req.body.assignments_array !== undefined) {
         const assign_helper_actions = req.body.assignments_array.map(assignment => {
@@ -270,22 +273,28 @@ function sendMailToHelperToNoticeHimHisAssignment(assignment){
                                         models.raid.findOne({
                                             where: {
                                                 id: point_of_interest_found.dataValues.id_raid
-                                            },
-                                            attributes: ['name', 'date', 'edition', 'place']
+                                            }
                                         }).then(function (raid_found) {
                                             if (raid_found !== null) {
-                                                let local_name = raid_found.dataValues.name;
-                                                let local_date = raid_found.dataValues.date;
-                                                let local_edition = raid_found.dataValues.edition;
-                                                let local_place = raid_found.dataValues.place;
+                                                let local_name = raid_found.name;
+                                                let date = raid_found.date.split('-');
+                                                let local_date = date[2]+'/'+date[1]+'/'+date[0];
+                                                let local_edition = raid_found.edition;
+                                                let local_place = raid_found.place;
+                                                let local_time = "";
+                                                if(raid_found.start_time !== null){
+                                                    let time = raid_found.start_time.split(':');
+                                                    local_time = time[0]+'h'+time[1];
+                                                }
                                                 sender.sendMailToHelper({
                                                     email: local_email,
                                                     id_helper: assignment.id_helper,
                                                     id_helper_post: assignment.id_helper_post,
-                                                    title: helper_post_found.dataValues.title,
-                                                    description: helper_post_found.dataValues.description,
+                                                    title: helper_post_found.title,
+                                                    description: helper_post_found.description,
                                                     name: local_name,
                                                     date: local_date,
+                                                    time: local_time,
                                                     edition: local_edition,
                                                     place: local_place
                                                 });
@@ -332,7 +341,6 @@ exports.remove = function (req, res) {
     let organizer_id = req.body.organizer_id;
     let raid_id = req.params.id;
 
-    // TODO Check if there is more than one member in team
     models.team.findAll({
         where: {
             id_raid: raid_id

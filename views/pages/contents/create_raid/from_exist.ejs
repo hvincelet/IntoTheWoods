@@ -1,0 +1,55 @@
+<div class="breadcrumb-holder">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Accueil</a></li>
+            <li class="breadcrumb-item active">Organiser un Raid</li>
+            <li class="breadcrumb-item active">Sélection d'un raid existant comme thème</li>
+        </ul>
+    </div>
+</div>
+<section class="forms">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <h4>Sélection d'un raid existant comme thème</h4>
+                    </div>
+                    <div class="card-body">
+                        <% if(raids.length > 0){ %>
+                            <p class="card-text">
+                                Bonjour, la liste ci-dessous affiche une liste des raids triés par ordre alphabétique et par date décroissante.<br/>
+                                Pour utiliser un raid précédent comme thème, utilisez simplement le bouton à la fin de la ligne concernée.
+                            </p>
+                            <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
+                                <tr>
+                                    <th class="text-center">Nom</th>
+                                    <th class="text-center">Édition</th>
+                                    <th class="text-center">Date</th>
+                                    <th class="text-center">Lieu</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+
+                                <% raids.forEach(function (raid) { %>
+                                    <tr>
+                                        <td class="pt-3-half"><%= raid.name %></td>
+                                        <td class="pt-3-half"><%= raid.edition %></td>
+                                        <td class="pt-3-half"><%= raid.date %></td>
+                                        <td class="pt-3-half"><%= raid.place %></td>
+                                        <td class="pt-3-half"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0" onclick="window.location='/createraid/description?raid=<%= raid.id %>'">Utiliser ce raid</button></td>
+                                    </tr>
+                                <% }); %>
+                            </table>
+                        <% }else{ %>
+                            <p class="card-text">
+                                Bonjour, il n'y a pas actuellement de raid pouvant servir de base pour en créer un autre.<br/>
+                                Cliquez sur le bouton suivant pour en créer un intégralement.
+                            </p>
+                            <button type="button" class="btn btn-primary btn-rounded btn-sm my-0" onclick="window.location='/createraid/description'">Créer intégralement</button>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

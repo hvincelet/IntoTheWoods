@@ -30,11 +30,13 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
   `date` DATE NULL,
+  `start_time` TIME NULL,
   `edition` SMALLINT NULL,
   `place` TINYTEXT NULL,
   `lat` DOUBLE NULL,
   `lng` DOUBLE NULL,
   `hashtag` VARCHAR(30) NULL,
+  `allow_register` TINYINT(1) NOT NULL DEFAULT 0
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -193,7 +195,6 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`helper` (
   `last_name` VARCHAR(30) NULL,
   `first_name` VARCHAR(30) NULL,
   `check_in` TINYINT(1) NOT NULL DEFAULT 0,
-  `backup` TINYINT(1) NULL,
   `email` TINYTEXT NULL,
   PRIMARY KEY (`login`))
 ENGINE = InnoDB;
