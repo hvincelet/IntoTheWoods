@@ -87,7 +87,7 @@ $('#sendMail-button').click(function () {
                 $MESSAGE_MODAL_CONTENT.html("Le message a bien été envoyé à <strong>" + mail + "</strong>.");
             }else{
                 $MESSAGE_MODAL_TITLE.html("Message non envoyé...");
-                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
                 $MESSAGE_MODAL_CONTENT.html("Le message n'a pas pu être envoyé à <strong>" + mail + "</strong>...");
             }
             $MESSAGE_MODAL.modal('show');
@@ -95,7 +95,7 @@ $('#sendMail-button').click(function () {
         error: function (response) {
             let msg = JSON.parse(response).msg;
             $MESSAGE_MODAL_TITLE.html("Message non envoyé...");
-            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
             $MESSAGE_MODAL_CONTENT.html("Le message n'a pas pu être envoyé à <strong>" + mail + "</strong>...");
             $MESSAGE_MODAL.modal('show');
         }
@@ -119,19 +119,19 @@ $('#save-helper-post').click(function () {
             if(msg === "ok"){
                 $MESSAGE_MODAL_TITLE.html("Postes assignés");
                 $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                $MESSAGE_MODAL_CONTENT.html("Les postes ont bien été attribués aux helpers concernés.<br/><small>Afin de voir les changements, raffraichissez la page.</small>");
+                $MESSAGE_MODAL_CONTENT.html("Les postes ont bien été attribués aux bénévoles concernés.<br/><small>Afin de voir les changements, raffraichissez la page.</small>");
             }else{
                 $MESSAGE_MODAL_TITLE.html("Postes non assignés...");
-                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux helpers...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux bénévoles...");
             }
             $MESSAGE_MODAL.modal('show');
         },
         error: function (response) {
             let msg = JSON.parse(response).msg;
             $MESSAGE_MODAL_TITLE.html("Postes non assignés...");
-            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-            $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux helpers...");
+            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+            $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux bénévoles...");
             $MESSAGE_MODAL.modal('show');
         }
     });

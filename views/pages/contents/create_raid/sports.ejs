@@ -116,7 +116,7 @@
                                 <div class="col-sm-12">
                                     <input type="hidden" name="sports_list" id="sports_list">
                                     <%if(typeof raid_source !== "undefined"){ %><input type="hidden" name="raid_source" value="<%=raid_source%>"><%}%>
-                                    <input type="button" onclick="validateSports()" value="Enregistrer mon Raid et tracer les parcours" class="btn btn-primary">
+                                    <input type="button" onclick="validateSports(false)" value="Enregistrer mon Raid et tracer les parcours" class="btn btn-primary">
                                     <%if(typeof raid_source !== "undefined"){ %><input type="button" onclick="validateSports(true)" value="Enregistrer mon Raid en important les parcours du raid source" class="btn btn-primary"><%}%>
                                 </div>
                             </div>
@@ -128,7 +128,7 @@
     </div>
 </section>
 <script type="text/javascript">
-    function validateSports(copy_courses = false){
+    function validateSports(copy_courses){
         const form = $('#sports_form');
         let list = [
             <% sports.forEach(function(sport){ %>
