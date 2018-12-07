@@ -200,6 +200,8 @@ exports.saveSportsRanking = function (req, res) {
                     id: user.idCurrentRaid,
                     name: unique_raid_found.dataValues.name,
                     date: unique_raid_found.dataValues.date,
+                    start_time: null,
+                    allow_register: 0,
                     edition: unique_raid_found.dataValues.edition,
                     place: unique_raid_found.dataValues.place,
                     lat: unique_raid_found.dataValues.lat,
