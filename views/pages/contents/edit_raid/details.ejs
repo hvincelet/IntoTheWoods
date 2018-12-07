@@ -145,6 +145,7 @@ helpers.map( (helper, index) => {
                         <div class="table-editable">
                             <button type="button" class="btn btn-primary btn-rounded" style="margin-bottom: 1em;" data-toggle="modal" data-target="#modal-helpers">Ajouter des bénévoles</button>
                             <% if(helpers.length > 0){%>
+                            <button type="button" class="btn btn-info btn-rounded" style="margin-bottom: 1em;" data-toggle="modal" data-target="#mailModal" data-mail="<% helpers.forEach(function (helper) { %><%=helper.email%>,<% });%>" data-type="Helpers">Contacter tous les bénévoles</button>
                             <button type="button" class="btn btn-info btn-rounded" style="margin-bottom: 1em;" id="save-helper-post">Enregistrer les postes attribués</button>
                             <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
                                 <tr>
