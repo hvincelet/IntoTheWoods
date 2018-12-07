@@ -279,12 +279,17 @@ exports.displayHome = function (req, res) {
                                     }
                                 }).then(function (point_of_interest_found) {
                                     if (point_of_interest_found !== null) {
-                                        res.render(pages_path + "helper_home.ejs", {
-                                            pageTitle: "Parcours Bénévole",
-                                            assignment: assignment_found,
-                                            helper: helper_found,
-                                            helper_post: helper_post_found,
-                                            point_of_interest: point_of_interest_found
+                                        models.raid.findOne({
+                                            where: point_of_interest_found.id_raid
+                                        }).then(function (raid_found) {
+                                            res.render(pages_path + "helper_home.ejs", {
+                                                pageTitle: "Parcours Bénévole",
+                                                assignment: assignment_found,
+                                                helper: helper_found,
+                                                helper_post: helper_post_found,
+                                                point_of_interest: point_of_interest_found,
+                                                raid: raid_found
+                                            });
                                         });
                                     }
                                 });

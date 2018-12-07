@@ -41,14 +41,17 @@
 
                             <div style="padding: 1rem 1.25rem;">
                                 <h2>
-                                    Intitulé du poste
+                                    Poste : <%= helper_post.title%>
                                 </h2>
                                 <p>
-                                    Début du Raid
+                                    Début du Raid : <%=raid.start_time.split(':')[0]%>h<%=raid.start_time.split(':')[1]%>
                                 </p>
+                                <%if(helper_post.description !== null && helper_post.description.length > 0){%>
                                 <label>
-                                    Decription du poste
+                                    Decription du poste : <br/>
+                                    <%=helper_post.description%>
                                 </label>
+                                <%}%>
                             </div>
 
                             <script>
