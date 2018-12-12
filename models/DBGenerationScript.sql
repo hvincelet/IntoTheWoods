@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `lat` DOUBLE NULL,
   `lng` DOUBLE NULL,
   `hashtag` VARCHAR(30) NULL,
-  `allow_register` TINYINT(1) NOT NULL DEFAULT 0
+  `allow_register` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
