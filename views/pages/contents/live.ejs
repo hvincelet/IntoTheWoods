@@ -64,20 +64,27 @@
 			for (var i=0 ; i<data.length ; i++) {
 				participant = document.getElementById(data[i]["participant.id_participant"]+"_"+data[i]["participant.first_name"]+"_"+data[i]["participant.last_name"]);
 
-				course = participant.parentNode;
-				course.removeChild(participant);
-				courseOrder = course.parentNode.id.split("_")[1];
+				if(participant != null){
+					course = participant.parentNode;
+					course.removeChild(participant);
+					courseOrder = course.parentNode.id.split("_")[1];
 
-				course = document.getElementById("output_"+(data[i]["course.order_num"]+1));
+					course = document.getElementById("output_"+(data[i]["course.order_num"]+1));
 
-				ul = course.firstElementChild;
+					if(course != null){
+						ul = course.firstElementChild;
+					}
+					else{
+						ul = document.getElementById("output_"+(data[i]["course.order_num"])).firstElementChild;
+					}
 
-				li = document.createElement("li");
-				li.setAttribute("id", data[i]["participant.id_participant"]+"_"+data[i]["participant.first_name"]+"_"+data[i]["participant.last_name"]);
-				cn = document.createTextNode(data[i]["participant.first_name"] + " " + data[i]["participant.last_name"] + " vient de finir la course " + data[i]["course.label"] + " avec le temps suivant : " + data[i]["time"]);
-				
-				li.appendChild(cn);
-				ul.appendChild(li);
+					li = document.createElement("li");
+					li.setAttribute("id", data[i]["participant.id_participant"]+"_"+data[i]["participant.first_name"]+"_"+data[i]["participant.last_name"]);
+					cn = document.createTextNode(data[i]["participant.first_name"] + " " + data[i]["participant.last_name"] + " vient de finir la course " + data[i]["course.label"] + " avec le temps suivant : " + data[i]["time"]);
+					
+					li.appendChild(cn);
+					ul.appendChild(li);
+				}
 			}
 		}
 		request();
