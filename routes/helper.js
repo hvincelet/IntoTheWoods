@@ -5,6 +5,8 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const date = require('date-and-time');
 
+const helpers = models.helper;
+
 exports.inviteHelper = function (req, res) {
     const user = connected_user(req.sessionID);
     if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.raid_id);})){

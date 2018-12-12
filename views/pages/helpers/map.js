@@ -1,4 +1,4 @@
-$("#map").css("height", $(window).height()-350);
+$("#map").css("height", $(window).height()-300);
 
 /***************************************************************
  ***************************************************************
@@ -9,8 +9,6 @@ $("#map").css("height", $(window).height()-350);
 let raster = new ol.layer.Tile({
     source: new ol.source.OSM()
 });
-
-let source = new ol.source.Vector();
 
 let map = new ol.Map({
     target: 'map',
@@ -72,7 +70,12 @@ function performCheckin() {
 
 
 
-
+let geom = new ol.geom.Circle(ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat]), 30);
+let feature = new ol.Feature({
+        geometry: geom,
+    }
+);
+//source.addFeature(feature);
 
 
 
@@ -109,8 +112,8 @@ function loadPathToPost() {
                 });
                 feature.setStyle(new ol.style.Style({
                     stroke: new ol.style.Stroke({
-                        color: 'red',
-                        width: 3
+                        color: '#5c6bc0',
+                        width: 8
                     })
                 }));
                 var vectorSource = new ol.source.Vector({

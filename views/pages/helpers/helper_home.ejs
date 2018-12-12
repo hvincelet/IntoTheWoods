@@ -30,13 +30,15 @@
                     <div class="card">
                         <div class="card-header d-flex align-items-center">
                             <h2>Itinéraire jusqu'à votre poste</h2>
-                            <button class="btn" onclick="redirectGoogleMaps()" style="right: 10px; position: absolute;"><i class="fab fa-google"></i> Ouvrir dans Google Maps </button>
                         </div>
                         <div class="card-body" style="padding-right: 0px; padding-left: 0px; padding-top: 0px">
                             <div id="map" style="width: 100%; height: 100%;">
                                 <div id="panel-right">
-                                    <button id="checkin-button" class="btn btn-lg btn-success" onclick="performCheckin()"><i class="fas fa-user-check"></i> Check-in</button>
+                                    <button id="checkin-button" class="btn btm-sm btn-success" onclick="performCheckin()"><i class="fas fa-user-check"></i><div></div>Check-in</button>
                                 </div>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm" onclick="redirectGoogleMaps()" style="right: 10px; position: absolute;"><i class="fab fa-google"></i> Ouvrir dans Google Maps </button>
                             </div>
 
                             <div>
