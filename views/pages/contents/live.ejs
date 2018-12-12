@@ -62,15 +62,6 @@
 
 			document.getElementById("output").removeChild(document.getElementById("output").childNodes[0]);
 			document.getElementById("output").appendChild(ul);
-
-			/*if(document.getElementById("output").hasChildNodes()){
-				var item = document.getElementById("output").childNodes[0];
-				console.log(item);
-				item.replaceChild(ul, item.childNodes[0]);
-			}
-			else{
-				document.getElementById("output").appendChild(ul);
-			}*/
 		}
 		request();
 		setInterval(function(){request();}, 3000);

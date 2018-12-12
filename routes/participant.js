@@ -17,21 +17,28 @@ exports.displayRegister = function(req, res){
                     if(Date.parse(raid.dataValues.date) >= Date.now()){
                         get_raids_clean.push({'id':raid.dataValues.id,'name':raid.dataValues.name,'edition':raid.dataValues.edition,'date':raid.dataValues.date});
                     }
-
-                    if(index == raid_array.length -1 && get_raids_clean !== null){
-                        res.render(pages_path + "participant_register.ejs", {
-                            pageTitle: "Inscription Participant",
-                            raids: get_raids_clean
-                        });
-                    }
                 });
             });
-        }
 
-        res.render(pages_path + "participant_register.ejs", {
-            pageTitle: "Inscription Participant",
-            errorMessage: "Aucun raid à venir pour le moment. Veuillez réessayer plus tard."
-        });
+            if(get_raids_clean !== null){
+                res.render(pages_path + "participant_register.ejs", {
+                    pageTitle: "Inscription Participant",
+                    raids: get_raids_clean
+                });
+            }
+            else{
+                res.render(pages_path + "participant_register.ejs", {
+                    pageTitle: "Inscription Participant",
+                    errorMessage: "Aucun raid à venir pour le moment. Veuillez réessayer plus tard."
+                });
+            }
+        }
+        else{
+            res.render(pages_path + "participant_register.ejs", {
+                pageTitle: "Inscription Participant",
+                errorMessage: "Aucun raid à venir pour le moment. Veuillez réessayer plus tard."
+            });
+        }
     });
 };
 
