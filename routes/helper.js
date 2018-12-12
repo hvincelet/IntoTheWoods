@@ -377,16 +377,18 @@ exports.participantPassage = function(req, res){
         else{
             orderRun = 1;
             models.raid.findOne({
-                attributes: ['startTime'],
+                attributes: ['start_time', 'date'],
                 where: {
                     id: idRaid
                 }
             }).then(function (raid_found) {
                 if (raid_found !== null) {
-                    dateLastStage = new Date(raid_found.startTime+"UTC");
+                    let dateRaid = raid_found.date.split("-")
+                    let timeRaid = raid_found.start_time.split(":")
+
+                    dateLastStage = new Date(dateRaid[0], dateRaid[1]-1, dateRaid[2], timeRaid[0], timeRaid[1], timeRaid[2]);
 
                     let dateTime = new Date();
-
                     let time = new Date(dateTime - dateLastStage);
 
                     insertStage(orderRun, time, idParticipant, idRaid);
