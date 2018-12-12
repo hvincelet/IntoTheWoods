@@ -6,9 +6,40 @@ const models = require('../models');
 exports.displayLive = function(req, res){
 	const idRaid = req.params.id;
 
-	res.render(pages_path + "contents/live/live.ejs", {
-		pageTitle: "Live !"
-	});
+    let coursesModel = models.course;
+    let sportsModel = models.sport;
+
+    coursesModel.belongsTo(sportsModel, {foreignKey: 'id_sport'});
+
+    coursesModel.findAll({
+        attributes: ['id', 'order_num', 'label'],
+        where: {
+            id_raid: idRaid
+        },
+        include: [{
+            model: sportsModel,
+            attributes: ['name'],
+        }]
+    }).then(function(coursesFound){
+        models.participant.findAll({
+            where: {
+                id_raid: idRaid
+            }
+        }).then(function(participantsFound){
+            if(coursesFound !== null) {
+                res.render(pages_path + "contents/live.ejs", {
+                    pageTitle: "Live !",
+                    courses: coursesFound,
+                    participants : participantsFound
+                });
+            }
+            else{
+                res.render(pages_path + "contents/live.ejs", {
+                    pageTitle: "Live !"
+                });
+            }
+        });
+    });
 }
 
 exports.getData = function(req, res){
@@ -32,7 +63,6 @@ exports.getData = function(req, res){
         }],
         raw:true
 	}).then(function(stages_found){
-        console.log(stages_found);
         res.send(stages_found);
 	});
 }
