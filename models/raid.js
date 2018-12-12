@@ -32,8 +32,8 @@ module.exports = function(sequelize, DataTypes) {
       type: "DOUBLE",
       allowNull: true
     },
-    startTime: {
-      type: DataTypes.DATE,
+    start_time: {
+      type: DataTypes.TIME,
       allowNull: true
     }
   }, {

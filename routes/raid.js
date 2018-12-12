@@ -344,7 +344,6 @@ exports.displayRaid = function(req, res) {
 
 exports.setStartTime = function(req, res){
     let idRaid = req.body.idRaid;
-    console.log(idRaid);
 
     models.raid.findOne({
         where: {
@@ -352,21 +351,15 @@ exports.setStartTime = function(req, res){
         }
     }).then(function (raid_found) {
         if (raid_found !== null) {
-            if(raid_found.startTime != null){
-                console.log("L'heure de début de la course a déjà été renseigné.")
-            }
-            else{
-                let time = new Date();
-                models.raid.update(
-                    {
-                        startTime: time
-                    },
-                    {where: {
-                        id: idRaid
-                    }
-                });
-            }
-            
+            let time = new Date();
+            models.raid.update(
+                {
+                    start_time: time.toLocaleTimeString()
+                },
+                {where: {
+                    id: idRaid
+                }
+            });
         }
         else{
             console.log("erreur");
