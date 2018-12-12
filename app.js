@@ -71,6 +71,7 @@ const raid = require('./routes/raid');
 const map = require('./routes/map');
 const misc = require('./routes/misc');
 const helper = require('./routes/helper');
+const live = require('./routes/live');
 const participant = require('./routes/participant');
 
 /**********************************/

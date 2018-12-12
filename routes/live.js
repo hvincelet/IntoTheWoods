@@ -6,7 +6,7 @@ const models = require('../models');
 exports.displayLive = function(req, res){
 	const idRaid = req.params.id;
 
-	res.render(pages_path + "contents/live.ejs", {
+	res.render(pages_path + "contents/live/live.ejs", {
 		pageTitle: "Live !"
 	});
 }
