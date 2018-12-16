@@ -30,11 +30,13 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
   `date` DATE NULL,
+  `start_time` TIME NULL,
   `edition` SMALLINT NULL,
   `place` TINYTEXT NULL,
   `lat` DOUBLE NULL,
   `lng` DOUBLE NULL,
   `hashtag` VARCHAR(30) NULL,
+  `allow_register` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -61,6 +63,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`organizer` (
   `password` BLOB(128) NULL,
   `active` TINYINT(1) NULL,
   `picture` TEXT NULL,
+  `reset_password_id` VARCHAR(30) NULL,
   PRIMARY KEY (`email`))
 ENGINE = InnoDB;
 
@@ -138,7 +141,8 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`stage` (
   `id_participant` INT UNSIGNED NOT NULL,
   `id_course` INT UNSIGNED NOT NULL,
-  `time` TIME NULL DEFAULT NULL,
+  `time` TIME NULL,
+  `timeEntered` TIMESTAMP NULL,
   PRIMARY KEY (`id_participant`, `id_course`),
   CONSTRAINT `id_participant`
     FOREIGN KEY (`id_participant`)
@@ -192,8 +196,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`helper` (
   `last_name` VARCHAR(30) NULL DEFAULT NULL,
   `first_name` VARCHAR(30) NULL DEFAULT NULL,
   `check_in` TINYINT(1) NOT NULL DEFAULT 0,
-  `backup` TINYINT(1) NULL DEFAULT NULL,
-  `email` TINYTEXT NULL DEFAULT NULL,
+  `email` TINYTEXT NULL,
   PRIMARY KEY (`login`))
 ENGINE = InnoDB;
 
@@ -202,7 +205,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`helper_post` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_point_of_interest` INT UNSIGNED NULL,
+  `id_point_of_interest` INT UNSIGNED NOT NULL,
   `title` VARCHAR(128) NULL,
   `description` VARCHAR(1024) NULL,
   `nb_helper` INT DEFAULT 1,
@@ -220,7 +223,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`assignment` (
   `id_helper` VARCHAR(7) NOT NULL,
   `id_helper_post` INT UNSIGNED NOT NULL,
-  `attributed` VARCHAR(45) NULL,
+  `attributed` INT(1) UNSIGNED DEFAULT 0,
   `order_num` INT UNSIGNED NOT NULL,
   PRIMARY KEY (`id_helper`, `id_helper_post`),
   CONSTRAINT `id_helper`

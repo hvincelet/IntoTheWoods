@@ -1,7 +1,7 @@
 <div class="breadcrumb-holder">
     <div class="container-fluid">
         <ul class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="/dashboard">Accueil</a></li>
             <li class="breadcrumb-item active">Organiser un Raid</li>
             <li class="breadcrumb-item active">Sélection des sports</li>
         </ul>
@@ -24,8 +24,10 @@
                                     sports</h3>
                                 <div class="card-body">
                                     <div id="table" class="table-editable">
+                                        <%if(typeof selected_sports === "undefined") {%>
                                         <span class="table-add float-right mb-3 mr-2"><a href="#!" class="text-success"><i
                                                         class="fa fa-plus fa-2x" aria-hidden="true"></i></a></span>
+                                        <%}%>
                                         <table id="table"
                                                class="table table-bordered table-responsive-md table-striped text-center">
                                             <tr>
@@ -35,6 +37,7 @@
                                                 <th class="text-center">Tri</th>
                                                 <th class="text-center">Suppression</th>
                                             </tr>
+                                            <%if(typeof selected_sports === "undefined") {%>
                                             <tr>
                                                 <td class="pt-3-half row-number" width="2%">1</td>
                                                 <td class="pt-3-half" contenteditable="false" width="44%">
@@ -47,17 +50,35 @@
                                                 </td>
                                                 <td class="pt-3-half sport_name" contenteditable="true" width="44%"></td>
                                                 <td class="pt-3-half" width="5%">
-                                                    <span class="table-up" style="margin-right: 5px;"><a href="#!"
-                                                                                                         class="indigo-text"><i
-                                                                    class="fas fa-long-arrow-alt-up"></i></a></span>
-                                                    <span class="table-down"><a href="#!" class="indigo-text"><i
-                                                                    class="fas fa-long-arrow-alt-down"></i></a></span>
+                                                    <span class="table-up" style="margin-right: 5px;"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-up"></i></a></span>
+                                                    <span class="table-down"><a href="#!" class="indigo-text"><i class="fas fa-long-arrow-alt-down"></i></a></span>
                                                 </td>
                                                 <td width="5%">
-                                                    <span class="table-remove"><button type="button"
-                                                                                       class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button></span>
+                                                    <span class="table-remove"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button></span>
                                                 </td>
                                             </tr>
+                                            <%}else{
+                                                let i = 1;
+                                                selected_sports.map(selected => { %>
+                                                <tr>
+                                                    <td class="pt-3-half row-number" width="2%"><%= i %></td>
+                                                    <td class="pt-3-half" contenteditable="false" width="44%">
+                                                        <select disabled name="sport_type" class="select2-selection--single" style="width: 100% !important; height: auto; margin-right: 0; padding-right: 0;">
+                                                            <% sports.forEach(function(sport){ %>
+                                                                <option value="<%= sport.id %>" <%if (selected.id === sport.id) {%> selected <%}%>><%= sport.name %></option>
+                                                            <% }); %>
+                                                        </select>
+                                                    </td>
+                                                    <td class="pt-3-half sport_name" contenteditable="false" width="44%"><%=selected.label%></td>
+                                                    <td class="pt-3-half" width="5%">
+                                                    </td>
+                                                    <td width="5%">
+                                                        <span class="table-remove"><button disabled type="button" class="btn btn-danger btn-rounded btn-sm my-0">Supprimer</button></span>
+                                                    </td>
+                                                </tr>
+                                                <% i++ %>
+                                                <%});
+                                            }%>
                                         </table>
                                         <table id="hidden-table" style="display: none;">
                                             <!-- Default added row -->
@@ -94,7 +115,9 @@
                             <div class="form-group row">
                                 <div class="col-sm-12">
                                     <input type="hidden" name="sports_list" id="sports_list">
-                                    <input type="button" onclick="validateSports()" value="Enregistrer mon Raid" class="btn btn-primary">
+                                    <%if(typeof raid_source !== "undefined"){ %><input type="hidden" name="raid_source" value="<%=raid_source%>"><%}%>
+                                    <input type="button" onclick="validateSports(false)" value="Enregistrer mon Raid et tracer les parcours" class="btn btn-primary">
+                                    <%if(typeof raid_source !== "undefined"){ %><input type="button" onclick="validateSports(true)" value="Enregistrer mon Raid en important les parcours du raid source" class="btn btn-primary"><%}%>
                                 </div>
                             </div>
                         </form>
@@ -105,7 +128,8 @@
     </div>
 </section>
 <script type="text/javascript">
-    function validateSports(){
+    function validateSports(copy_courses){
+        const form = $('#sports_form');
         let list = [
             <% sports.forEach(function(sport){ %>
             {id: "<%=sport.id%>", name: '<%= sport.name%>'},
@@ -139,7 +163,17 @@
         });
 
         $('#sports_list').val( JSON.stringify(sports) );
-        $('#sports_form').submit();
+
+        let input = $("<input>")
+            .attr("type", "hidden")
+            .attr("name", "copy_courses")
+        if(copy_courses){
+            input.val("true");
+        }else{
+            input.val("false");
+        }
+        form.append(input);
+        form.submit();
     }
 
     $(document).ready(function () {

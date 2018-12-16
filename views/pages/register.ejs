@@ -17,7 +17,7 @@
                         </button>
                     </div>
                 <% } %>
-                <form class="text-left form-validate" method="post" action="/register">
+                <form class="text-left form-validate" id="register_form">
                     <div class="form-group-material">
                         <input id="register-userfn" type="text" name="registerUserFn" required data-msg="Merci d'entrer votre prénom" class="input-material">
                         <label for="register-userfn" class="label-material">Prénom</label>
@@ -39,9 +39,10 @@
                         <label for="register-agree">J'accepte <a href="/termsandpolicy" target="_blank">les termes et les conditions d'utilisation</a></label>
                     </div>
                     <div class="form-group text-center">
-                        <a id="register" class="btn btn-primary" href="javascript:register()">S'inscrire</a>
+                        <button id="register" class="btn btn-primary" type="submit">S'inscrire</button>
                     </div>
                 </form><small>Vous avez déjà un compte ? </small><a href="/login" class="signup">Connectez-vous</a>
+                <br/><small>Ou bien </small><a href="/" class="signup">retournez à la page d'accueil</a>
             </div>
             <div class="copyrights text-center">
                 <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
@@ -70,44 +71,64 @@
 </div>
 <% include partials/footer %>
 <script type="text/javascript">
-    function register() {
-        let data = {
-            firstname : $('#register-userfn').val(),
-            lastname : $('#register-userln').val(),
-            email : $('#register-email').val(),
-            password : $('#register-password').val()
-        };
-        $.ajax({
-            type: 'POST',
-            url: '/register',
-            data: data,
-            success: function (response) {
-                let msg = JSON.parse(response).msg;
+    $('form[id="register_form"]').validate({
+        rules: {
+            registerUserFn: "required",
+            registerUserLn: "required",
+            registerEmail: {required: true, email: true},
+            registerPassword: {required: true, minlength: 8},
+            registerAgree: "required"
+        },
+        messages: {
+            registerUserFn: "Saisissez votre prénom",
+            registerUserLn: "Saisissez votre nom",
+            registerEmail: "Saisissez une adresse e-mail valide",
+            registerPassword: {
+                required: "Saisissez un mot de passe",
+                minlength: "Votre mot de passe doit faire au moins 8 caractères"
+            },
+            registerAgree: "Veuillez acceptez les termes et conditions d'utilisations"
+        },
+        submitHandler: function(form) {
+            //form.submit();
+            let data = {
+                firstname : $('#register-userfn').val(),
+                lastname : $('#register-userln').val(),
+                email : $('#register-email').val(),
+                password : $('#register-password').val()
+            };
+            $.ajax({
+                type: 'POST',
+                url: '/register',
+                data: data,
+                success: function (response) {
+                    let msg = JSON.parse(response).msg;
 
-                if (msg==="already-exist"){
+                    if (msg==="already-exist"){
 
-                    $('.modal-title').text('Adresse e-mail déjà utilisée !');
-                    $('.modal-body').text("Cette adresse e-mail ("+data['email']+") est déjà utilisée, merci d'en utiliser une autre.");
-                    $('#submit-button').text('Retour');
-                    $('#submit-button').attr('data-dismiss', 'modal');
-                    $('#modal').modal('show');
-                }else if (msg==="ok"){
-                    $('.modal-title').text('Inscription enregistrée !');
-                    $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
-                    $('#submit-button').text('Retourner à la page de connexion');
-                    $('#submit-button').attr('onclick', 'document.location.href=\'/login\'');
+                        $('.modal-title').text('Adresse e-mail déjà utilisée !');
+                        $('.modal-body').text("Cette adresse e-mail ("+data['email']+") est déjà utilisée, merci d'en utiliser une autre.");
+                        $('#submit-button').text('Retour');
+                        $('#submit-button').attr('data-dismiss', 'modal');
+                        $('#modal').modal('show');
+                    }else if (msg==="ok"){
+                        $('.modal-title').text('Inscription enregistrée !');
+                        $('.modal-body').text("Rendez-vous sur votre adresse e-mail ("+data['email']+") afin de valider votre inscritption !");
+                        $('#submit-button').text('Retourner à la page de connexion');
+                        $('#submit-button').attr('onclick', 'document.location.href=\'/login\'');
+                        $('#modal').modal('show');
+                    }
+                },
+                error: function (msg) {
+                    $('.modal-title').text('Erreur lors de l\'inscription...');
+                    $('.modal-body').text("Erreur "+msg.status+" : "+msg.statusText);
+                    $('#submit-button').text('Recharger la page');
+                    $('#submit-button').attr('onclick', 'location.reload()');
                     $('#modal').modal('show');
                 }
-            },
-            error: function (msg) {
-                $('.modal-title').text('Erreur lors de l\'inscription...');
-                $('.modal-body').text("Erreur "+msg.status+" : "+msg.statusText);
-                $('#submit-button').text('Recharger la page');
-                $('#submit-button').attr('onclick', 'location.reload()');
-                $('#modal').modal('show');
-            }
-        });
-    }
+            });
+        }
+    });
 </script>
 </body>
 </html>

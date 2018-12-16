@@ -17,7 +17,9 @@
                         </button>
                     </div>
                 <% } %>
-                <form class="text-left form-validate" method="post" action="/helper">
+
+                <% if(typeof raids !== "undefined") { %>
+                <form class="text-left form-validate" method="post" action="/participant/register">
                     <div class="form-group-material">
                         <input id="register-userfn" type="text" name="registerUserFn" required data-msg="Merci d'entrer votre prénom" class="input-material">
                         <label for="register-userfn" class="label-material">Prénom</label>
@@ -26,22 +28,18 @@
                         <input id="register-userln" type="text" name="registerUserLn" required data-msg="Merci d'entrer votre nom" class="input-material">
                         <label for="register-userln" class="label-material">Nom</label>
                     </div>
-                    <div class="form-group-material">
-                        <input id="register-email" type="email" name="registerEmail" required data-msg="Merci d'entrer votre adresse e-mail" class="input-material">
-                        <label for="register-email" class="label-material">Adresse e-mail</label>
-                    </div>
-                    <% if(typeof activity !== "undefined") { %>
+
                     <div class="form-group">
-                        <label for="register-run" class="col-sm-2 control-label">Postes</label>
+                        <label for="register-run" class="col-sm-2 control-label">Raids</label>
                         <div class="col-sm-10">
-                            <select id="register-run" name="registerRun" multiple class="form-control">
-                                <% activity.forEach(function(item){ %>
-                                  <option value='<%-item.id%>'> <%-item.description%> </option>
+                            <select id="register-run" name="registerRun" class="form-control">
+                                <% raids.forEach(function(item){ %>
+                                  <option value='<%-item.id%>'> <%-item.edition%>e <%-item.name%> le <%-item.date%></option>
                                 <% }); %>
                             </select>
                         </div>
                     </div>
-                    <% } %>
+
                     <div class="form-group terms-conditions text-center">
                         <input id="register-agree" name="registerAgree" type="checkbox" required value="1" data-msg="Votre accord est obligatoire" class="form-control-custom">
                         <label for="register-agree">J'accepte <a href="/termsandpolicy" target="_blank">les termes et les conditions d'utilisation</a></label>
@@ -50,6 +48,7 @@
                         <input id="register" type="submit" value="S'inscrire" class="btn btn-primary">
                     </div>
                 </form>
+                <% } %>
             </div>
             <div class="copyrights text-center">
                 <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>

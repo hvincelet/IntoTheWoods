@@ -20,10 +20,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       defaultValue: '0'
     },
-    backup: {
-      type: DataTypes.INTEGER(1),
-      allowNull: true
-    },
     email: {
       type: DataTypes.TEXT,
       allowNull: true

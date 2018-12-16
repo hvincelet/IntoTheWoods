@@ -13,8 +13,7 @@ function loadPointsOfInterest(pointArray) {
 
         pointOfInterestArrayToStore.push({
             id: pointOfInterest.id,
-            is_new: false,
-            removed: false
+            is_new: false
         });
     });
 }
@@ -68,8 +67,7 @@ function setPointOfInterestFromCoordinates(coordinates) {
 
             pointOfInterestArrayToStore.push({
                 id: lastPointOfInterestCreatedID,
-                is_new: true,
-                removed: false
+                is_new: true
             });
 
             showPopup(pointOfInterestFound, "Créer le point d'intérêt");
@@ -81,6 +79,13 @@ function setPointOfInterestFromCoordinates(coordinates) {
 }
 
 function updatePointOfInterestId(serverId) {
+
+    pointOfInterestArrayToStore.map(pointOfInterest => {
+        if (pointOfInterest.removed){
+            pointOfInterestArrayToStore.remove(pointOfInterest);
+        }
+    });
+
     serverId.map(pointOfInterestServerId => {
         let feature = vector.getSource().getFeatureById("new_point_of_interest_" + pointOfInterestServerId.clientId);
         feature.setId("point_of_interest_" + pointOfInterestServerId.serverId);

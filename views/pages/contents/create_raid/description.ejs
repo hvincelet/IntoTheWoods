@@ -1,7 +1,7 @@
 <div class="breadcrumb-holder">
     <div class="container-fluid">
         <ul class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="/dashboard">Accueil</a></li>
             <li class="breadcrumb-item active">Organiser un Raid</li>
             <li class="breadcrumb-item active">Fiche descriptive</li>
         </ul>
@@ -20,8 +20,14 @@
                             <div class="form-group row">
                                 <label class="col-sm-3">Nom du Raid :</label>
                                 <div class="col-sm-9">
-                                    <input id="raidName" name="raidName" type="text" placeholder="Nom du Raid"
-                                           class="form-control form-control-success">
+                                    <%if(typeof raid === "undefined"){%>
+                                        <input id="raidName" name="raidName" type="text" placeholder="Nom du Raid"
+                                            class="form-control form-control-success" value="">
+                                    <% }else{ %>
+                                        <input id="raidName" name="raidName" type="text" placeholder="Nom du Raid"
+                                            class="form-control form-control-success" disabled value="<%=raid.name%>">
+                                        <input type="hidden" name="raidName" value="<%=raid.name%>">
+                                    <% } %>
                                     <small class="form-text">Exemple : Raid &lt;Mon association sportive&gt;</small>
                                 </div>
                             </div>
@@ -29,7 +35,8 @@
                                 <label class="col-sm-3">Édition :</label>
                                 <div class="col-sm-9">
                                     <input id="raidEdition" name="raidEdition" type="number" placeholder="Édition n°"
-                                           class="form-control form-control-success" min="1">
+                                           class="form-control form-control-success" min="1"
+                                           value="<%if(typeof raid !== "undefined"){%><%= parseInt(raid.edition) + 1 %><%}%>">
                                     <small class="form-text">Exemple : Édition 1, Édition 2018</small>
                                 </div>
                             </div>
@@ -50,9 +57,18 @@
                                             <button type="button" class="input-group-text" id="search-button"><i
                                                         class="fas fa-search-location" id="search"></i></button>
                                         </div>
-                                        <input type="text" id="ajax" name="raidPlace" list="json-datalist"
+                                        <%if(typeof raid === "undefined"){%>
+                                            <input type="text" id="ajax" name="raidPlace" list="json-datalist"
                                                placeholder="Ex : Avenue des Champs Élysées, Paris"
-                                               class="form-control form-control-success" aria-describedby="search">
+                                               class="form-control form-control-success" aria-describedby="search"
+                                               value="">
+                                        <% }else{ %>
+                                        <input type="text" id="ajax" name="raidPlace" list="json-datalist"
+                                               placeholder="Ex : Avenue des Champs Élysées, Paris" disabled
+                                               class="form-control form-control-success" aria-describedby="search"
+                                               value="<%=raid.place%>">
+                                            <input type="hidden" name="raidPlace" value="<%=raid.place%>">
+                                        <% } %>
                                     </div>
                                     <datalist id="json-datalist">
                                         <select id="select-datalist" multiple size=3 class="form-control"></select>
@@ -67,6 +83,7 @@
 
                             <div class="form-group row">
                                 <div class="col-sm-9 offset-sm-3">
+                                    <%if(typeof raid !== "undefined"){ %><input type="hidden" name="raid_source" value="<%=raid.id%>"><%}%>
                                     <input type="submit" value="Enregistrer mon Raid" class="btn btn-primary">
                                 </div>
                             </div>
@@ -79,7 +96,7 @@
 </section>
 
 <script type="application/javascript">
-    if ( $('#raidStartDate')[0].type != 'date' ) $('#raidStartDate').datepicker();
+    if ( $('#raidStartDate')[0].type != 'date' ) $('#raidStartDate').datepicker({minDate: new Date()});
     $(document).ready(function () {
         $("#ajax").keyup(function () {
             if ($("#ajax").val().length >= 3) {

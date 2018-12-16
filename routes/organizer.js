@@ -1,33 +1,9 @@
 const jdenticon = require('jdenticon');
-const pages_path = "../views/pages/";
+const pages_path = __dirname+"/../views/pages/";
 const models = require('../models');
 const crypto = require('crypto');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
-
-exports.displayHome = function (req, res) {
-    models.raid.findAll({
-        attributes: ['id', 'name', 'date', 'edition', 'place']
-    }).then(function (raids_found) {
-        let raids = [];
-        raids_found.forEach(function (raid) {
-            raids.push({
-                id: raid.dataValues.id,
-                name: raid.dataValues.name,
-                date: raid.dataValues.date,
-                edition: raid.dataValues.edition,
-                place: raid.dataValues.place
-            });
-        });
-        const user = connected_user(req.sessionID);
-        res.render(pages_path + "contents/homepage.ejs", {
-            pageTitle: "Accueil",
-            page: "homepage",
-            raids: raids,
-            user: user
-        });
-    });
-};
 
 exports.dashboard = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -41,8 +17,15 @@ exports.dashboard = function (req, res) {
 exports.displayLogScreen = function (req, res) {
     const user = connected_user(req.sessionID);
     if (user) {
-        return res.redirect("/");
+        return res.redirect("/dashboard");
     }
+    if(req.query.new_password === '1') {
+        return res.render(pages_path + "login.ejs", {
+            pageTitle: "Connexion",
+            new_password: "Votre mot de passe a bien été modifié."
+        });
+    }
+
     res.render(pages_path + "login.ejs", {
         pageTitle: "Connexion"
     });
@@ -73,35 +56,34 @@ exports.idVerification = function (req, res) {
             let team_model = models.team;
             let raid_model = models.raid;
 
-            raid_model.belongsTo(team_model, {foreignKey: 'id'});
+            team_model.belongsTo(raid_model, {foreignKey: 'id_raid'});
 
-            raid_model.findAll({
+            team_model.findAll({
                 include: [{
-                    model: team_model,
-                    where: {
-                        id_raid: Sequelize.col('raid.id'),
-                        id_organizer: user.login
-                        //date > date_of_the_day - one_month
-                    }
+                    model: raid_model
                 }],
-                attributes: ['id', 'name', 'edition', 'date', 'place', 'lat', 'lng']
-            }).then(function(raids_found){
-                if(raids_found){
-                    raids_found.forEach(function(tuple){
-                        user.raid_list.push({
-                            id: tuple.dataValues.id,
-                            name: tuple.dataValues.name,
-                            edition: tuple.dataValues.edition,
-                            date: tuple.dataValues.date,
-                            place: tuple.dataValues.place,
-                            lat: tuple.dataValues.lat,
-                            lng: tuple.dataValues.lng
-                        });
-                    });
+                where: {
+                    id_organizer: user.login
                 }
+            }).then(function(raids_found){
+                raids_found.map(tuple => {
+                    let date = tuple.dataValues.raid.dataValues.date.split('-');
+                    let local_date = date[2]+'/'+date[1]+'/'+date[0];
+                    user.raid_list.push({
+                        id: tuple.dataValues.raid.dataValues.id,
+                        name: tuple.dataValues.raid.dataValues.name,
+                        edition: tuple.dataValues.raid.dataValues.edition,
+                        date: local_date,
+                        place: tuple.dataValues.raid.dataValues.place,
+                        lat: tuple.dataValues.raid.dataValues.lat,
+                        lng: tuple.dataValues.raid.dataValues.lng,
+                        start_time: tuple.dataValues.raid.start_time,
+                        allow_register: tuple.dataValues.raid.allow_register
+                    });
+                });
                 connected_users.push(user);
+                return res.redirect('/dashboard');
             });
-            return res.redirect('/dashboard');
         } else {
             res.render(pages_path + "login.ejs", {
                 pageTitle: "Connexion",
@@ -183,32 +165,41 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
         return res.redirect('/dashboard');
     }
 
-    // TODO Check if invited organizer is already in team
-
     let invited_organizer = req.body.mail;
     if(invited_organizer !== user.login){
-        models.organizer.findOne({
-            where: {email: invited_organizer}
-        }).then(function (organizer) {
-            if(organizer){
-                models.team.create({
-                    id_raid: req.params.raid_id,
-                    id_organizer: invited_organizer
-                }).then(function (organizer_add_to_team) {
-                    if(organizer_add_to_team){
-                        // send mail
-                        sender.inviteOrganizer({
-                            email: invited_organizer,
-                            organizer: user.first_name + " " + user.last_name,
-                            raid: req.body.raid
-                        });
-                        res.send(JSON.stringify({msg: "ok"}));
-                    }else {
-                        res.send(JSON.stringify({msg: "not-added"}));
-                    }
-                })
+        models.team.findOne({
+            where: {
+                id_organizer: invited_organizer,
+                id_raid: req.params.raid_id
+            }
+        }).then(function (organizer_found) {
+            if(organizer_found){
+                res.send(JSON.stringify({msg: "already-in-team"}));
             }else{
-                res.send(JSON.stringify({msg: "no-account"}));
+                models.organizer.findOne({
+                    where: {email: invited_organizer}
+                }).then(function (organizer) {
+                    if(organizer){
+                        models.team.create({
+                            id_raid: req.params.raid_id,
+                            id_organizer: invited_organizer
+                        }).then(function (organizer_add_to_team) {
+                            if(organizer_add_to_team){
+                                // send mail
+                                sender.inviteOrganizer({
+                                    email: invited_organizer,
+                                    organizer: user.first_name + " " + user.last_name,
+                                    raid: req.body.raid
+                                });
+                                res.send(JSON.stringify({msg: "ok"}));
+                            }else {
+                                res.send(JSON.stringify({msg: "not-added"}));
+                            }
+                        });
+                    }else{
+                        res.send(JSON.stringify({msg: "no-account"}));
+                    }
+                });
             }
         });
     }else{
@@ -216,27 +207,105 @@ exports.shareRaidToOthersOrganizers = function(req, res) {
     }
 };
 
-
 exports.assignHelper = function(req, res) {
-    const assign_helper_actions =  req.body.assignments_array.map(assignment => {
-        return new Promise(resolve => {
-            models.assignment.findOne({
-                where: {
-                    id_helper: assignment.id_helper,
-                    attributed: 1
-                }
-            }).then(function(assignment_to_unattribute) {
-                if(assignment_to_unattribute !== null) { // Helper has already been assigned
-                    assignment_to_unattribute.update({
-                        attributed: 0
-                    }).then(function () {
+    if(req.body.assignments_array !== undefined) {
+        const assign_helper_actions = req.body.assignments_array.map(assignment => {
+            return new Promise(resolve => {
+                models.assignment.findOne({
+                    where: {
+                        id_helper: assignment.id_helper,
+                        attributed: 1
+                    }
+                }).then(function (assignment_to_unattribute) {
+                    if (assignment_to_unattribute !== null) { // Helper has already been assigned
+                        assignment_to_unattribute.update({
+                            attributed: 0
+                        }).then(function () {
+                            sendMailToHelperToNoticeHimHisAssignment(assignment);
+                            return resolve();
+                        });
+                    } else { // Helper has never been assigned
                         sendMailToHelperToNoticeHimHisAssignment(assignment);
                         return resolve();
-                    });
-                }else { // Helper has never been assigned
-                    sendMailToHelperToNoticeHimHisAssignment(assignment);
-                    return resolve();
-                }
+                    }
+                });
+            });
+        });
+        Promise.all(assign_helper_actions).then(result => {
+            res.send(JSON.stringify({msg: "ok"}));
+        });
+    }
+};
+
+function sendMailToHelperToNoticeHimHisAssignment(assignment){
+    models.assignment.findOne({
+        where: {
+            id_helper: assignment.id_helper,
+            id_helper_post: assignment.id_helper_post
+        }
+    }).then(function(assignment_to_attribute) {
+        if(assignment_to_attribute !== null) {
+            assignment_to_attribute.update({
+                attributed: 1
+            }).then(function () {
+                models.helper.findOne({
+                    where: {
+                        login: assignment.id_helper
+                    },
+                    attributes: ['email']
+                }).then(function (helper_found) {
+                    if (helper_found !== null) {
+                        let local_email = helper_found.dataValues.email;
+                        models.helper_post.findOne({
+                            where: {
+                                id: assignment.id_helper_post
+                            },
+                            attributes: ['id_point_of_interest', 'description', 'title']
+                        }).then(function (helper_post_found) {
+                            if (helper_post_found !== null) {
+                                models.point_of_interest.findOne({
+                                    where: {
+                                        id: helper_post_found.dataValues.id_point_of_interest
+                                    },
+                                    attributes: ['id_raid']
+                                }).then(function (point_of_interest_found) {
+                                    if (point_of_interest_found !== null) {
+                                        models.raid.findOne({
+                                            where: {
+                                                id: point_of_interest_found.dataValues.id_raid
+                                            }
+                                        }).then(function (raid_found) {
+                                            if (raid_found !== null) {
+                                                let local_name = raid_found.name;
+                                                let date = raid_found.date.split('-');
+                                                let local_date = date[2]+'/'+date[1]+'/'+date[0];
+                                                let local_edition = raid_found.edition;
+                                                let local_place = raid_found.place;
+                                                let local_time = "";
+                                                if(raid_found.start_time !== null){
+                                                    let time = raid_found.start_time.split(':');
+                                                    local_time = time[0]+'h'+time[1];
+                                                }
+                                                sender.sendMailToHelper({
+                                                    email: local_email,
+                                                    id_helper: assignment.id_helper,
+                                                    id_helper_post: assignment.id_helper_post,
+                                                    title: helper_post_found.title,
+                                                    description: helper_post_found.description,
+                                                    name: local_name,
+                                                    date: local_date,
+                                                    time: local_time,
+                                                    edition: local_edition,
+                                                    place: local_place
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
             });
         });
     });
@@ -332,5 +401,54 @@ exports.sendMail = function (req, res) {
             });
         }
     });
+}
+
+exports.sendMail = function (req, res) {
+    const user = connected_user(req.sessionID);
+    if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.id)})){
+        return res.redirect('/dashboard');
+    }
+
+    let mails = req.body.mails;
+    mails.map(mail =>{
+        if(mail !== ""){
+            sender.sendMail({
+                email: mail,
+                organizer: req.body.organizer,
+                message: req.body.message,
+                subject: req.body.subject,
+                raid_name: req.body.raid_name
+            });
+        }
+    });
     res.send(JSON.stringify({msg: "ok"}));
+};
+
+exports.remove = function (req, res) {
+    const user = connected_user(req.sessionID);
+    if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.id)})){
+        return res.redirect('/dashboard');
+    }
+
+    let organizer_id = req.body.organizer_id;
+    let raid_id = req.params.id;
+
+    models.team.findAll({
+        where: {
+            id_raid: raid_id
+        }
+    }).then(function (organizers_in_team) {
+        if(organizers_in_team.length > 1){
+            models.team.destroy({
+                where: {
+                    id_raid: raid_id,
+                    id_organizer: organizer_id
+                }
+            }).then(function () {
+                res.send(JSON.stringify({msg: "ok"}));
+            });
+        }else{
+            res.send(JSON.stringify({msg: "only_one_organizer"}));
+        }
+    });
 };

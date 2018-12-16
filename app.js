@@ -1,4 +1,4 @@
-const env = process.argv[2];
+global.env = process.argv[2];
 const https = require('https');
 const fs = require('fs');
 const express = require('express');
@@ -8,7 +8,7 @@ const express_lib = require('express');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
-const config = require('./config/config')[env];
+const config = require('./config/config')[global.env];
 
 // IntoTheWoods app
 const intothewoods = express();
@@ -71,15 +71,21 @@ const raid = require('./routes/raid');
 const map = require('./routes/map');
 const misc = require('./routes/misc');
 const helper = require('./routes/helper');
+const live = require('./routes/live');
+const participant = require('./routes/participant');
 
 /**********************************/
 /*             Routes             */
 /**********************************/
 
-//routes dedicated to register and connection
-intothewoods.route('/')
-    .get(organizer.displayHome);
+// Misc routes
+intothewoods.route('/termsandpolicy')
+    .get(misc.cgu);
 
+intothewoods.route('/')
+    .get(misc.displayHome);
+
+// Routes dedicated to register and connection
 intothewoods.route('/login')
     .get(organizer.displayLogScreen)
     .post(organizer.idVerification);
@@ -94,12 +100,22 @@ intothewoods.route('/register')
 intothewoods.route('/validate')
     .get(organizer.validate); // /validate?id={email}&hash={password_hash}
 
+intothewoods.route('/resetpassword')
+    .post(misc.forgotten_password)
+    .get(misc.display_change_password);
+
+intothewoods.route('/newpassword')
+    .post(misc.register_new_password);
+
 //routes dedicated to the raids' pages
 intothewoods.route('/dashboard')
     .get(checkAuth, organizer.dashboard);
 
 intothewoods.route('/createraid/start')
     .get(checkAuth, raid.init);
+
+intothewoods.route('/createraid/from_exist')
+    .get(checkAuth, raid.from_exist);
 
 intothewoods.route('/createraid/description')
     .get(checkAuth, raid.displayDescriptionForm)
@@ -122,11 +138,29 @@ intothewoods.route('/editraid/:id/map')
     .get(checkAuth, map.displayMap)
     .post(checkAuth, map.storeMapData);
 
+intothewoods.route('/editraid/:id/allowregister')
+    .post(checkAuth, raid.allowregister);
+
+intothewoods.route('/editraid/:id/starttime')
+    .post(checkAuth, raid.starttime);
+
 intothewoods.route('/editraid/:id/sendMessage')
     .post(checkAuth, organizer.sendMail);
 
+intothewoods.route('/editraid/:id/updatepoi')
+    .post(checkAuth, raid.savePoi);
+
+intothewoods.route('/editraid/:id/removeOrganizer')
+    .post(checkAuth, organizer.remove);
+
+intothewoods.route('/editraid/:id/removeHelper')
+    .post(checkAuth, helper.remove);
+
 intothewoods.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
+
+intothewoods.route('/editraid/setStartTime')
+    .post(checkAuth, raid.setStartTime);
 
 
 //routes dedicated to the helpers
@@ -142,6 +176,26 @@ intothewoods.route('/helper/assign')
 
 intothewoods.route('/helper/:id/home')
     .get(helper.displayHome);
+
+intothewoods.route('/helper/check_in')
+    .post(helper.performCheckin);
+intothewoods.route('/helper/participantPassage')
+    .post(helper.participantPassage); //TODO : Décommenter la ligne une fois le dev terminé
+
+// Routes dedicated to participant
+intothewoods.route('/participant/register')
+    .get(participant.displayRegister)
+    .post(participant.register);
+
+intothewoods.route('/participant/:id/home')
+    .get(participant.displayHome);
+
+
+//Routes dedicated to the Live
+intothewoods.route('/live/:id')
+    .get(live.displayLive)
+    .post(live.getData);
+
 
 
 
@@ -159,7 +213,7 @@ intothewoods.route('/termsandpolicy')
 
 //bad url route
 intothewoods.use(function (req, resp, next) {
-    resp.render("pages/404.ejs", {
+    resp.render(__dirname + "/views/pages/404.ejs", {
         "pageTitle": "Erreur 404"
     });
 });
