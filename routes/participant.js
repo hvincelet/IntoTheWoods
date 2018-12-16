@@ -66,4 +66,25 @@ exports.register = function(req, res){
 
 exports.displayHome = function(req, res){
     //TODO
+    models.participant.findOne({
+      where: {
+        id_participant: req.params.id
+      }
+    }).then(function(participant_found){
+      if(participant_found !== null){
+        models.raid.findOne({
+          where: {
+            id: participant_found.dataValues.id_raid
+          }
+        }).then(function(raid_found){
+          if(raid_found !== null){
+            res.render(pages_path + "runners" + "/runners_home.ejs", {
+                pageTitle: "Accueil Participant",
+                participant: participant_found,
+                raid: raid_found
+            });
+          }
+        })
+      }
+    });
 };

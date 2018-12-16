@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<% include ../partials/head %>
+<body>
+<div class="page page-full">
+  <% if(typeof errorMessage !== "undefined") { %>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+          <%= errorMessage %>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+  <% }else{ %>
+    <style>
+      input, label {
+        vertical-align:middle
+      }
+      .qrcode-text {
+        padding-right:1.7em;
+        margin-right:0
+      }
+      .qrcode-text-btn {
+        display:inline-block;
+        background:url(//dab1nmslvvntp.cloudfront.net/wp-content/uploads/2017/07/1499401426qr_icon.svg) 50% 50% no-repeat;
+        height:1em;
+        width:1.7em;
+        margin-left:-1.7em;
+        cursor:pointer
+      }
+      .qrcode-text-btn > input[type=file] {
+        position:absolute;
+        overflow:hidden;
+        width:1px;
+        height:1px;
+        opacity:0
+      }
+    </style>
+    <div class="container-fluid" style="padding: 0;">
+      <h2> Test génération QR code </h2>
+      <p> Infos participant </p>
+      <ul>
+        <li> id : <%= participant.id_participant%> </li>
+        <li> id_raid : <%= participant.id_raid%> </li>
+        <li> first_name : <%= participant.first_name%> </li>
+        <li> last_name : <%= participant.last_name%> </li>
+      </ul>
+      <p> Infos raid </p>
+      <ul>
+        <li> id : <%= raid.id%> </li>
+        <li> name : <%= raid.name%> </li>
+        <li> date : <%= raid.date%> </li>
+        <li> start_time : <%= raid.start_time%> </li>
+        <li> edition : <%= raid.edition%> </li>
+        <li> place : <%= raid.place%> </li>
+        <li> lat : <%= raid.lat%> </li>
+        <li> lng : <%= raid.lng%> </li>
+      </ul>
+      <p> QR code Generator </p>
+      <div id="qrcode"></div>
+      <br/><p> QR code Reader </p>
+      <input type=text size=16 placeholder="Tracking Code" class=qrcode-text id="qrreader">
+      <label class=qrcode-text-btn>
+        <input type=file accept="image/*" capture=environment onclick="return showQRIntro();" onchange="openQRCamera(this);" tabindex=-1>
+      </label>
+      <input id="check_runner" type=button value="Check Runner" onclick="checkRunner();" disabled>
+    </div>
+    <script>
+        const participant = <%- JSON.stringify(participant) %>;
+        const raid = <%- JSON.stringify(raid) %>;
+    </script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script type="text/javascript" src="https://dmla.github.io/jsqrcode/src/qr_packed.js"></script>
+    <script>
+      // QR code generator : version 1
+      var runner_qrcode = new QRCode(document.getElementById("qrcode"),{
+        text: "http://192.168.43.110:8080/participant/"+<%-participant.id_participant%>+"/home",
+        width: 256,
+        height: 256,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+      });
+      runner_qrcode.makeCode();
+      // QR code reader : version 1
+      function openQRCamera(node) {
+        var reader = new FileReader();
+        reader.onload = function() {
+          node.value = "";
+          qrcode.callback = function(res) {
+            if(res instanceof Error) {
+              alert("No QR code found. Please make sure the QR code is within the camera's frame and try again.");
+            } else {
+              node.parentNode.previousElementSibling.value = res;
+            }
+          };
+          qrcode.decode(reader.result);
+        };
+        reader.readAsDataURL(node.files[0]);
+        document.getElementById("check_runner").removeAttribute("disabled");
+      }
+      function showQRIntro() {
+        return confirm("Use your camera to take a picture of a QR code.");
+      }
+      function checkRunner() {
+        window.location.replace(document.getElementById("qrreader").value);
+      }
+    </script>
+  <% } %>
+</div>
+<div class="login-page">
+    <div class="copyrights text-center">
+        <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+        <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+    </div>
+</div>
+<% include ../partials/footer %>
+</body>
+</html>

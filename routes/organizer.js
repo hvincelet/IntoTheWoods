@@ -307,8 +307,8 @@ function sendMailToHelperToNoticeHimHisAssignment(assignment){
                     }
                 });
             });
-        });
-    });
+    }
+  });
 
     Promise.all(assign_helper_actions).then(result => {
         res.send(JSON.stringify({msg: "ok"}));
