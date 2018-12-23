@@ -1,4 +1,4 @@
-const env = process.argv[2];
+global.env = process.argv[2];
 const https = require('https');
 const fs = require('fs');
 const express = require('express');
@@ -8,7 +8,7 @@ const express_lib = require('express');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
-const config = require('./config/config')[env];
+const config = require('./config/config')[global.env];
 
 // IntoTheWoods app
 const intothewoods = express();
@@ -113,6 +113,9 @@ intothewoods.route('/dashboard')
 intothewoods.route('/createraid/start')
     .get(checkAuth, raid.init);
 
+intothewoods.route('/createraid/from_exist')
+    .get(checkAuth, raid.from_exist);
+
 intothewoods.route('/createraid/description')
     .get(checkAuth, raid.displayDescriptionForm)
     .post(checkAuth, raid.createRaid);
@@ -133,6 +136,12 @@ intothewoods.route('/editraid/:id')
 intothewoods.route('/editraid/:id/map')
     .get(checkAuth, map.displayMap)
     .post(checkAuth, map.storeMapData);
+
+intothewoods.route('/editraid/:id/allowregister')
+    .post(checkAuth, raid.allowregister);
+
+intothewoods.route('/editraid/:id/starttime')
+    .post(checkAuth, raid.starttime);
 
 intothewoods.route('/editraid/:id/sendMessage')
     .post(checkAuth, organizer.sendMail);

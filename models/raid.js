@@ -13,7 +13,11 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     date: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
+      allowNull: true
+    },
+    start_time: {
+      type: DataTypes.TIME,
       allowNull: true
     },
     edition: {
@@ -35,6 +39,11 @@ module.exports = function(sequelize, DataTypes) {
     hashtag: {
       type: DataTypes.STRING(30),
       allowNull: true
+    },
+    allow_register: {
+      type: DataTypes.INTEGER(1),
+      allowNull: false,
+      defaultValue: '0'
     }
   }, {
     tableName: 'raid'

@@ -64,6 +64,10 @@ footer.main-footer{
     margin-top: 20px !important;
 }
 
+.card.no-margin-top{
+    margin-top: 0 !important;
+}
+
 .map {
     /*height: 400px;*/
     height: 100%;

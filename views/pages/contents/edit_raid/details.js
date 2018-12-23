@@ -87,7 +87,7 @@ $('#sendMail-button').click(function () {
                 $MESSAGE_MODAL_CONTENT.html("Le message a bien été envoyé à <strong>" + mail + "</strong>.");
             }else{
                 $MESSAGE_MODAL_TITLE.html("Message non envoyé...");
-                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
                 $MESSAGE_MODAL_CONTENT.html("Le message n'a pas pu être envoyé à <strong>" + mail + "</strong>...");
             }
             $MESSAGE_MODAL.modal('show');
@@ -95,7 +95,7 @@ $('#sendMail-button').click(function () {
         error: function (response) {
             let msg = JSON.parse(response).msg;
             $MESSAGE_MODAL_TITLE.html("Message non envoyé...");
-            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
             $MESSAGE_MODAL_CONTENT.html("Le message n'a pas pu être envoyé à <strong>" + mail + "</strong>...");
             $MESSAGE_MODAL.modal('show');
         }
@@ -119,19 +119,19 @@ $('#save-helper-post').click(function () {
             if(msg === "ok"){
                 $MESSAGE_MODAL_TITLE.html("Postes assignés");
                 $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                $MESSAGE_MODAL_CONTENT.html("Les postes ont bien été attribués aux helpers concernés.<br/><small>Afin de voir les changements, raffraichissez la page.</small>");
+                $MESSAGE_MODAL_CONTENT.html("Les postes ont bien été attribués aux bénévoles concernés.<br/><small>Afin de voir les changements, raffraichissez la page.</small>");
             }else{
                 $MESSAGE_MODAL_TITLE.html("Postes non assignés...");
-                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux helpers...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux bénévoles...");
             }
             $MESSAGE_MODAL.modal('show');
         },
         error: function (response) {
             let msg = JSON.parse(response).msg;
             $MESSAGE_MODAL_TITLE.html("Postes non assignés...");
-            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-            $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux helpers...");
+            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+            $MESSAGE_MODAL_CONTENT.html("Les postes n'ont pas pu être assignés aux bénévoles...");
             $MESSAGE_MODAL.modal('show');
         }
     });
@@ -365,6 +365,46 @@ function removeHelper(id, name){
             $MESSAGE_MODAL_TITLE.html("Erreur...");
             $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
             $MESSAGE_MODAL_CONTENT.html("Le/la bénévole "+name+" n'a pas pu être supprimé·e de l'équipe des bénévoles de ce raid...");
+            $MESSAGE_MODAL.modal('show');
+        }
+    });
+}
+
+<% if(raid.start_time !== null){ %>
+    if ( $('#start_time')[0].type != 'time' ) $('#start_time').val("<%=raid.start_time.slice(0,-3)%>");
+<% } %>
+
+
+function saveStartTime() {
+    let time = $('#start_time').val();
+
+    let $MESSAGE_MODAL = $('#messageModal');
+    let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+    let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+    let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+    $.ajax({
+        type: 'POST',
+        url: '/editraid/<%= raid.id %>/starttime',
+        data: {start_time: time},
+        success: function (response) {
+            msg = JSON.parse(response).msg;
+            if(msg === "ok"){
+                $MESSAGE_MODAL_TITLE.html("Heure de départ sauvegardée !");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("L'heure de départ ("+time+") a bien été sauvegardée.");
+                $MESSAGE_MODAL.modal('show');
+            }else{
+                $MESSAGE_MODAL_TITLE.html("Heure de départ non sauvegardée !");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Impossible de sauvegarder l'heure de départ...<br/>Merci de réessayer dans quelques instants.");
+                $MESSAGE_MODAL.modal('show');
+            }
+        },
+        error: function (response) {
+            let msg = JSON.parse(response).msg;
+            $MESSAGE_MODAL_TITLE.html("Heure de départ non sauvegardée !");
+            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+            $MESSAGE_MODAL_CONTENT.html("Impossible de sauvegarder l'heure de départ...<br/>Merci de réessayer dans quelques instants.");
             $MESSAGE_MODAL.modal('show');
         }
     });
