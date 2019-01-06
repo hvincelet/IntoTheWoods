@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `place` TINYTEXT NULL,
   `lat` DOUBLE NULL,
   `lng` DOUBLE NULL,
-  `startTime` TIMESTAMP NULL
+  `startTime` TIMESTAMP NULL,
   `hashtag` VARCHAR(30) NULL,
   `allow_register` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`))

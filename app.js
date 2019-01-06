@@ -81,10 +81,6 @@ const participant = require('./routes/participant');
 /*             Routes             */
 /**********************************/
 
-// Misc routes
-intothewoods.route('/termsandpolicy')
-    .get(misc.cgu);
-
 intothewoods.route('/')
     .get(misc.displayHome);
 
@@ -155,7 +151,7 @@ intothewoods.route('/editraid/:id/removeHelper')
 intothewoods.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
-app.route('/editraid/setStartTime')
+intothewoods.route('/editraid/setStartTime')
     .post(checkAuth, raid.setStartTime);
 
 
@@ -189,13 +185,13 @@ intothewoods.route('/participant/:id/home')
 
 
 //Routes dedicated to the Live
-app.route('/live/:id')
+intothewoods.route('/live/:id')
     .get(live.displayLive)
     .post(live.getData);
 
 
-
-app.route('/termsandpolicy')
+// Misc routes
+intothewoods.route('/termsandpolicy')
     .get(misc.cgu);
 
 
