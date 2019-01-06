@@ -16,6 +16,7 @@ GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'localhost' IDENTIFIED 
 GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'148.60.%.%' IDENTIFIED BY 'glpass2018' WITH GRANT OPTION;
 
 -- sequelize-auto -o "./models" -d intoTheWoodsDB -h localhost -u gluser2018 -x glpass2018 -e mysql
+-- ALTER USER 'gluser2018'@'localhost' IDENTIFIED WITH mysql_native_password BY 'glpass2018';
 
 -- -----------------------------------------------------
 -- Schema intoTheWoodsDB

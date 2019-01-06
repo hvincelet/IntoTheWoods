@@ -6,6 +6,7 @@ const geocoder = new Nominatim();
 const ejs = require('ejs');
 const fs = require('fs');
 const raids = models.raid;
+const Op = require('Sequelize').Op
 
 exports.init = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -316,15 +317,33 @@ exports.getGeocodedResults = function (req, res) {
 
 exports.displayAllRaids = function (req, res) {
     const user = connected_user(req.sessionID);
-    if (user.raid_list.length !== 0) {
-        res.render(pages_path + "template.ejs", {
-            pageTitle: "Gestion des Raids",
-            page: "edit_raid/all",
-            user: user
-        });
-    } else {
-        res.redirect('/dashboard');
-    }
+
+    let raidModel = models.raid;
+    let teamModel = models.team;
+
+    teamModel.belongsTo(raidModel, {foreignKey: 'id_raid'});
+    teamModel.findAll({
+        attributes: ['raid.id', 'raid.name', 'raid.date', 'raid.edition', 'raid.place'],
+        include: [{
+            model: raidModel
+        }],
+        where: {
+            id_organizer: {
+                [Op.ne]: user.login
+            }
+        }
+    }).then(function(raidsFound){
+        if (raidsFound !== 0) {
+            res.render(pages_path + "template.ejs", {
+                pageTitle: "Gestion des Raids",
+                page: "edit_raid/all",
+                user: user,
+                raids: raidsFound
+            });
+        } else {
+            res.redirect('/dashboard');
+        }
+    });
 };
 
 exports.displayRaid = function (req, res) {
