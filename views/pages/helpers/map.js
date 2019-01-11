@@ -33,34 +33,43 @@ function redirectGoogleMaps() {
     win.focus();
 }
 
-let check_in = false;
+check_in = helper.check_in === 1;
+modifyCheckinButton(check_in);
 
 function performCheckin() {
-    check_in = !check_in;
-    let data = {
-        helper_login: helper.login,
-        check_in: check_in
-    };
+    // allow check-in if the helper is close to the point of interest, for ex : 15m
+    if (distance <= 15 || check_in){
+        check_in = !check_in;
+        let data = {
+            helper_login: helper.login,
+            check_in: check_in
+        };
 
-    $.ajax({
-        type: 'POST',
-        url: '/helper/check_in',
-        data: data,
-        success: function (response) {
-            if (JSON.parse(response).msg === "true") {
-                $('#checkin_button_icon').text('').attr('class', 'fas fa-user-check');
-                $('#checkin-button').attr('class', 'btn btm-sm btn-default');
-                $('#checkin_icon_label').text("Check-out");
-            } else {
-                $('#checkin_button_icon').text('').attr('class', 'fas fa-user-check');
-                $('#checkin-button').attr('class', 'btn btm-sm btn-success');
-                $('#checkin_icon_label').text("Check-in");
+        $.ajax({
+            type: 'POST',
+            url: '/helper/check_in',
+            data: data,
+            success: function (response) {
+                modifyCheckinButton((JSON.parse(response).msg === 'true'));
+            },
+            error: function (response) {
             }
+        });
+    } else {
+        alert("Vous devez vous trouvez à proximité de votre point d'intérêt pour effectuer cette action");
+    }
+}
 
-        },
-        error: function (response) {
-        }
-    });
+function modifyCheckinButton(isChecked) {
+    if (isChecked) {
+        $('#checkin_button_icon').text('').attr('class', 'fas fa-user-check');
+        $('#checkin-button').attr('class', 'btn btm-sm btn-success');
+        $('#checkin_icon_label').text("Check-out");
+    } else {
+        $('#checkin_button_icon').text('').attr('class', 'fas fa-user-check');
+        $('#checkin-button').attr('class', 'btn btm-sm btn-default');
+        $('#checkin_icon_label').text("Check-in");
+    }
 }
 
 function recenterMap() {
@@ -74,7 +83,7 @@ function recenterMap() {
  ***************************************************************
  ***************************************************************/
 
-let circle = new ol.geom.Circle(ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat]), 40);
+let circle = new ol.geom.Circle(ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat]), 30);
 let feature = new ol.Feature({
         geometry: circle,
         style: new ol.style.Style({
@@ -115,7 +124,7 @@ marker_target.setPosition(ol.proj.fromLonLat([point_of_interest.lng, point_of_in
 // Calculate Countdown between raid programmed time and current
 moment.locale('fr');
 window.setInterval(function () {
-    if (moment(raid.date + "-" + raid.start_time, "YYYY-MM-DD-hh:mm:ss").isAfter()){
+    if (moment(raid.date + "-" + raid.start_time, "YYYY-MM-DD-hh:mm:ss").isAfter()) {
         $('#countdownTime').text("Début du raid " + moment(raid.date + "-" + raid.start_time, "YYYY-MM-DD-hh:mm:ss").fromNow());
     } else {
         $('#countdownTime').text("Le raid est en cours");
@@ -130,6 +139,7 @@ window.setInterval(function () {
  ***************************************************************/
 
 let position;
+let distance;
 
 // create an Overlay using the div with id location.
 let marker = new ol.Overlay({
@@ -153,8 +163,11 @@ geolocation.on('change:position', function () {
     loadPathToPost(position);
 
     $('#distance_label').text(formatDistance(distanceBetweenPoints(ol.proj.fromLonLat(position), ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat]))));
-
-    console.log(distanceBetweenPoints(ol.proj.fromLonLat(position), ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat])))
+    distance = distanceBetweenPoints(ol.proj.fromLonLat(position), ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat]));
+    if (distance > 15 && check_in){
+        check_in = false;
+        modifyCheckinButton(check_in);
+    }
 });
 
 function distanceBetweenPoints(lonlat1, lonlat2) {

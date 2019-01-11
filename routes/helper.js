@@ -283,13 +283,6 @@ exports.displayHome = function (req, res) {
                                         models.raid.findOne({
                                             where: point_of_interest_found.id_raid
                                         }).then(function (raid_found) {
-
-
-                                            // calcul de la difference de timing
-                                            // console.log(raid_found.date);
-                                            // moment.locale('fr');
-                                            // console.log(moment(raid_found.date + "-" + raid_found.start_time, "YYYY-MM-DD-hh:mm:ss").fromNow());
-
                                             res.render(pages_path + "helper_home.ejs", {
                                                 pageTitle: "Parcours Bénévole",
                                                 assignment: assignment_found,
