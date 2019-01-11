@@ -3,7 +3,6 @@ const pages_path = __dirname+"/../views/pages/";
 const models = require('../models');
 const crypto = require('crypto');
 const sender = require('./sender');
-const Sequelize = require('sequelize');
 
 exports.dashboard = function (req, res) {
     const user = connected_user(req.sessionID);

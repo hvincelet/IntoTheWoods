@@ -1,4 +1,3 @@
-const jdenticon = require('jdenticon');
 const pages_path = "../views/pages/";
 const models = require('../models');
 
@@ -26,13 +25,13 @@ exports.displayRegister = function(req, res){
 
             Promise.all(raidsCounter).then(function(){
                 if(get_raids_clean !== null && get_raids_clean.length > 0){
-                    res.render(pages_path + "participant_register.ejs", {
+                    res.render(pages_path + "contents/live/participant_register.ejs", {
                         pageTitle: "Inscription Participant",
                         raids: get_raids_clean
                     });
                 }
                 else{
-                    res.render(pages_path + "participant_register.ejs", {
+                    res.render(pages_path + "contents/live/participant_register.ejs", {
                         pageTitle: "Inscription Participant",
                         errorMessage: "Aucun raid à venir pour le moment. Veuillez réessayer plus tard."
                     });
@@ -40,7 +39,7 @@ exports.displayRegister = function(req, res){
             })
         }
         else{
-            res.render(pages_path + "participant_register.ejs", {
+            res.render(pages_path + "contents/live/participant_register.ejs", {
                 pageTitle: "Inscription Participant",
                 errorMessage: "Aucun raid à venir pour le moment. Veuillez réessayer plus tard."
             });

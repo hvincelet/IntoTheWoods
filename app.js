@@ -8,7 +8,8 @@ const express_lib = require('express');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
-const config = require('./config/config')[global.env];
+const config_path = require('./config/config')[global.env].credentials;
+const config = require(config_path)[env];
 
 // IntoTheWoods app
 const intothewoods = express();
@@ -189,6 +190,8 @@ intothewoods.route('/live/:id')
     .get(live.displayLive)
     .post(live.getData);
 
+intothewoods.route('/live')
+    .get(live.displayAllLive);
 
 // Misc routes
 intothewoods.route('/termsandpolicy')

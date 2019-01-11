@@ -3,8 +3,9 @@ const path = require('path');
 const Sequelize = require('sequelize');
 const env = 'development';
 const config = require(__dirname + '/../config/config.js')[env];
+const credentials = require(__dirname + '/../' + config.credentials)[env];
 
-global.sequelize = new Sequelize(config.database, config.username, config.password, config);
+global.sequelize = new Sequelize(credentials.database, credentials.username, credentials.password, credentials);
 let basename = path.basename(__filename);
 let db = {};
 
