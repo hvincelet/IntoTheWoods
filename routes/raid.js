@@ -328,9 +328,7 @@ exports.displayAllRaids = function (req, res) {
             model: raidModel
         }],
         where: {
-            id_organizer: {
-                [Op.ne]: user.login
-            }
+            id_organizer: user.login
         }
     }).then(function(raidsFound){
         if (raidsFound !== 0) {
@@ -647,6 +645,35 @@ exports.setStartTime = function(req, res){
             models.raid.update(
                 {
                     start_time: time.toLocaleTimeString()
+                },
+                {where: {
+                        id: idRaid
+                    }
+                });
+        }
+        else{
+            console.log("erreur");
+            //TODO : renvoyer un message d'erreur
+        }
+    });
+};
+
+exports.setRegisterDates = function(req, res){
+    let idRaid = req.body.idRaid;
+    let startRegister = req.body.startRegister;
+    let endRegister = req.body.endRegister;
+
+    models.raid.findOne({
+        where: {
+            id: idRaid
+        }
+    }).then(function (raid_found) {
+        if (raid_found !== null) {
+            let time = new Date();
+            models.raid.update(
+                {
+                    startRegister: startRegister,
+                    endRegister: endRegister
                 },
                 {where: {
                         id: idRaid
