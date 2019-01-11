@@ -119,6 +119,15 @@
         z-index:1;
     }
 
+    #panel-center {
+        top: 21px;
+        margin-left: 50%;
+        margin-right: 50%;
+        text-align: center;
+        position: absolute;
+        z-index:1;
+    }
+
     #panel-right {
         top: 17px;
         right: 10px;
@@ -157,8 +166,11 @@
                             <button id="add_course_button" class="btn btn-default" style="display: none" onclick="addCourse()"><i class="fas fa-route"></i> Tracer un parcours</button>
                         </div>
 
+                        <div id="panel-center">
+                            <button id="button-eraser" class="btn btn-xs btn-danger" onclick="removeCurrentEditedCourse()" style="display: none"><i class="fas fa-eraser"></i></i> effacer le tracé</button>
+                        </div>
+
                         <div id="panel-right" style="display: none">
-                            <!--<button id="" class="btn btn-xs btn-danger" onclick=""><i class="fas fa-eraser"></i></i> effacer le tracé</button>-->
                             <div id="course-button-group" class="btn-group" role="group" aria-label="group" >
                                 <button id="previous_button" class="btn btn-default" onclick="previousCourse()"><i class="fas fa-angle-left"></i></button>
                                 <button id="current_course" class="btn btn-default font-weight-bold" style="width:160px; color:white"></button>

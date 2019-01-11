@@ -83,7 +83,7 @@ function addInteractions() {
 
     map.addInteraction(draw);
 
-    createMeasureTooltip();
+    createMeasureTooltip(idCurrentEditedCourse+1);
     let listener;
     draw.on('drawstart',
         function (evt) {
@@ -121,7 +121,7 @@ function addInteractions() {
             sketch = null;
             // unset tooltip so that a new one can be created
             measureTooltipElement = null;
-            createMeasureTooltip();
+            createMeasureTooltip(idCurrentEditedCourse+1);
             ol.Observable.unByKey(listener);
         }, this);
 }
@@ -341,13 +341,14 @@ let formatArea = function (polygon) {
     return output;
 };
 
-function createMeasureTooltip() {
+function createMeasureTooltip(featureId) {
     if (measureTooltipElement) {
         measureTooltipElement.parentNode.removeChild(measureTooltipElement);
     }
     measureTooltipElement = document.createElement('div');
     measureTooltipElement.className = 'tooltip tooltip-measure';
     measureTooltip = new ol.Overlay({
+        id: featureId,
         element: measureTooltipElement,
         offset: [0, -15],
         positioning: 'bottom-center'
