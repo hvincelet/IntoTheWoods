@@ -2,6 +2,11 @@ const jdenticon = require('jdenticon');
 const pages_path = "../views/pages/";
 const models = require('../models');
 
+const fs = require('fs');
+const pdf = require('html-pdf');
+var options = { format: 'A4', orientation: 'landscape' };
+const QRCode = require('qrcode');
+
 // Register new participant default page
 exports.displayRegister = function(req, res){
     var  get_raids_clean = [];
@@ -65,7 +70,7 @@ exports.register = function(req, res){
 };
 
 exports.displayHome = function(req, res){
-    //TODO
+    //TODO : home for participant (supposition : contains live and others informations)
     models.participant.findOne({
       where: {
         id_participant: req.params.id
@@ -85,6 +90,54 @@ exports.displayHome = function(req, res){
             });
           }
         })
+      }
+    });
+};
+
+exports.generateQRCode = function(req, res){
+    //TODO : generate QR Code PDFs for all participant
+    const raid = 1
+    models.raid.findOne({
+      where: {
+        id: raid
+      },
+      attributes: ['id','name','edition']
+    }).then(function(raid_found){
+      if(raid_found !== null){
+        models.participant.findAll({
+          where: {
+            id_raid: raid
+          },
+          attributes: ['id_participant']
+        }).then(function(participant_found){
+          if(participant_found !== null){
+            let cpt = 0;
+            let html = '';
+            participant_found.forEach(function(participant){
+              QRCode.toDataURL(participant.id_participant.toString(), { errorCorrectionLevel: 'L', width:350 }, function (err, url) {
+                if (err) return console.log(err);
+                //console.log(url)
+                html = html+"<html>"+
+                           "<body>"+
+                           "<center>"+
+                             "<div style='height: 10px;'></div>"+
+                             "<p style='font-size: 40pt;'><strong>"+participant.id_participant+"</strong><br>"+
+                             "<img src='"+url+"'></img><br>"+
+                             "<strong>"+raid_found.name.toUpperCase()+" "+raid_found.edition+"</strong></p>"+
+                           "</center>"+
+                           "</body>"+
+                           "</html>";
+                cpt=cpt+1;
+                if(cpt==participant_found.length){
+                  pdf.create(html, options).toFile('./participants.pdf', function(err, res) {
+                    if (err) return console.log(err);
+                    console.log(res); // { filename: '/app/participants.pdf' }
+                  });
+                }
+              });
+            });
+          }
+        });
       }
     });
 };

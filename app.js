@@ -190,6 +190,9 @@ intothewoods.route('/participant/register')
 intothewoods.route('/participant/:id/home')
     .get(participant.displayHome);
 
+// Routes dedicated to QR code
+intothewoods.route('/participant/qrcode/generate')
+    .get(participant.generateQRCode);
 
 //Routes dedicated to the Live
 intothewoods.route('/live/:id')
