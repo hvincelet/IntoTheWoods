@@ -34,7 +34,7 @@ function redirectGoogleMaps() {
 }
 
 check_in = helper.check_in === 1;
-modifyCheckinButton(check_in);
+updateCheckinButton(check_in);
 
 function performCheckin() {
     // allow check-in if the helper is close to the point of interest, for ex : 15m
@@ -50,7 +50,7 @@ function performCheckin() {
             url: '/helper/check_in',
             data: data,
             success: function (response) {
-                modifyCheckinButton((JSON.parse(response).msg === 'true'));
+                updateCheckinButton((JSON.parse(response).msg === 'true'));
             },
             error: function (response) {
             }
@@ -60,7 +60,7 @@ function performCheckin() {
     }
 }
 
-function modifyCheckinButton(isChecked) {
+function updateCheckinButton(isChecked) {
     if (isChecked) {
         $('#checkin_button_icon').text('').attr('class', 'fas fa-user-check');
         $('#checkin-button').attr('class', 'btn btm-sm btn-success');
@@ -166,7 +166,7 @@ geolocation.on('change:position', function () {
     distance = distanceBetweenPoints(ol.proj.fromLonLat(position), ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat]));
     if (distance > 15 && check_in){
         check_in = false;
-        modifyCheckinButton(check_in);
+        updateCheckinButton(check_in);
     }
 });
 

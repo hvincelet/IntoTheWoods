@@ -1,7 +1,6 @@
 let pointOfInterestArrayToStore = [];
 
 function loadPointsOfInterest(pointArray) {
-    console.log(typeof pointArray);
     pointArray.map(pointOfInterest => {
         let geom = new ol.geom.Point(ol.proj.fromLonLat(pointOfInterest.lonlat));
         let feature = new ol.Feature({
@@ -101,8 +100,6 @@ function updatePointOfInterestId(serverId) {
         pointOfInterestFound.is_new = false;
 
         let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
-            console.log(helperPost.id_point_of_interest);
-            console.log(pointOfInterestServerId.clientId);
             return helperPost.id_point_of_interest === parseInt(pointOfInterestServerId.clientId);
         });
         if (helperPostFound !== undefined) {
