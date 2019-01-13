@@ -660,8 +660,10 @@ exports.setStartTime = function(req, res){
 
 exports.setRegisterDates = function(req, res){
     let idRaid = req.body.idRaid;
-    let startRegister = req.body.startRegister;
-    let endRegister = req.body.endRegister;
+    let startRegister = new Date(req.body.startRegister);
+    let endRegister = new Date(req.body.endRegister);
+
+    console.log(idRaid+" "+startRegister+" "+endRegister)
 
     models.raid.findOne({
         where: {
