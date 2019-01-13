@@ -14,8 +14,8 @@ const config = require('./config/config')[global.env];
 const intothewoods = express();
 
 intothewoods.use(favicon(__dirname + '/views/img/favicon.png'));
-intothewoods.use(bodyParser.json());
-intothewoods.use(bodyParser.urlencoded({extended: true}));
+intothewoods.use(bodyParser.json({limit: '5mb'}));
+intothewoods.use(bodyParser.urlencoded({limit: '5mb', extended: true}));
 intothewoods.use("/views", express.static(__dirname + '/views'));
 intothewoods.set('view engine', 'ejs');
 intothewoods.use(session({
@@ -106,10 +106,14 @@ intothewoods.route('/resetpassword')
 intothewoods.route('/newpassword')
     .post(misc.register_new_password);
 
-//routes dedicated to the raids' pages
 intothewoods.route('/dashboard')
     .get(checkAuth, organizer.dashboard);
 
+intothewoods.route('/profile')
+    .get(checkAuth, organizer.profile)
+    .post(checkAuth, organizer.saveProfile);
+
+//routes dedicated to the raids' pages
 intothewoods.route('/createraid/start')
     .get(checkAuth, raid.init);
 

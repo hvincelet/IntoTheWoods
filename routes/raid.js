@@ -359,7 +359,7 @@ exports.displayRaid = function (req, res) {
         team_model.findAll({
             include: [{
                 model: organizer_model,
-                attributes: ['email', 'last_name', 'first_name']
+                attributes: ['email', 'last_name', 'first_name', 'picture']
             }],
             attributes: ['id_organizer'],
             where: {
@@ -372,7 +372,8 @@ exports.displayRaid = function (req, res) {
                 organizers_linked_with_the_current_raid.push({
                     email: organizer.dataValues.organizer.dataValues.email,
                     first_name: organizer.dataValues.organizer.dataValues.first_name,
-                    last_name: organizer.dataValues.organizer.dataValues.last_name
+                    last_name: organizer.dataValues.organizer.dataValues.last_name,
+                    picture: organizer.organizer.picture
                 });
             });
 

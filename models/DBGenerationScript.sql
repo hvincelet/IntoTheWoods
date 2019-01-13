@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `lat` DOUBLE NULL,
   `lng` DOUBLE NULL,
   `hashtag` VARCHAR(30) NULL,
-  `allow_register` TINYINT(1) NOT NULL DEFAULT 0
+  `allow_register` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`organizer` (
   `first_name` VARCHAR(30) NULL,
   `password` BLOB(128) NULL,
   `active` TINYINT(1) NULL,
-  `picture` TEXT NULL,
+  `picture` MEDIUMTEXT NULL,
   `reset_password_id` VARCHAR(30) NULL,
   PRIMARY KEY (`email`))
 ENGINE = InnoDB;

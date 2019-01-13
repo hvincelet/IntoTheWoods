@@ -4,12 +4,12 @@
         <!-- Sidebar Header -->
         <div class="sidenav-header d-flex align-items-center justify-content-center">
             <!-- User Info -->
-            <div class="sidenav-header-inner text-center">
+            <div class="sidenav-header-inner text-center" >
                 <img src="data:image/png;base64,<%= user.picture %>" alt="person" class="img-fluid rounded-circle" />
-                <h2 class="h5"><%= user.first_name %> <%= user.last_name %></h2>
+                <h2 class="h5"><a href="/profile"><%= user.first_name %> <%= user.last_name %></a></h2>
             </div>
             <!-- Small Brand information, appears on minimized sidebar-->
-            <div class="sidenav-header-logo"><span class="brand-small text-center"><strong class="text-primary"><%= user.initials %></strong></span></div>
+            <div class="sidenav-header-logo" ><a href="/profile"><span class="brand-small text-center"><strong class="text-primary"><%= user.initials %></strong></span></a></div>
         </div>
     </div>
     <!-- Sidebar Navigation Menus-->
