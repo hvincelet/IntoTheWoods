@@ -1,6 +1,6 @@
 // Prevent change page during editing
-$(window).bind('beforeunload', function(e) {
-    if(editing){
+$(window).bind('beforeunload', function (e) {
+    if (editing) {
         return "Êtes-vous sûr de vouloir quitter le mode édition ?";
     }
 });
@@ -57,7 +57,7 @@ let map = new ol.Map({
     overlays: [overlay],
     view: new ol.View({
         center: ol.proj.fromLonLat([raid.lng, raid.lat]),
-        zoom: 13
+        zoom: 14
     })
 });
 
@@ -83,7 +83,7 @@ function addInteractions() {
 
     map.addInteraction(draw);
 
-    createMeasureTooltip(idCurrentEditedCourse+1);
+    createMeasureTooltip(idCurrentEditedCourse + 1);
     let listener;
     draw.on('drawstart',
         function (evt) {
@@ -121,7 +121,7 @@ function addInteractions() {
             sketch = null;
             // unset tooltip so that a new one can be created
             measureTooltipElement = null;
-            createMeasureTooltip(idCurrentEditedCourse+1);
+            createMeasureTooltip(idCurrentEditedCourse + 1);
             ol.Observable.unByKey(listener);
         }, this);
 }
@@ -370,6 +370,8 @@ function showTopPanel() {
         map.removeInteraction(modify);
         map.removeOverlay(helpTooltip);
         resetInteraction();
+        $('#button-eraser').hide();
+        $('#abort_button').hide();
         $('#add_point_of_interest_button').hide();
         $('#add_course_button').hide();
         $('#edit_button_icon').text('  Éditer la carte')
@@ -383,11 +385,30 @@ function showTopPanel() {
             .attr('class', 'fas fa-check');
         $('#edit_button').attr('class', 'btn btn-success')
             .attr('title', 'Enregistrer les modifications');
+        $('#abort_button').show("fast");
         $('#add_point_of_interest_button').show("fast");
         $('#add_course_button').show("fast");
         editing = true;
     }
 }
+
+function abortChanges() {
+    // clear all features on the screen
+    vector.getSource().clear();
+    map.overlays_.clear();
+
+    // clear temporary features lists
+    pointOfInterestArrayToStore = [];
+    helperPostArrayToStore = [];
+    courseArrayToStore = [];
+
+    loadPointsOfInterest(pointOfInterestArrayToLoad);
+    loadCourses(courseArrayToLoad);
+    loadHelperPost(helperPostArrayToLoad);
+
+    showTopPanel();
+}
+
 
 let idCurrentEditedCourse = 0;
 
@@ -414,3 +435,117 @@ function nextCourse() {
 loadPointsOfInterest(pointOfInterestArrayToLoad);
 loadCourses(courseArrayToLoad);
 loadHelperPost(helperPostArrayToLoad);
+
+
+// https://openlayers.org/en/latest/examples/gpx.html
+
+/***************************************************************
+ ***************************************************************
+ ***                     Import/Export GPX                   ***
+ ***************************************************************
+ ***************************************************************/
+
+let gpxFormat = new ol.format.GPX();
+let gpxFeatures;
+
+function handleFileSelect(evt) {
+    let files = evt.target.files; // FileList object
+
+    // files is a FileList of File objects. List some properties.
+    let output = [];
+    for (let i = 0, f; f = files[i]; i++) {
+        console.log("files[i]", files[i]);
+        let reader = new FileReader();
+        reader.readAsText(files[i], "UTF-8");
+        reader.onload = function (evt) {
+            console.log(evt.target.result);
+            gpxFeatures = gpxFormat.readFeatures(evt.target.result, {
+                dataProjection: 'EPSG:4326',
+                featureProjection: 'EPSG:3857'
+            });
+            gpxLayer.getSource().addFeatures(gpxFeatures);
+            console.log("gpxFeatures", gpxFeatures)
+        };
+        output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+            f.size, ' bytes, last modified: ',
+            f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+            '</li>');
+    }
+    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+}
+
+
+var defaultStyle = {
+    'Point': new ol.style.Style({
+        image: new ol.style.Circle({
+            fill: new ol.style.Fill({
+                color: 'rgba(255,255,0,0.5)'
+            }),
+            radius: 5,
+            stroke: new ol.style.Stroke({
+                color: '#ff0',
+                width: 1
+            })
+        })
+    }),
+    'LineString': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: '#f00',
+            width: 3
+        })
+    }),
+    'Polygon': new ol.style.Style({
+        fill: new ol.style.Fill({
+            color: 'rgba(0,255,255,0.5)'
+        }),
+        stroke: new ol.style.Stroke({
+            color: '#0ff',
+            width: 1
+        })
+    }),
+    'MultiPoint': new ol.style.Style({
+        image: new ol.style.Circle({
+            fill: new ol.style.Fill({
+                color: 'rgba(255,0,255,0.5)'
+            }),
+            radius: 5,
+            stroke: new ol.style.Stroke({
+                color: '#f0f',
+                width: 1
+            })
+        })
+    }),
+    'MultiLineString': new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: '#0f0',
+            width: 3
+        })
+    }),
+    'MultiPolygon': new ol.style.Style({
+        fill: new ol.style.Fill({
+            color: 'rgba(0,0,255,0.5)'
+        }),
+        stroke: new ol.style.Stroke({
+            color: '#00f',
+            width: 1
+        })
+    })
+};
+
+let styleFunction = function (feature, resolution) {
+    let featureStyleFunction = feature.getStyleFunction();
+    if (featureStyleFunction) {
+        return featureStyleFunction.call(feature, resolution);
+    } else {
+        return defaultStyle[feature.getGeometry().getType()];
+    }
+};
+
+let gpxLayer = new ol.layer.Vector({
+    source: new ol.source.Vector({}),
+    style: styleFunction
+});
+
+map.addLayer(gpxLayer);
+
+document.getElementById('files').addEventListener('change', handleFileSelect, false);

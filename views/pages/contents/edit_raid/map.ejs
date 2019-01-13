@@ -120,7 +120,7 @@
     }
 
     #panel-center {
-        top: 21px;
+        top: 17px;
         margin-left: 50%;
         margin-right: 50%;
         text-align: center;
@@ -158,16 +158,23 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
-
+                    <input type="file" id="files" name="files[]" multiple />
+                    <output id="list"></output>
                     <div id="map">
                         <div id="panel-left">
-                            <button id="edit_button" class="btn btn-info" title="Ajouter, modifier et déplacer des éléments sur la carte" onclick="showTopPanel()"><i id="edit_button_icon" class="fas fa-map-marked">  Éditer la carte</i></button>
-                            <button id="add_point_of_interest_button" class="btn btn-default" style="display: none" onclick="addPointOfInterest()"><i class="fas fa-dot-circle"></i> Ajouter un point d'intérêt</button>
-                            <button id="add_course_button" class="btn btn-default" style="display: none" onclick="addCourse()"><i class="fas fa-route"></i> Tracer un parcours</button>
+                            <div>
+                                <button id="edit_button" class="btn btn-info" title="Ajouter, modifier et déplacer des éléments sur la carte" onclick="showTopPanel()"><i id="edit_button_icon" class="fas fa-map-marked">  Éditer la carte</i></button>
+                                <button id="add_point_of_interest_button" class="btn btn-default" style="display: none" onclick="addPointOfInterest()"><i class="fas fa-dot-circle"></i> Ajouter un point d'intérêt</button>
+                                <button id="add_course_button" class="btn btn-default" style="display: none" onclick="addCourse()"><i class="fas fa-route"></i> Tracer un parcours</button>
+                            </div>
+                            <div>
+                                <button id="abort_button" class="btn" title="Abandonner les modifications" style="display: none; color: white; background-color: #ff6e40; width: 40px; margin-top: 4px;" onclick="abortChanges()"><i id="edit_button_icon" class="fas fa-times">  </i></button>
+                            </div>
                         </div>
 
                         <div id="panel-center">
-                            <button id="button-eraser" class="btn btn-xs btn-danger" onclick="removeCurrentEditedCourse()" style="display: none"><i class="fas fa-eraser"></i></i> effacer le tracé</button>
+                            <button id="button-eraser" class="btn btn-danger" onclick="removeCurrentEditedCourse()" style="display: none"><i class="fas fa-eraser"></i></i> effacer le tracé</button>
+
                         </div>
 
                         <div id="panel-right" style="display: none">
