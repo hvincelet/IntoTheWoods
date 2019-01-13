@@ -3,6 +3,8 @@ const pages_path = __dirname+"/../views/pages/";
 const models = require('../models');
 const crypto = require('crypto');
 const sender = require('./sender');
+const Sequelize = require('sequelize');
+const fs = require('fs');
 
 exports.dashboard = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -68,7 +70,20 @@ exports.idVerification = function (req, res) {
                 raids_found.map(tuple => {
                     let date = tuple.dataValues.raid.dataValues.date.split('-');
                     let local_date = date[2]+'/'+date[1]+'/'+date[0];
-                    user.raid_list.push({
+                    if(new Date(date) >= new Date()){
+                        user.raid_list.push({
+                            id: tuple.dataValues.raid.dataValues.id,
+                            name: tuple.dataValues.raid.dataValues.name,
+                            edition: tuple.dataValues.raid.dataValues.edition,
+                            date: local_date,
+                            place: tuple.dataValues.raid.dataValues.place,
+                            lat: tuple.dataValues.raid.dataValues.lat,
+                            lng: tuple.dataValues.raid.dataValues.lng,
+                            start_time: tuple.dataValues.raid.start_time,
+                            allow_register: tuple.dataValues.raid.allow_register
+                        });
+                    }
+                    user.other_raid_list.push({
                         id: tuple.dataValues.raid.dataValues.id,
                         name: tuple.dataValues.raid.dataValues.name,
                         edition: tuple.dataValues.raid.dataValues.edition,
@@ -156,11 +171,11 @@ exports.validate = function (req, res) {
             successMessage: "Votre adresse mail a bien été confirmée."
         });
     })
-}
+};
 
 exports.shareRaidToOthersOrganizers = function(req, res) {
     const user = connected_user(req.sessionID);
-    if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
+    if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.raid_id)})){
         return res.redirect('/dashboard');
     }
 
@@ -357,5 +372,28 @@ exports.remove = function (req, res) {
         }else{
             res.send(JSON.stringify({msg: "only_one_organizer"}));
         }
+    });
+};
+
+exports.profile = function (req, res) {
+    const user = connected_user(req.sessionID);
+    res.render(pages_path + "template.ejs", {
+        pageTitle: "Gestion du profil",
+        page: "profile",
+        user: user
+    });
+};
+
+exports.saveProfile = function (req, res) {
+    const user = connected_user(req.sessionID);
+
+    let photo = req.body.photo.split(',')[1];
+
+    models.organizer.update({
+        picture: photo
+    },{where: {email: user.login}}).then(function () {
+        user.picture = photo;
+
+        res.send(JSON.stringify({msg: "ok"}));
     });
 };

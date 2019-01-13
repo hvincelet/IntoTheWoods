@@ -15,8 +15,8 @@ const config = require(config_path)[env];
 const intothewoods = express();
 
 intothewoods.use(favicon(__dirname + '/views/img/favicon.png'));
-intothewoods.use(bodyParser.json());
-intothewoods.use(bodyParser.urlencoded({extended: true}));
+intothewoods.use(bodyParser.json({limit: '5mb'}));
+intothewoods.use(bodyParser.urlencoded({limit: '5mb', extended: true}));
 intothewoods.use("/views", express.static(__dirname + '/views'));
 intothewoods.set('view engine', 'ejs');
 intothewoods.use(session({
@@ -29,18 +29,15 @@ intothewoods.use(session({
 }));
 
 global.connected_users = [];
-if(config.no_login) {
+if (config.no_login) {
     connected_users.push({
-        login: "graballa@enssat.fr",
-        first_name: "Gwendal",
-        last_name: "Raballand",
-        initials: "GR",
+        login: "derouxjulien@gmail.com",
+        first_name: "Julien",
+        last_name: "Deroux",
+        initials: "JD",
         picture: null,
         idCurrentRaid: -1, //for tests
         raid_list: [{
-            name: "Pleumeur Raid",
-            edition: 1,
-            date: "2019-03-15",
             id: 1,
             place: "Pleumeur-Bodou, Lannion, Côtes-d'Armor, Bretagne, France métropolitaine, 22560, France",
             lat: 48.7732657,
@@ -49,18 +46,18 @@ if(config.no_login) {
     });
 }
 
-global.connected_user = function(uuid){
-    if(config.no_login) {
+global.connected_user = function (uuid) {
+    if (config.no_login) {
         return connected_users[0];
     }
-    return connected_users.find(function(user){
+    return connected_users.find(function (user) {
         return user.uuid == uuid;
     });
 };
 
 let checkAuth = function (req, res, next) {
-    if(!config.no_login) {
-        const user = connected_users.find(function(user){
+    if (!config.no_login) {
+        const user = connected_users.find(function (user) {
             return user.uuid == req.sessionID;
         });
         if (!user) {
@@ -82,6 +79,10 @@ const participant = require('./routes/participant');
 /*             Routes             */
 /**********************************/
 
+// Misc routes
+intothewoods.route('/termsandpolicy')
+    .get(misc.cgu);
+
 intothewoods.route('/')
     .get(misc.displayHome);
 
@@ -100,10 +101,21 @@ intothewoods.route('/register')
 intothewoods.route('/validate')
     .get(organizer.validate); // /validate?id={email}&hash={password_hash}
 
-//routes dedicated to the raids' pages
+intothewoods.route('/resetpassword')
+    .post(misc.forgotten_password)
+    .get(misc.display_change_password);
+
+intothewoods.route('/newpassword')
+    .post(misc.register_new_password);
+
 intothewoods.route('/dashboard')
     .get(checkAuth, organizer.dashboard);
 
+intothewoods.route('/profile')
+    .get(checkAuth, organizer.profile)
+    .post(checkAuth, organizer.saveProfile);
+
+//routes dedicated to the raids' pages
 intothewoods.route('/createraid/start')
     .get(checkAuth, raid.init);
 
@@ -193,14 +205,9 @@ intothewoods.route('/live/:id')
 intothewoods.route('/live')
     .get(live.displayAllLive);
 
-// Misc routes
-intothewoods.route('/termsandpolicy')
-    .get(misc.cgu);
-
-
 //bad url route
 intothewoods.use(function (req, resp, next) {
-    resp.render("pages/404.ejs", {
+    resp.render(__dirname + "/views/pages/404.ejs", {
         "pageTitle": "Erreur 404"
     });
 });
