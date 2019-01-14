@@ -348,6 +348,7 @@ exports.remove = function (req, res) {
         }
     });
 };
+
 exports.participantPassage = function(req, res){
     let idParticipant = req.body.idParticipant;
     let idRaid = req.body.idRaid;
@@ -422,3 +423,19 @@ insertStage = function(orderRun, time, idParticipant, idRaid){
         }
     });
 }
+
+exports.qrcodeReader = function(req, res){
+  // TODO : check if participant can use qrcodeReader
+  res.render(pages_path + "qrcodeReader.ejs", {
+      pageTitle: "Lecteur de QRCode pour participant",
+  });
+}
+
+exports.registerRunner = function(req, res){
+    //console.log(req.body);
+    var participant = {};
+    participant.id = req.body.id;
+    participant.time = req.body.time;
+    // TODO : register participant and time
+    return res.send(participant);
+};

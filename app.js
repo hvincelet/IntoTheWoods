@@ -162,6 +162,8 @@ intothewoods.route('/team/:raid_id/inviteorganizers')
 intothewoods.route('/editraid/setStartTime')
     .post(checkAuth, raid.setStartTime);
 
+intothewoods.route('/editraid/:id/generateQRCode')
+    .get(raid.generateQRCode);
 
 //routes dedicated to the helpers
 intothewoods.route('/team/:raid_id/invitehelpers')
@@ -182,27 +184,21 @@ intothewoods.route('/helper/check_in')
 intothewoods.route('/helper/participantPassage')
     .post(helper.participantPassage); //TODO : Décommenter la ligne une fois le dev terminé
 
+intothewoods.route('/helper/:id/qrcodeReader')
+    .get(helper.qrcodeReader);
+
+intothewoods.route('/helper/registerRunner')
+    .post(helper.registerRunner);
+
 // Routes dedicated to participant
 intothewoods.route('/participant/register')
     .get(participant.displayRegister)
     .post(participant.register);
 
-intothewoods.route('/participant/:id/home') // test qr code reader
-    .get(participant.displayHome);
-
-// Routes dedicated to QR code
-intothewoods.route('/participant/qrcode/generate')
-    .get(participant.generateQRCode);
-
-intothewoods.route('/participant/stage') // test register participant
-    .post(participant.getStage);
-
 //Routes dedicated to the Live
 intothewoods.route('/live/:id')
     .get(live.displayLive)
     .post(live.getData);
-
-
 
 
 intothewoods.route('/termsandpolicy')
