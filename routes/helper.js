@@ -3,7 +3,8 @@ const models = require('../models');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
-const date = require('date-and-time');
+const moment = require('moment');
+
 const helpers = models.helper;
 
 exports.inviteHelper = function (req, res) {
@@ -52,7 +53,7 @@ exports.inviteHelper = function (req, res) {
                     });
                 }
                 if (index === helper_emails.length - 1) {
-                    res.send(JSON.stringify({status: helper_invite_status}));
+                    return res.send(JSON.stringify({status: helper_invite_status}));
                 }
             });
         } else {
@@ -63,7 +64,7 @@ exports.inviteHelper = function (req, res) {
         }
     });
 
-    res.send(JSON.stringify({status: helper_invite_status}));
+    return res.send(JSON.stringify({status: helper_invite_status}));
 };
 
 exports.displayRegister = function (req, res) {

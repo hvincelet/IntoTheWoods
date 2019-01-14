@@ -205,7 +205,7 @@ exports.storeMapData = function (req, res) {
                                     nb_Helper: helper_post.nb_helper
                                 },
                                 {where: {id: helper_post.id}}
-                            )
+                            );
                         }
                     });
                 }

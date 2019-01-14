@@ -7,6 +7,10 @@ const ejs = require('ejs');
 const fs = require('fs');
 const raids = models.raid;
 
+const pdf = require('html-pdf');
+var options = { format: 'A4', orientation: 'landscape' };
+const QRCode = require('qrcode');
+
 exports.init = function (req, res) {
     const user = connected_user(req.sessionID);
     res.render(pages_path + "template.ejs", {
@@ -87,10 +91,6 @@ exports.createRaid = function (req, res) {
         lat: 0.0,
         lng: 0.0
     }).then(function (raid_created) {
-        models.helper_post.create({
-            title: "Backup",
-            nb_helper: -1
-        });
         let user = connected_user(req.sessionID);
         user.idCurrentRaid = raid_created.dataValues.id;
         models.team.create({
@@ -100,7 +100,7 @@ exports.createRaid = function (req, res) {
 
         geocoder.search({q: req.body.raidPlace}) // allows to list all the locations corresponding to the city entered
             .then((response) => {
-                if (typeof response[0].lat !== undefined) {
+                if (response[0].lat !== undefined) {
                     raid_created.update({
                         place: response[0].display_name,
                         lat: response[0].lat,
@@ -617,32 +617,6 @@ exports.starttime = function (req, res) {
             }
         });
     }
-};
-
-exports.setStartTime = function(req, res){
-    let idRaid = req.body.idRaid;
-
-    models.raid.findOne({
-        where: {
-            id: idRaid
-        }
-    }).then(function (raid_found) {
-        if (raid_found !== null) {
-            let time = new Date();
-            models.raid.update(
-                {
-                    start_time: time.toLocaleTimeString()
-                },
-                {where: {
-                        id: idRaid
-                    }
-                });
-        }
-        else{
-            console.log("erreur");
-            //TODO : renvoyer un message d'erreur
-        }
-    });
 };
 
 exports.generateQRCode = function(req, res){

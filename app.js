@@ -71,7 +71,6 @@ const raid = require('./routes/raid');
 const map = require('./routes/map');
 const misc = require('./routes/misc');
 const helper = require('./routes/helper');
-const live = require('./routes/live');
 const participant = require('./routes/participant');
 
 /**********************************/
@@ -200,9 +199,11 @@ intothewoods.route('/live/:id')
     .get(live.displayLive)
     .post(live.getData);
 
+// Routes dedicated to participant
+intothewoods.route('/participant/register')
+    .get(participant.displayRegister)
+    .post(participant.register);
 
-intothewoods.route('/termsandpolicy')
-    .get(misc.cgu);
 
 // routes dedicated to the team' pages
 //intothewoods.route('/manageteam') // manage helper and organizer of raid
