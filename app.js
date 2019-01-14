@@ -72,6 +72,7 @@ const map = require('./routes/map');
 const misc = require('./routes/misc');
 const helper = require('./routes/helper');
 const participant = require('./routes/participant');
+const live = require('./routes/live');
 
 /**********************************/
 /*             Routes             */
@@ -183,6 +184,10 @@ intothewoods.route('/helper/check_in')
 intothewoods.route('/participant/register')
     .get(participant.displayRegister)
     .post(participant.register);
+
+// Routes dedicated to live
+intothewoods.route('/live/:id')
+    .get(live.home);
 
 
 //bad url route

@@ -71,20 +71,11 @@ exports.idVerification = function (req, res) {
                 raids_found.map(tuple => {
                     let date = tuple.dataValues.raid.dataValues.date.split('-');
                     let local_date = date[2]+'/'+date[1]+'/'+date[0];
+                    let in_future = false;
                     if(new Date(date) >= new Date()){
-                        user.raid_list.push({
-                            id: tuple.dataValues.raid.dataValues.id,
-                            name: tuple.dataValues.raid.dataValues.name,
-                            edition: tuple.dataValues.raid.dataValues.edition,
-                            date: local_date,
-                            place: tuple.dataValues.raid.dataValues.place,
-                            lat: tuple.dataValues.raid.dataValues.lat,
-                            lng: tuple.dataValues.raid.dataValues.lng,
-                            start_time: tuple.dataValues.raid.start_time,
-                            allow_register: tuple.dataValues.raid.allow_register
-                        });
+                        in_future = true;
                     }
-                    user.other_raid_list.push({
+                    user.raid_list.push({
                         id: tuple.dataValues.raid.dataValues.id,
                         name: tuple.dataValues.raid.dataValues.name,
                         edition: tuple.dataValues.raid.dataValues.edition,
@@ -93,7 +84,8 @@ exports.idVerification = function (req, res) {
                         lat: tuple.dataValues.raid.dataValues.lat,
                         lng: tuple.dataValues.raid.dataValues.lng,
                         start_time: tuple.dataValues.raid.start_time,
-                        allow_register: tuple.dataValues.raid.allow_register
+                        allow_register: tuple.dataValues.raid.allow_register,
+                        in_future: in_future
                     });
                 });
                 connected_users.push(user);

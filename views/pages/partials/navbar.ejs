@@ -30,9 +30,9 @@
             <% if(typeof user.raid_list !== "undefined" && user.raid_list.length > 0) { %>
                 <li><a href="#manageraid" aria-expanded="<% if (page.includes("edit_raid")){%>true<%}else{%>false<%}%>" data-toggle="collapse"> <i class="icon-list"></i>Gérer mes Raids</a>
                     <ul id="manageraid" class="<% if (!page.includes("edit_raid")){%>collapse<%}%> list-unstyled ">
-                        <% user.raid_list.forEach(function(one_raid){ %>
+                        <% user.raid_list.forEach(function(one_raid){ if(one_raid.in_future){%>
                             <li><a href="/editraid/<%=one_raid.id%>" <% if (page.includes("edit_raid/details") && one_raid.id === raid.id){%> style="border-left: 2px solid #379392;" <%}%>><%=one_raid.name%> - Édition <%=one_raid.edition%></a></li>
-                        <% }); %>
+                        <% }}); %>
                         <li><a href="/editraid" <% if (page.includes("edit_raid/all")){%> style="border-left: 2px solid #379392;" <%}%>>Autres Raids</a></li>
                     </ul>
                 </li>
