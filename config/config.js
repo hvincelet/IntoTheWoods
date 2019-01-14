@@ -8,7 +8,7 @@ module.exports = {
         host: 'localhost',
         dialect: 'mysql',
         logging: false, // True for logging sequelize message
-        no_login: false,
+        no_login: true,
         define: {
             timestamps: false
         }

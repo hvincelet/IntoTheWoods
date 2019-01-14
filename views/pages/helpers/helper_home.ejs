@@ -13,12 +13,48 @@
     <% }else{ %>
 
         <style>
+            #panel-left {
+                bottom: 250px;
+                left: 10px;
+                position: absolute;
+                z-index: 1;
+            }
             #panel-right {
-                top: 65px;
+                top: 66px;
                 right: 10px;
                 position: absolute;
                 z-index: 1;
             }
+
+            #panel-bottom-right {
+                bottom: 250px;
+                right: 10px;
+                position: absolute;
+                z-index: 1;
+            }
+
+            .marker {
+                font-size: 1.4em;
+            }
+
+            .marker, ::after, ::before{
+                box-sizing: unset;
+            }
+
+            h3 {
+                font-size: small;
+                color: #37474f;
+            }
+
+            small {
+                color: #78909c
+            }
+
+            label {
+                font-size: large;
+                color: #62717b;
+            }
+
         </style>
 
         <div class="container-fluid" style="padding: 0;">
@@ -30,37 +66,52 @@
                     <div class="card no-margin-top">
                         <div class="card-header d-flex align-items-center">
                             <h2>Itinéraire jusqu'à votre poste</h2>
-                            <button class="btn btn-default" onclick="redirectGoogleMaps()" style="right: 10px; position: absolute;"><i class="fab fa-google"></i> Ouvrir dans Google Maps </button>
                         </div>
-                        <div class="card-body" style="padding-right: 0px; padding-left: 0px; padding-top: 0px">
-                            <div id="map" style="width: 100%; height: 100%;">
-                                <div id="panel-right">
-                                    <button id="checkin-button" class="btn btn-lg btn-success" onclick="performCheckin()"><i class="fas fa-user-check"></i> Check-in</button>
+                        <div class="card-body" style="padding-right: 0px; padding-left: 0px; padding-top: 0px;">
+                            <div id="map" class="full-map">
+                                <div id="panel-left">
+                                    <button class="btn btn-default btn-sm" onclick="redirectGoogleMaps()"><i class="fab fa-google"></i> Ouvrir dans Google Maps</button>
                                 </div>
+
+                                <div id="panel-right">
+                                    <button id="checkin-button" class="btn btn-default" onclick="performCheckin()"><i  id="checkin_button_icon" class="fas fa-user-check"></i><div id="checkin_icon_label">Check-in</div></button>
+                                    <div style="text-align: right;">
+                                        <label id="distance_label" style="color: #2196f3; font-size: 1em; text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;"></label>
+                                    </div>
+
+                                </div>
+                                <div id="panel-bottom-right">
+                                    <button class="btn btn-primary" onclick="recenterMap()"><i class="fas fa-crosshairs"></i></button>
+                                </div>
+
                             </div>
+                            <div id="location" class="marker"><i class="fas fa-walking"></i></div>
+                            <div id="location_target" class="marker" style="color: #e53935;"><i class="fas fa-map-marker-alt"></i></div>
+
 
                             <div style="padding: 1rem 1.25rem;">
-                                <h2>
-                                    Poste : <%= helper_post.title%>
-                                </h2>
-                                <p>
-                                    Début du Raid : <%=raid.start_time.split(':')[0]%>h<%=raid.start_time.split(':')[1]%>
-                                </p>
-                                <%if(helper_post.description !== null && helper_post.description.length > 0){%>
-                                <label>
-                                    Decription du poste : <br/>
-                                    <%=helper_post.description%>
-                                </label>
-                                <%}%>
+                                <div align="right">
+                                    <h2 id="countdownTime" style="color: #4caf50"></h2>
+                                    <small class="form-text">Début prévu le <%=raid.date%> à <%=raid.start_time.split(':')[0]%>h<%=raid.start_time.split(':')[1]%></small>
+                                </div>
+                                <h3 class="">Poste</h3>
+                                <label><%= helper_post.title %></label>
+
+                                <% if(helper_post.description !== null && helper_post.description.length > 0){ %>
+                                    <h3 style="font-size: small">Description du poste</h3>
+                                    <label><%= helper_post.description %></label>
+                                <% } %>
                             </div>
 
                             <script>
+                                const raid = <%- JSON.stringify(raid) %>;
                                 const assignment = <%- JSON.stringify(assignment) %>;
                                 const helper = <%- JSON.stringify(helper) %>;
                                 const helper_post = <%- JSON.stringify(helper_post) %>;
                                 const point_of_interest = <%- JSON.stringify(point_of_interest) %>;
                             </script>
                             <script src="https://ignf.github.io/geoportal-access-lib/latest/dist/GpServices.js"></script>
+                            <script src="/views/vendors/moment-with-locales.js"></script>
                             <script src="/views/pages/helpers/map.js"></script>
                         </div>
                     </div>
