@@ -141,3 +141,15 @@ exports.generateQRCode = function(req, res){
       }
     });
 };
+
+exports.getStage = function(req, res){
+    //TODO : get participant at stage
+    console.log(req.body);
+    var participants = req.body;
+
+    var participant = {};
+    participant.id = participants.id;
+    participant.time = participants.time;
+
+    return res.send(participant);
+};

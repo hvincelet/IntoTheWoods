@@ -26,27 +26,6 @@
       }
     </style>
     <div class="container-fluid" style="padding: 0;">
-      <!--
-      <h2> Informations </h2>
-      <p> Infos participant </p>
-      <ul>
-        <li> id : <%= participant.id_participant%> </li>
-        <li> id_raid : <%= participant.id_raid%> </li>
-        <li> first_name : <%= participant.first_name%> </li>
-        <li> last_name : <%= participant.last_name%> </li>
-      </ul>
-      <p> Infos raid </p>
-      <ul>
-        <li> id : <%= raid.id%> </li>
-        <li> name : <%= raid.name%> </li>
-        <li> date : <%= raid.date%> </li>
-        <li> start_time : <%= raid.start_time%> </li>
-        <li> edition : <%= raid.edition%> </li>
-        <li> place : <%= raid.place%> </li>
-        <li> lat : <%= raid.lat%> </li>
-        <li> lng : <%= raid.lng%> </li>
-      </ul>
-      -->
       <center>
       <h2>Participant - QRCode Reader</h2>
       <div id="loadingMessage">Unable to access video stream (please make sure you have a webcam enabled)</div>
@@ -110,12 +89,18 @@
             drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
             outputMessage.hidden = true;
             outputData.parentElement.hidden = false;
-            //outputData.innerText = code.data;
+
             if(participantID.indexOf(code.data) === -1){
-              var local_time = Date.now();
+
+              var local_time = new Date(Date.now());
               participantID.push(code.data);
               participantTime.push(local_time);
-              outputData.innerText += "[ ID Participant : "+code.data+" , Stage Time : "+local_time+" ]";
+
+              var d = new Date();
+              d.setTime(d.getTime()+(24*60*60*1000));
+              var expires = "expires="+ d.toUTCString();
+              document.cookie = code.data+"="+local_time+";"+expires+";path=/";
+              send_data();
             }
           }else{
             outputMessage.hidden = true; //false
@@ -124,6 +109,36 @@
         }
         requestAnimationFrame(tick);
       }
+
+      // Send cookies data
+      function send_data(){
+        // Export cookie to JSON object
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+          var tab = ca[i].split('=');
+          var cookies_json = { 'id':tab[0], 'time':tab[1] };
+          // Post Ajax request
+          $.ajax({
+            type : "POST",
+            contentType : "application/json",
+            data : JSON.stringify(cookies_json),
+            url : "http://192.168.43.110:8080/participant/stage",
+            dataType : 'json',
+            success : function(data) {
+              outputData.innerText = "Participant "+data.id+" checked at "+ new Date(data.time).toLocaleTimeString()+".";
+              document.cookie = tab[0]+"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+              console.log("success");
+            },
+            error : function(e) {
+              outputData.innerText = "Participant not checked (update with network).";
+              console.log("error");
+            }
+          });
+        }
+      }
+      // Send data every 10
+      setInterval(send_data(),10000);
     </script>
   <% } %>
 </div>

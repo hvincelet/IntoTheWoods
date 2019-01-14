@@ -187,12 +187,15 @@ intothewoods.route('/participant/register')
     .get(participant.displayRegister)
     .post(participant.register);
 
-intothewoods.route('/participant/:id/home')
+intothewoods.route('/participant/:id/home') // test qr code reader
     .get(participant.displayHome);
 
 // Routes dedicated to QR code
 intothewoods.route('/participant/qrcode/generate')
     .get(participant.generateQRCode);
+
+intothewoods.route('/participant/stage') // test register participant
+    .post(participant.getStage);
 
 //Routes dedicated to the Live
 intothewoods.route('/live/:id')
