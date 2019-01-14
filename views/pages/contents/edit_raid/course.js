@@ -112,6 +112,7 @@ function updateSelectedCourse() {
 }
 
 function removeCurrentEditedCourse() {
+    console.log("removed overlay id : " + (idCurrentEditedCourse + 1));
     feature = source.getFeatureById("course_" + (idCurrentEditedCourse + 1));
     source.removeFeature(feature);
     map.removeOverlay(map.getOverlayById(idCurrentEditedCourse + 1));
