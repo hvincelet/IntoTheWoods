@@ -7,6 +7,7 @@ module.exports = {
         database: 'intoTheWoodsDB',
         host: 'localhost',
         dialect: 'mysql',
+        operatorsAliases: false,
         logging: false, // True for logging sequelize message
         no_login: true,
         define: {
@@ -22,6 +23,7 @@ module.exports = {
         database: 'intoTheWoodsDB',
         host: 'localhost',
         dialect: 'mysql',
+        operatorsAliases: false,
         logging: false,
         no_login: false,
         define: {
