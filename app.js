@@ -144,6 +144,9 @@ intothewoods.route('/editraid/:id/allowregister')
 intothewoods.route('/editraid/:id/starttime')
     .post(checkAuth, raid.starttime);
 
+intothewoods.route('/editraid/:id/hashtag')
+    .post(checkAuth, raid.saveHashtag);
+
 intothewoods.route('/editraid/:id/sendMessage')
     .post(checkAuth, organizer.sendMail);
 

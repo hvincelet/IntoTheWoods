@@ -205,7 +205,8 @@ exports.saveSportsRanking = function (req, res) {
                     edition: unique_raid_found.dataValues.edition,
                     place: unique_raid_found.dataValues.place,
                     lat: unique_raid_found.dataValues.lat,
-                    lng: unique_raid_found.dataValues.lng
+                    lng: unique_raid_found.dataValues.lng,
+                    hashtag: unique_raid_found.dataValues.hashtag
                 });
             }
 
@@ -640,4 +641,27 @@ exports.setStartTime = function(req, res){
             //TODO : renvoyer un message d'erreur
         }
     });
+};
+
+exports.saveHashtag = function(req, res){
+    let user = connected_user(req.sessionID);
+    const raid = user.raid_list.find(function (raid) {
+        return raid.id === parseInt(req.params.id);
+    });
+    if (!raid) {
+        res.send(JSON.stringify({msg: "raid not found"}));
+        return res.redirect('/dashboard');
+    }else {
+        models.raid.findByPk(raid.id).then(function (raid_found) {
+            if (raid_found !== null) {
+                raid_found.update({
+                    hashtag: req.body.hashtag
+                }).then(function(){
+                    return res.send(JSON.stringify({msg: "ok"}));
+                });
+            } else {
+                return res.send(JSON.stringify({msg: "raid not found"}));
+            }
+        });
+    }
 };
