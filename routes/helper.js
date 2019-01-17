@@ -7,7 +7,7 @@ const moment = require('moment');
 
 const helpers = models.helper;
 
-exports.inviteHelper = function (req, res) {
+exports.inviteHelper = function(req, res) {
     const user = connected_user(req.sessionID);
     if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.raid_id);})){
         return res.redirect('/dashboard');
@@ -67,7 +67,9 @@ exports.inviteHelper = function (req, res) {
     return res.send(JSON.stringify({status: helper_invite_status}));
 };
 
-exports.displayRegister = function (req, res) {
+// Register new Helper default page
+exports.displayRegister = function(req, res){
+
     let raid_id = req.query.raid;
     if (raid_id !== undefined) {
         let get_post_clean = [];
@@ -244,7 +246,7 @@ exports.register = function (req, res) {
     }
 };
 
-exports.displayHome = function (req, res) {
+exports.displayHome = function(req, res){
 
     models.assignment.findAll({
         where: {
@@ -307,6 +309,7 @@ exports.displayHome = function (req, res) {
             });
         }
     });
+
 };
 
 exports.performCheckin = function (req, res) {
@@ -349,3 +352,101 @@ exports.remove = function (req, res) {
         }
     });
 };
+exports.participantPassage = function(req, res){
+    let idParticipant = req.body.idParticipant;
+    let idRaid = req.body.idRaid;
+
+    let dateLastStage = 0;
+
+    let orderRun;
+
+    models.stage.findAll({
+        where: {
+            id_participant: idParticipant
+        }
+    }).then(function (stages_found) {
+        if (stages_found !== null && stages_found.length >= 1) {
+            orderRun = stages_found.length + 1;
+
+            dateLastStage = new Date(stages_found[stages_found.length-1].timeEntered+"UTC");
+
+            let dateTime = new Date();
+
+            let time = new Date(dateTime - dateLastStage);
+
+            insertStage(orderRun, time, idParticipant, idRaid);
+        }
+        else{
+            orderRun = 1;
+            models.raid.findOne({
+                attributes: ['start_time', 'date'],
+                where: {
+                    id: idRaid
+                }
+            }).then(function (raid_found) {
+                if (raid_found !== null) {
+                    let dateRaid = raid_found.date.split("-")
+                    let timeRaid = raid_found.start_time.split(":")
+
+                    dateLastStage = new Date(dateRaid[0], dateRaid[1]-1, dateRaid[2], timeRaid[0], timeRaid[1], timeRaid[2]);
+
+                    let dateTime = new Date();
+                    let time = new Date(dateTime - dateLastStage);
+
+                    insertStage(orderRun, time, idParticipant, idRaid);
+                }
+                else{
+                    console.log("erreur");
+                }
+            });
+        }
+
+        models.course.findOne({
+            attributes: ['id'],
+            where: {
+                id_raid: idRaid,
+                order_num: orderRun
+            }
+        }).then(function (course_found) {
+            if(course_found !== null){
+                let time = Date.parse("January 01, 1970 "+stages_found[stages_found.length-1].time);
+
+                time = Date.parse(date)-(Date.parse(date)-time);
+
+                models.stage.create({
+                    id_participant: idParticipant,
+                    id_course: course_found.id,
+                    time: time
+                });
+            }
+            else{
+                console.log("erreur");
+                //TODO : renvoyer un message d'erreur
+            }
+        });
+    });
+};
+
+insertStage = function(orderRun, time, idParticipant, idRaid){
+
+    models.course.findOne({
+        attributes: ['id'],
+        where: {
+            id_raid: idRaid,
+            order_num: orderRun
+        }
+    }).then(function (course_found) {
+        if(course_found !== null){
+            models.stage.create({
+                id_participant: idParticipant,
+                id_course: course_found.id,
+                time: time.getUTCHours()+":"+time.getUTCMinutes()+":"+time.getUTCSeconds(),
+                timeEntered: new Date()
+            });
+        }
+        else{
+            console.log("erreur");
+            //TODO : renvoyer un message d'erreur
+        }
+    });
+}

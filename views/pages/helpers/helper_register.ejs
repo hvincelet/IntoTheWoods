@@ -195,114 +195,101 @@
         });
     }
 
-    $('form[id="helper_form"]').validate({
-        rules: { // registerUserFn registerUserLn registerEmail
-            registerUserFn: "required",
-            registerUserLn: "required",
-            registerEmail: {required: true, email: true},
-            registerAgree: "required"
-        },
-        messages: {
-            registerUserFn: "Saisissez votre prénom",
-            registerUserLn: "Saisissez votre nom",
-            registerEmail: "Saisissez une adresse e-mail valide",
-            registerAgree: "Veuillez acceptez les termes et conditions d'utilisations"
-        },
-        submitHandler: function (form) {
-            let list = [
-                <% activity.forEach(function(item){ %>
-                {id: "<%=item.id%>", name: '<%=item.title%>'},
-                <% }); %>
-            ];
+    $('form[id="helper_form"]').submit(event => {
+        event.preventDefault(); // disable form submit after ajax
+        let list = [
+            <% activity.forEach(function(item){ %>
+            {id: "<%=item.id%>", name: '<%=item.title%>'},
+            <% }); %>
+        ];
 
-            list.forEach(function (wish) {
-                let elem = document.createElement('textarea');
-                elem.innerHTML = wish.name;
-                wish.name = elem.value;
+        list.forEach(function (wish) {
+            let elem = document.createElement('textarea');
+            elem.innerHTML = wish.name;
+            wish.name = elem.value;
+        });
+
+        let whishes = [];
+
+        if($("#backup:checked").length > 0){
+            list.map(item => {
+                whishes.push({
+                    order: 1,
+                    id: item.id
+                });
             });
+        }else{
+            $('#table').find('tr').each(function () {
+                let index = $(this).find('td.row-number').text()
+                let selected_wish = $(this).find('td .select2-selection__rendered').text();
 
-            let whishes = [];
-
-            if($("#backup:checked").length > 0){
-                list.map(item => {
-                    whishes.push({
-                        order: 1,
-                        id: item.id
+                if($.isNumeric( index ) && parseInt(index) > 0){
+                    let wish = 0;
+                    list.forEach(function (item) {
+                        if(item.name === selected_wish){
+                            wish = item.id;
+                        }
                     });
-                });
-            }else{
-                $('#table').find('tr').each(function () {
-                    let index = $(this).find('td.row-number').text()
-                    let selected_wish = $(this).find('td .select2-selection__rendered').text();
+                    let already_added = whishes.some(function (element) {
+                        return element.id === wish;
+                    });
 
-                    if($.isNumeric( index ) && parseInt(index) > 0){
-                        let wish = 0;
-                        list.forEach(function (item) {
-                            if(item.name === selected_wish){
-                                wish = item.id;
-                            }
+                    if(!already_added){
+                        whishes.push({
+                            order: index,
+                            id: wish
                         });
-                        let already_added = whishes.some(function (element) {
-                            return element.id === wish;
-                        });
-
-                        if(!already_added){
-                            whishes.push({
-                                order: index,
-                                id: wish
-                            });
-                        }
                     }
-                });
-            }
-
-            $('#wishes_list').val( JSON.stringify(whishes) );
-
-            let $MESSAGE_MODAL = $('#messageModal');
-            let $MESSAGE_MODAL_TITLE = $('#messageDialog');
-            let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
-            let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
-
-            $.ajax({
-                type: 'POST',
-                url: '/helper/register',
-                data: {
-                    registerEmail: $('#register-email').val(),
-                    registerUserLn: $('#register-userln').val(),
-                    registerUserFn: $('#register-userfn').val(),
-                    whishes: whishes
-                },
-                success: function (response) {
-                    msg = JSON.parse(response).msg;
-                    if(msg === "ok"){
-                        $MESSAGE_MODAL_TITLE.html("Inscription validée !");
-                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                        $MESSAGE_MODAL_CONTENT.html("Vous avez bien été inscrit comme bénévole pour ce raid.<br/>" +
-                            "Vous recevrez un mail lorsqu'un poste vous aura été attribué par les organisat·eurs·rices.");
-                    }else{
-                        $MESSAGE_MODAL_TITLE.html("Erreur...");
-                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
-                        if(msg === "already_register"){
-                            $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
-                                "L'adresse e-mail est déjà associée à un bénévole pour ce raid...");
-                        }else{
-                            $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
-                                "Merci de recharger la page et de réessayer.");
-                        }
-
-                    }
-                    $MESSAGE_MODAL.modal('show');
-                },
-                error: function (response) {
-                    let msg = JSON.parse(response).msg;
-                    $MESSAGE_MODAL_TITLE.html("Erreur...");
-                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                    $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
-                        "Merci de recharger la page et de réessayer.");
-                    $MESSAGE_MODAL.modal('show');
                 }
             });
         }
+
+        $('#wishes_list').val( JSON.stringify(whishes) );
+
+        let $MESSAGE_MODAL = $('#messageModal');
+        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+
+        $.ajax({
+            type: 'POST',
+            url: '/helper/register',
+            data: {
+                registerEmail: $('#register-email').val(),
+                registerUserLn: $('#register-userln').val(),
+                registerUserFn: $('#register-userfn').val(),
+                whishes: whishes
+            },
+            success: function (response) {
+                msg = JSON.parse(response).msg;
+                if(msg === "ok"){
+                    $MESSAGE_MODAL_TITLE.html("Inscription validée !");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Vous avez bien été inscrit comme bénévole pour ce raid.<br/>" +
+                        "Vous recevrez un mail lorsqu'un poste vous aura été attribué par les organisat·eurs·rices.");
+                }else{
+                    $MESSAGE_MODAL_TITLE.html("Erreur...");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                    if(msg === "already_register"){
+                        $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
+                            "L'adresse e-mail est déjà associée à un bénévole pour ce raid...");
+                    }else{
+                        $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
+                            "Merci de recharger la page et de réessayer.");
+                    }
+
+                }
+                $MESSAGE_MODAL.modal('show');
+            },
+            error: function (response) {
+                let msg = JSON.parse(response).msg;
+                $MESSAGE_MODAL_TITLE.html("Erreur...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Impossible de valider votre inscription...<br/>" +
+                    "Merci de recharger la page et de réessayer.");
+                $MESSAGE_MODAL.modal('show');
+            }
+        });
     });
 </script>
 <% include ../partials/footer %>

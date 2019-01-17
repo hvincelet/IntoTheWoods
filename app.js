@@ -8,7 +8,8 @@ const express_lib = require('express');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
-const config = require('./config/config')[global.env];
+const config_path = require('./config/config')[global.env].credentials;
+const config = require(config_path)[env];
 
 // IntoTheWoods app
 const intothewoods = express();
@@ -50,14 +51,14 @@ global.connected_user = function (uuid) {
         return connected_users[0];
     }
     return connected_users.find(function (user) {
-        return user.uuid == uuid;
+        return user.uuid === uuid;
     });
 };
 
 let checkAuth = function (req, res, next) {
     if (!config.no_login) {
         const user = connected_users.find(function (user) {
-            return user.uuid == req.sessionID;
+            return user.uuid === req.sessionID;
         });
         if (!user) {
             return res.redirect('/login');
@@ -163,6 +164,10 @@ intothewoods.route('/editraid/:id/removeHelper')
 intothewoods.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
+intothewoods.route('/editraid/setStartTime')
+    .post(checkAuth, raid.setStartTime);
+
+
 //routes dedicated to the helpers
 intothewoods.route('/team/:raid_id/invitehelpers')
     .post(checkAuth, helper.inviteHelper);
@@ -180,14 +185,29 @@ intothewoods.route('/helper/:id/home')
 intothewoods.route('/helper/check_in')
     .post(helper.performCheckin);
 
-// Routes dedicated to participant
+intothewoods.route('/helper/participantPassage')
+    .post(helper.participantPassage);
+
+//Routes dedicated to the participants
 intothewoods.route('/participant/register')
     .get(participant.displayRegister)
     .post(participant.register);
 
-// Routes dedicated to live
+intothewoods.route('/participant/:id/home')
+    .get(participant.displayHome);
+
+
+//Routes dedicated to the Live
 intothewoods.route('/live/:id')
-    .get(live.home);
+    .get(live.displayLive)
+    .post(live.getData);
+
+intothewoods.route('/live')
+    .get(live.displayAllLive);
+
+// Misc routes
+intothewoods.route('/termsandpolicy')
+    .get(misc.cgu);
 
 
 //bad url route

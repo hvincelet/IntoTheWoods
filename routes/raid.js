@@ -615,3 +615,29 @@ exports.starttime = function (req, res) {
         });
     }
 };
+
+exports.setStartTime = function(req, res){
+    let idRaid = req.body.idRaid;
+
+    models.raid.findOne({
+        where: {
+            id: idRaid
+        }
+    }).then(function (raid_found) {
+        if (raid_found !== null) {
+            let time = new Date();
+            models.raid.update(
+                {
+                    start_time: time.toLocaleTimeString()
+                },
+                {where: {
+                    id: idRaid
+                }
+            });
+        }
+        else{
+            console.log("erreur");
+            //TODO : renvoyer un message d'erreur
+        }
+    });
+};

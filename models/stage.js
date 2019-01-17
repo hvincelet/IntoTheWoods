@@ -23,6 +23,10 @@ module.exports = function(sequelize, DataTypes) {
     time: {
       type: DataTypes.TIME,
       allowNull: true
+    },
+    timeEntered: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     tableName: 'stage'

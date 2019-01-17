@@ -51,7 +51,6 @@ exports.idVerification = function (req, res) {
                 initials: organizer_found.dataValues.first_name.charAt(0).concat(organizer_found.dataValues.last_name.charAt(0)).toUpperCase(),
                 picture: organizer_found.dataValues.picture,
                 raid_list: [],
-                other_raid_list: [],
                 idCurrentRaid: -1
             };
 
