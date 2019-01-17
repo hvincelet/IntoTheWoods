@@ -24,7 +24,7 @@
     "ejs-html": "^5.1.5",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
-    "jdenticon": "^2.1.0",
+    "jdenticon": "^2.1.1",
     "moment": "^2.23.0",
     "mysql": "^2.16.0",
     "mysql2": "^1.6.4",

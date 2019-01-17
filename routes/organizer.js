@@ -84,6 +84,7 @@ exports.idVerification = function (req, res) {
                         lng: tuple.dataValues.raid.dataValues.lng,
                         start_time: tuple.dataValues.raid.start_time,
                         allow_register: tuple.dataValues.raid.allow_register,
+                        hashtag: tuple.dataValues.raid.dataValues.hashtag,
                         in_future: in_future
                     });
                 });

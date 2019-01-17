@@ -149,6 +149,9 @@ intothewoods.route('/editraid/:id/allowregister')
 intothewoods.route('/editraid/:id/starttime')
     .post(checkAuth, raid.starttime);
 
+intothewoods.route('/editraid/:id/hashtag')
+    .post(checkAuth, raid.saveHashtag);
+
 intothewoods.route('/editraid/:id/sendMessage')
     .post(checkAuth, organizer.sendMail);
 
@@ -204,11 +207,6 @@ intothewoods.route('/live/:id')
 
 intothewoods.route('/live')
     .get(live.displayAllLive);
-
-// Misc routes
-intothewoods.route('/termsandpolicy')
-    .get(misc.cgu);
-
 
 //bad url route
 intothewoods.use(function (req, resp, next) {
