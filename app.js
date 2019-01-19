@@ -72,6 +72,7 @@ const map = require('./routes/map');
 const misc = require('./routes/misc');
 const helper = require('./routes/helper');
 const participant = require('./routes/participant');
+const live = require('./routes/live');
 
 /**********************************/
 /*             Routes             */
@@ -158,11 +159,11 @@ intothewoods.route('/editraid/:id/removeHelper')
 intothewoods.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
-intothewoods.route('/editraid/setStartTime')
-    .post(checkAuth, raid.setStartTime);
+//intothewoods.route('/editraid/setStartTime')
+//    .post(checkAuth, raid.setStartTime);
 
 intothewoods.route('/editraid/:id/generateQRCode')
-    .get(raid.generateQRCode);
+    .post(checkAuth, raid.generateQRCode);
 
 //routes dedicated to the helpers
 intothewoods.route('/team/:raid_id/invitehelpers')

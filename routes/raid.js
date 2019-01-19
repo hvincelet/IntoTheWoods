@@ -10,6 +10,7 @@ const raids = models.raid;
 const pdf = require('html-pdf');
 var options = { format: 'A4', orientation: 'landscape' };
 const QRCode = require('qrcode');
+const http = require('http');
 
 exports.init = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -654,9 +655,10 @@ exports.generateQRCode = function(req, res){
                          "</html>";
               cpt=cpt+1;
               if(cpt==participant_found.length){
-                pdf.create(html, options).toFile('./participants.pdf', function(err, res) {
-                  if (err) return console.log(err);
-                  //console.log(res); // { filename: '/app/participants.pdf' }
+                pdf.create(html, options).toBuffer(function(err, buffer) {
+                  if (err) return res.send(JSON.stringify({msg: "not-generate"}));
+                  buffer = buffer.toString('base64');
+                  return res.send({msg: "ok",buffer: buffer});
                 });
               }
             });
