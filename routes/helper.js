@@ -426,14 +426,32 @@ insertStage = function(orderRun, time, idParticipant, idRaid){
 }
 
 exports.qrcodeReader = function(req, res){
-  // TODO : check if participant can use qrcodeReader
-  res.render(pages_path + "qrcodeReader.ejs", {
-      pageTitle: "Lecteur de QRCode pour participant",
+  models.assignment.findOne({
+    attributes: ['id_helper_post'],
+    where: {
+      id_helper: req.params.id
+    }
+  }).then(function(helper_found){
+    if(helper_found !== null){
+      models.helper_post.findOne({
+        attributes: ['allow_qrcodereader'],
+        where: {
+          id: helper_found.id
+        }
+      }).then(function(helper_post_found){
+        if(helper_post_found != null){
+          if(helper_post_found.allow_qrcodereader == 1){
+            res.render(pages_path + "qrcodeReader.ejs", {
+                pageTitle: "Lecteur de QRCode pour participant",
+            });
+          }
+        }
+      })
+    }
   });
 }
 
 exports.registerRunner = function(req, res){
-    //console.log(req.body);
     var participant = {};
     participant.id = req.body.id;
     participant.time = req.body.time;

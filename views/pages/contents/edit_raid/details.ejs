@@ -103,7 +103,7 @@ helpers.map( (helper, index) => {
                                     <td width="10%" contenteditable="false"><input class="poi_number_helper" type="number" min="1" value="<%= poi.nb_helper %>"/></td>
                                     <td width="40%" class="poi_description" contenteditable="true"><%= poi.description %></td>
                                     <td width="10%" contenteditable="false">
-                                      <input id="allow_qrcodereader" name="allow_qrcodereader" type="checkbox" value="<%= poi.id %>"
+                                      <input id="allow_qrcodereader<%=poi.id%>" type="checkbox" value="<%=poi.id%>"
                                       <%if(parseInt(poi.allow_qrcodereader) === 1){%> checked <%}%> >
                                     </td>
                                 </tr>
@@ -264,7 +264,8 @@ helpers.map( (helper, index) => {
         });
         <% }); %>
 
-        $('#allow_qrcodereader:checkbox').change(function () {
+        <% pois.map(poi => { %>
+        $("#allow_qrcodereader<%=poi.id%>:checkbox").change(function () {
             let $MESSAGE_MODAL = $('#messageModal');
             let $MESSAGE_MODAL_TITLE = $('#messageDialog');
             let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
@@ -299,6 +300,7 @@ helpers.map( (helper, index) => {
                 }
             });
         });
+        <% }); %>
     });
     <%- scripts %>
 </script>

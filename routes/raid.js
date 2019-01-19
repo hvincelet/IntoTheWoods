@@ -677,15 +677,15 @@ exports.allowqrcodereader = function (req, res) {
   if (!raid) {
       return res.redirect('/dashboard');
   }else {
-    models.point_of_interest.findOne({
+    models.helper_post.findOne({
         where: {
-            id: req.body.id
+            id: parseInt(req.body.id)
         }
-    }).then(function (poi_found) {
-        if(poi_found === null){
+    }).then(function (helper_post_found) {
+        if(helper_post_found === null){
             return res.send(JSON.stringify({msg: "not-found"}));
         }else{
-            poi_found.update({
+            helper_post_found.update({
                 allow_qrcodereader: parseInt(req.body.status)
             }).then(function () {
                 return res.send(JSON.stringify({msg: "ok"}));
