@@ -165,6 +165,9 @@ intothewoods.route('/team/:raid_id/inviteorganizers')
 intothewoods.route('/editraid/:id/generateQRCode')
     .post(checkAuth, raid.generateQRCode);
 
+intothewoods.route('/editraid/:id/allowqrcodereader')
+        .post(checkAuth, raid.allowqrcodereader);
+
 //routes dedicated to the helpers
 intothewoods.route('/team/:raid_id/invitehelpers')
     .post(checkAuth, helper.inviteHelper);

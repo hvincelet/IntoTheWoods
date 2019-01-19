@@ -491,7 +491,7 @@ exports.displayRaid = function (req, res) {
                         let helper_post_model = models.helper_post;
                         helper_post_model.belongsTo(poi_model, {foreignKey: "id_point_of_interest"});
                         helper_post_model.findAll({
-                            attributes: ["id", "title", "nb_helper", "description"],
+                            attributes: ["id", "title", "nb_helper", "description", "allow_qrcodereader"],
                             include: {
                                 model: poi_model,
                                 where: {
@@ -668,3 +668,29 @@ exports.generateQRCode = function(req, res){
     }
   });
 }
+
+exports.allowqrcodereader = function (req, res) {
+  let user = connected_user(req.sessionID);
+  const raid = user.raid_list.find(function (raid) {
+      return raid.id === parseInt(req.params.id);
+  });
+  if (!raid) {
+      return res.redirect('/dashboard');
+  }else {
+    models.point_of_interest.findOne({
+        where: {
+            id: req.body.id
+        }
+    }).then(function (poi_found) {
+        if(poi_found === null){
+            return res.send(JSON.stringify({msg: "not-found"}));
+        }else{
+            poi_found.update({
+                allow_qrcodereader: parseInt(req.body.status)
+            }).then(function () {
+                return res.send(JSON.stringify({msg: "ok"}));
+            });
+        }
+    });
+  }
+};

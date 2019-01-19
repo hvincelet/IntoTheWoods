@@ -209,6 +209,7 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`helper_post` (
   `title` VARCHAR(128) NULL,
   `description` VARCHAR(1024) NULL,
   `nb_helper` INT DEFAULT 1,
+  `allow_qrcodereader` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   CONSTRAINT `id_point_of_interest`
     FOREIGN KEY (`id_point_of_interest`)

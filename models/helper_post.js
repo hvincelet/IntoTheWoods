@@ -28,6 +28,11 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER(11),
       allowNull: true,
       defaultValue: '1'
+    },
+    allow_qrcodereader: {
+      type: DataTypes.INTEGER(1),
+      allowNull: false,
+      defaultValue: '0'
     }
   }, {
     tableName: 'helper_post'

@@ -94,13 +94,18 @@ helpers.map( (helper, index) => {
                                     <th class="text-center">Nom</th>
                                     <th class="text-center">Nombre de bénévole</th>
                                     <th class="text-center">Description</th>
+                                    <th class="text-center">Lecteur de QRCode</th>
                                 </tr>
                                 <% pois.map(poi => { %>
                                 <tr>
                                     <td class="poi_id" style="display: none;"><%= poi.id %></td>
                                     <td class="pt-3-half poi_name" contenteditable="true" width="40%"><%=poi.name%></td>
-                                    <td width="20%" contenteditable="false"><input class="poi_number_helper" type="number" min="1" value="<%= poi.nb_helper %>"/></td>
+                                    <td width="10%" contenteditable="false"><input class="poi_number_helper" type="number" min="1" value="<%= poi.nb_helper %>"/></td>
                                     <td width="40%" class="poi_description" contenteditable="true"><%= poi.description %></td>
+                                    <td width="10%" contenteditable="false">
+                                      <input id="allow_qrcodereader" name="allow_qrcodereader" type="checkbox" value="<%= poi.id %>"
+                                      <%if(parseInt(poi.allow_qrcodereader) === 1){%> checked <%}%> >
+                                    </td>
                                 </tr>
                                 <% }); %>
                             </table>
@@ -258,6 +263,42 @@ helpers.map( (helper, index) => {
             });
         });
         <% }); %>
+
+        $('#allow_qrcodereader:checkbox').change(function () {
+            let $MESSAGE_MODAL = $('#messageModal');
+            let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+            let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+            let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+            let status = this.checked?"accessible":"non accessible";
+            $.ajax({
+                type: 'POST',
+                url: '/editraid/<%=raid.id%>/allowqrcodereader',
+                data: {
+                    status: this.checked?1:0,
+                    id: this.value
+                },
+                success: function (response) {
+                    msg = JSON.parse(response).msg;
+                    if(msg === "ok"){
+                        $MESSAGE_MODAL_TITLE.html("Lecteur de QR Code ");
+                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                        $MESSAGE_MODAL_CONTENT.html("Le lecteur de QR Code est désormais " + status + ".");
+                    }else{
+                        $MESSAGE_MODAL_TITLE.html("Impossible d'effectuer cette action");
+                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                        $MESSAGE_MODAL_CONTENT.html("Une erreur est survenue... Impossible de sauvegarder le statut.<br/>Raffraichissez la page et rééssayez.");
+                    }
+                    $MESSAGE_MODAL.modal('show');
+                },
+                error: function (response) {
+                    let msg = JSON.parse(response).msg;
+                    $MESSAGE_MODAL_TITLE.html("Impossible d'effectuer cette action");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Une erreur est survenue... Impossible de sauvegarder le statut.<br/>Raffraichissez la page et rééssayez.");
+                    $MESSAGE_MODAL.modal('show');
+                }
+            });
+        });
     });
     <%- scripts %>
 </script>
