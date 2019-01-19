@@ -187,10 +187,10 @@ intothewoods.route('/helper/check_in')
 intothewoods.route('/helper/participantPassage')
     .post(helper.participantPassage); //TODO : Décommenter la ligne une fois le dev terminé
 
-intothewoods.route('/helper/:id/qrcodeReader')
+intothewoods.route('/helper/qrcodereader')
     .get(helper.qrcodeReader);
 
-intothewoods.route('/helper/registerRunner')
+intothewoods.route('/helper/registerrunner')
     .post(helper.registerRunner);
 
 // Routes dedicated to participant

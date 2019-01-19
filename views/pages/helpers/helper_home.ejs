@@ -100,6 +100,9 @@
                                 <% if(helper_post.description !== null && helper_post.description.length > 0){ %>
                                     <h3 style="font-size: small">Description du poste</h3>
                                     <label><%= helper_post.description %></label>
+                                    <% if(helper_post.allow_qrcodereader == 1){ %>
+                                      <button onclick="window.location.replace('../qrcodereader')"> Lecteur de QR Code </button>
+                                    <% } %>
                                 <% } %>
                             </div>
 

@@ -36,10 +36,6 @@
       </div>
     </center>
     </div>
-    <script>
-        const participant = <%- JSON.stringify(participant) %>;
-        const raid = <%- JSON.stringify(raid) %>;
-    </script>
     <script src="/views/vendors/jsQR.js"></script>
     <script>
       var video = document.createElement("video");
@@ -123,16 +119,14 @@
             type : "POST",
             contentType : "application/json",
             data : JSON.stringify(cookies_json),
-            url : "http://localhost:8080/helper/registerRunner",
+            url : "http://localhost:8080/helper/registerrunner",
             dataType : 'json',
             success : function(data) {
               outputData.innerText = "Participant "+data.id+" checked at "+ new Date(data.time).toLocaleTimeString()+".";
               document.cookie = tab[0]+"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-              console.log("success");
             },
             error : function(e) {
               outputData.innerText = "Participant not checked (update with network).";
-              console.log("error");
             }
           });
         }
