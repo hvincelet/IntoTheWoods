@@ -436,5 +436,6 @@ exports.registerRunner = function(req, res){
     participant.id = req.body.id;
     participant.time = req.body.time;
     // TODO : register participant and time
+    console.log(participant);
     return res.send(participant);
 };
