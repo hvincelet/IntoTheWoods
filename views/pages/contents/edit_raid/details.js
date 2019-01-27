@@ -370,9 +370,16 @@ function removeHelper(id, name){
     });
 }
 
-if(raid.start_time !== null){
-    if ( $('#start_time')[0].type != 'time' ) $('#start_time').val("<%=raid.start_time.slice(0,-3)%>");
-}
+<% if(raid.start_time !== null){ %>
+    let start_time_input = $('#start_time');
+    if ( start_time_input[0].type !== 'time'){
+        <% if(raid.start_time.length > 5){ %>
+            start_time_input.val("<%=raid.start_time.slice(0,-3)%>");
+        <% }else{ %>
+            start_time_input.val("<%=raid.start_time%>");
+        <% } %>
+    }
+<% } %>
 
 
 function saveStartTime() {
