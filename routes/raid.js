@@ -205,7 +205,8 @@ exports.saveSportsRanking = function (req, res) {
                     edition: unique_raid_found.dataValues.edition,
                     place: unique_raid_found.dataValues.place,
                     lat: unique_raid_found.dataValues.lat,
-                    lng: unique_raid_found.dataValues.lng
+                    lng: unique_raid_found.dataValues.lng,
+                    hashtag: unique_raid_found.dataValues.hashtag
                 });
             }
 
@@ -359,7 +360,7 @@ exports.displayRaid = function (req, res) {
         team_model.findAll({
             include: [{
                 model: organizer_model,
-                attributes: ['email', 'last_name', 'first_name']
+                attributes: ['email', 'last_name', 'first_name', 'picture']
             }],
             attributes: ['id_organizer'],
             where: {
@@ -372,7 +373,8 @@ exports.displayRaid = function (req, res) {
                 organizers_linked_with_the_current_raid.push({
                     email: organizer.dataValues.organizer.dataValues.email,
                     first_name: organizer.dataValues.organizer.dataValues.first_name,
-                    last_name: organizer.dataValues.organizer.dataValues.last_name
+                    last_name: organizer.dataValues.organizer.dataValues.last_name,
+                    picture: organizer.organizer.picture
                 });
             });
 
@@ -610,6 +612,55 @@ exports.starttime = function (req, res) {
                     raid.start_time = req.body.start_time;
                     return res.send(JSON.stringify({msg: "ok"}));
                 });
+            }
+        });
+    }
+};
+
+exports.setStartTime = function(req, res){
+    let idRaid = req.body.idRaid;
+
+    models.raid.findOne({
+        where: {
+            id: idRaid
+        }
+    }).then(function (raid_found) {
+        if (raid_found !== null) {
+            let time = new Date();
+            models.raid.update(
+                {
+                    start_time: time.toLocaleTimeString()
+                },
+                {where: {
+                    id: idRaid
+                }
+            });
+        }
+        else{
+            console.log("erreur");
+            //TODO : renvoyer un message d'erreur
+        }
+    });
+};
+
+exports.saveHashtag = function(req, res){
+    let user = connected_user(req.sessionID);
+    const raid = user.raid_list.find(function (raid) {
+        return raid.id === parseInt(req.params.id);
+    });
+    if (!raid) {
+        res.send(JSON.stringify({msg: "raid not found"}));
+        return res.redirect('/dashboard');
+    }else {
+        models.raid.findByPk(raid.id).then(function (raid_found) {
+            if (raid_found !== null) {
+                raid_found.update({
+                    hashtag: req.body.hashtag
+                }).then(function(){
+                    return res.send(JSON.stringify({msg: "ok"}));
+                });
+            } else {
+                return res.send(JSON.stringify({msg: "raid not found"}));
             }
         });
     }

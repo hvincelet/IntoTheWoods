@@ -46,6 +46,10 @@ footer.main-footer{
     background-size: cover;
 }
 
+.live-background{
+    background-color: #393836;
+}
+
 .form-group .select2-container {
     position: relative;
     z-index: 2;
@@ -103,4 +107,52 @@ footer.main-footer{
 
 .card table {
     background-color: whitesmoke;
+}
+
+table.profile{
+    background-color: transparent;
+    border: none;
+    width: 100%;
+}
+
+table.profile th{
+    width: 7%;
+    text-align: right;
+    padding-bottom: 2%;
+}
+
+table.profile td{
+    text-align: left;
+    width: 15%;
+    padding-left: 2%;
+    padding-bottom: 2%;
+}
+
+table.profile td.profile{
+    width: 58%;
+    padding-right: 20%;
+}
+
+table.profile img{
+    image-rendering: high-quality;
+    width: 150px;
+}
+
+.img_thumbnail{
+    width: 50px;
+    image-rendering: high-quality;
+    margin-right: 2%;
+}
+
+.live-card{
+    background-color: rgba(225, 225, 225, 0.70);
+    height: 100%;
+    border-radius: 1%;
+}
+.live-card .card-body .card-text{
+    color: black !important;
+}
+
+.custom-file-input ~ .custom-file-label::after {
+    content: "Sélectionner";
 }
