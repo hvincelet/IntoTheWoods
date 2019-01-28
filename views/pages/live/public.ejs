@@ -22,15 +22,20 @@
                 <div class="card live-card">
                     <div class="card-body">
                         <h4 class="card-title">Classement</h4>
-
+                        <div class="form-group">
+                            <div id="output" class="col-sm-10">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-4"> <!-- Social Network -->
                 <div class="card live-card">
-                    <div class="card-body">
-                        <h4 class="card-title">Réseaux sociaux</h4>
-
+                    <div class="card-body" style="display:flex;flex-direction:column;">
+                        <h4 class="card-title" style="flex-shrink:0;">Réseaux sociaux</h4>
+                        <div style="overflow-y:auto;">
+                            <%- text %>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -44,5 +49,60 @@
     </div>
 </div>
 <% include ../partials/footer %>
+<script type="text/javascript">
+    function getXMLHttpRequest() {
+        var xhr = null;
+
+        if (window.XMLHttpRequest || window.ActiveXObject) {
+            if (window.ActiveXObject) {
+                try {
+                    xhr = new ActiveXObject("Msxml2.XMLHTTP");
+                } catch(e) {
+                    xhr = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+            } else {
+                xhr = new XMLHttpRequest();
+            }
+        } else {
+            alert("Votre navigateur ne supporte pas l'objet XMLHTTPRequest...");
+            return null;
+        }
+
+        return xhr;
+    }
+
+    function request() {
+        var xhr = getXMLHttpRequest();
+
+        xhr.open("POST", "http://localhost:8080/live/1", true);
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState==4 && xhr.status==200){
+                var response=JSON.parse(xhr.responseText);
+                console.log(response);
+                readData(response);
+            }
+        };
+
+        xhr.send();
+    }
+
+    function readData(data) {
+        var ul = document.createElement("ul"), li, cn;
+
+        for (var i=0 ; i<data.length ; i++) {
+            li = document.createElement("li");
+            cn = document.createTextNode(data[i]["participant.first_name"] + " " + data[i]["participant.first_name"] + " vient de finir la course " + data[i]["course.label"] + " avec le temps suivant : " + data[i]["time"]);
+
+            li.appendChild(cn);
+            ul.appendChild(li);
+        }
+
+        document.getElementById("output").removeChild(document.getElementById("output").childNodes[0]);
+        document.getElementById("output").appendChild(ul);
+    }
+    request();
+    setInterval(function(){request();}, 3000);
+</script>
 </body>
 </html>
