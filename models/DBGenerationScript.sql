@@ -16,6 +16,7 @@ GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'localhost' IDENTIFIED 
 GRANT ALL PRIVILEGES ON intothewoodsdb.* TO 'gluser2018'@'148.60.%.%' IDENTIFIED BY 'glpass2018' WITH GRANT OPTION;
 -- ALTER USER 'gluser2018'@'localhost' IDENTIFIED WITH mysql_native_password BY 'glpass2018';
 -- sequelize-auto -o "./models" -d intoTheWoodsDB -h localhost -u gluser2018 -x glpass2018 -e mysql
+-- ALTER USER 'gluser2018'@'localhost' IDENTIFIED WITH mysql_native_password BY 'glpass2018';
 
 -- -----------------------------------------------------
 -- Schema intoTheWoodsDB
@@ -38,6 +39,8 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `startTime` TIMESTAMP NULL,
   `hashtag` VARCHAR(30) NULL,
   `allow_register` TINYINT(1) NOT NULL DEFAULT 0,
+  `startRegister` DATETIME NULL,
+  `endRegister` DATETIME NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 

@@ -6,6 +6,7 @@ const geocoder = new Nominatim();
 const ejs = require('ejs');
 const fs = require('fs');
 const raids = models.raid;
+const Op = require('Sequelize').Op
 
 exports.init = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -664,4 +665,35 @@ exports.saveHashtag = function(req, res){
             }
         });
     }
+};
+
+exports.setRegisterDates = function(req, res){
+    let idRaid = req.body.idRaid;
+    let startRegister = new Date(req.body.startRegister);
+    let endRegister = new Date(req.body.endRegister);
+
+    console.log(idRaid+" "+startRegister+" "+endRegister)
+
+    models.raid.findOne({
+        where: {
+            id: idRaid
+        }
+    }).then(function (raid_found) {
+        if (raid_found !== null) {
+            let time = new Date();
+            models.raid.update(
+                {
+                    startRegister: startRegister,
+                    endRegister: endRegister
+                },
+                {where: {
+                        id: idRaid
+                    }
+                });
+        }
+        else{
+            console.log("erreur");
+            //TODO : renvoyer un message d'erreur
+        }
+    });
 };

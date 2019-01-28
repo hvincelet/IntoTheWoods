@@ -4,6 +4,7 @@ const sender = require('./sender');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const moment = require('moment');
+const date = require('date-and-time');
 
 const helpers = models.helper;
 
@@ -67,9 +68,7 @@ exports.inviteHelper = function(req, res) {
     return res.send(JSON.stringify({status: helper_invite_status}));
 };
 
-// Register new Helper default page
-exports.displayRegister = function(req, res){
-
+exports.displayRegister = function (req, res) {
     let raid_id = req.query.raid;
     if (raid_id !== undefined) {
         let get_post_clean = [];
@@ -246,7 +245,7 @@ exports.register = function (req, res) {
     }
 };
 
-exports.displayHome = function(req, res){
+exports.displayHome = function (req, res) {
 
     models.assignment.findAll({
         where: {
