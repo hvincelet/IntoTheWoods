@@ -448,28 +448,51 @@ loadHelperPost(helperPostArrayToLoad);
 let gpxFormat = new ol.format.GPX();
 let gpxFeatures;
 
+
+//$('#gpxErrorModal').hide();
+//$('#exampleModal').modal('show');
+
 function handleFileSelect(evt) {
     let files = evt.target.files; // FileList object
 
     // files is a FileList of File objects. List some properties.
     let output = [];
     for (let i = 0, f; f = files[i]; i++) {
-        console.log("files[i]", files[i]);
-        let reader = new FileReader();
-        reader.readAsText(files[i], "UTF-8");
-        reader.onload = function (evt) {
-            console.log(evt.target.result);
-            gpxFeatures = gpxFormat.readFeatures(evt.target.result, {
-                dataProjection: 'EPSG:4326',
-                featureProjection: 'EPSG:3857'
-            });
-            gpxLayer.getSource().addFeatures(gpxFeatures);
-            console.log("gpxFeatures", gpxFeatures)
-        };
-        output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-            f.size, ' bytes, last modified: ',
-            f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-            '</li>');
+        if (files[i].type === "application/gpx+xml") {
+
+            let reader = new FileReader();
+            reader.readAsText(files[i], "UTF-8");
+            reader.onload = function (evt) {
+                //console.log(evt.target.result);
+
+
+                gpxFeatures = gpxFormat.readFeatures(evt.target.result, {
+                    dataProjection: 'EPSG:4326',
+                    featureProjection: 'EPSG:3857'
+                });
+                gpxLayer.getSource().addFeatures(gpxFeatures);
+                console.log("gpxFeatures", gpxFeatures)
+            };
+            output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+                f.size, ' bytes, last modified: ',
+                f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+                '</li>');
+
+
+
+            $('#exampleModal').modal('show');
+
+        } else {
+            let $MESSAGE_MODAL = $('#messageModal');
+            let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+            let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+            let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+
+            $MESSAGE_MODAL_TITLE.html("Problème à l'import");
+            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+            $MESSAGE_MODAL_CONTENT.html("Le format du fichier sélectionné n'est pas le bon. Veillez à ouvrir un fichier .gpx");
+            $MESSAGE_MODAL.modal('show');
+        }
     }
     document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
 }
@@ -549,3 +572,4 @@ let gpxLayer = new ol.layer.Vector({
 map.addLayer(gpxLayer);
 
 document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
