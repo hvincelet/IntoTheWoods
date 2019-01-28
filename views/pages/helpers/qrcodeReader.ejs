@@ -119,7 +119,7 @@
             type : "POST",
             contentType : "application/json",
             data : JSON.stringify(cookies_json),
-            url : "http://localhost:8080/helper/registerrunner",
+            url : "/helper/registerrunner",
             dataType : 'json',
             success : function(data) {
               outputData.innerText = "Participant "+data.id+" checked at "+ new Date(data.time).toLocaleTimeString()+".";

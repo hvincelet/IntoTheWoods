@@ -184,8 +184,6 @@ intothewoods.route('/helper/:id/home')
 
 intothewoods.route('/helper/check_in')
     .post(helper.performCheckin);
-intothewoods.route('/helper/participantPassage')
-    .post(helper.participantPassage); //TODO : Décommenter la ligne une fois le dev terminé
 
 intothewoods.route('/helper/qrcodereader')
     .get(helper.qrcodeReader);
