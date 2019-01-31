@@ -318,11 +318,13 @@ exports.getGeocodedResults = function (req, res) {
 
 exports.displayAllRaids = function (req, res) {
     const user = connected_user(req.sessionID);
+    const raids = user.raid_list;
     if (user.raid_list.length !== 0) {
         res.render(pages_path + "template.ejs", {
             pageTitle: "Gestion des Raids",
             page: "edit_raid/all",
-            user: user
+            user: user,
+            raids: raids
         });
     } else {
         res.redirect('/dashboard');

@@ -400,7 +400,7 @@ exports.participantPassage = function(req, res){
             });
         }
 
-        models.course.findOne({
+        /*models.course.findOne({
             attributes: ['id'],
             where: {
                 id_raid: idRaid,
@@ -408,6 +408,7 @@ exports.participantPassage = function(req, res){
             }
         }).then(function (course_found) {
             if(course_found !== null){
+                console.log(stages_found)
                 let time = Date.parse("January 01, 1970 "+stages_found[stages_found.length-1].time);
 
                 time = Date.parse(date)-(Date.parse(date)-time);
@@ -422,7 +423,7 @@ exports.participantPassage = function(req, res){
                 console.log("erreur");
                 //TODO : renvoyer un message d'erreur
             }
-        });
+        });*/
     });
 };
 

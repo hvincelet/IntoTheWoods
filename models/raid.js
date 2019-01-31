@@ -36,10 +36,6 @@ module.exports = function(sequelize, DataTypes) {
       type: "DOUBLE",
       allowNull: true
     },
-    startTime: {
-      type: DataTypes.DATE,
-      allowNull: true
-    },
     hashtag: {
       type: DataTypes.STRING(30),
       allowNull: true
@@ -56,6 +52,10 @@ module.exports = function(sequelize, DataTypes) {
     endRegister: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    startTime: {
+      type: DataTypes.DATEONLY,
+      allowNull: false
     }
   }, {
     tableName: 'raid'
