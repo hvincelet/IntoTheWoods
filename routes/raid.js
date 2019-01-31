@@ -6,7 +6,6 @@ const geocoder = new Nominatim();
 const ejs = require('ejs');
 const fs = require('fs');
 const raids = models.raid;
-const Op = require('Sequelize').Op
 
 const pdf = require('html-pdf');
 var options = { format: 'A4', orientation: 'landscape' };
@@ -670,7 +669,7 @@ exports.generateQRCode = function(req, res){
       });
     }
   });
-}
+};
 
 exports.allowqrcodereader = function (req, res) {
   let user = connected_user(req.sessionID);
@@ -695,6 +694,7 @@ exports.allowqrcodereader = function (req, res) {
             });
         }
     });
+  }
 };
 
 exports.saveHashtag = function(req, res){
@@ -721,11 +721,12 @@ exports.saveHashtag = function(req, res){
 };
 
 exports.setRegisterDates = function(req, res){
+
     let idRaid = req.body.idRaid;
     let startRegister = new Date(req.body.startRegister);
     let endRegister = new Date(req.body.endRegister);
 
-    console.log(idRaid+" "+startRegister+" "+endRegister)
+    console.log(idRaid+" "+startRegister+" "+endRegister);
 
     models.raid.findOne({
         where: {
