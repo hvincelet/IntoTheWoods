@@ -12,7 +12,8 @@ function loadPointsOfInterest(pointArray) {
 
         pointOfInterestArrayToStore.push({
             id: pointOfInterest.id,
-            is_new: false
+            is_new: false,
+            removed: false
         });
     });
 }
@@ -66,7 +67,8 @@ function setPointOfInterestFromCoordinates(coordinates) {
 
             pointOfInterestArrayToStore.push({
                 id: lastPointOfInterestCreatedID,
-                is_new: true
+                is_new: true,
+                removed: false
             });
 
             showPopup(pointOfInterestFound, "Créer le point d'intérêt");

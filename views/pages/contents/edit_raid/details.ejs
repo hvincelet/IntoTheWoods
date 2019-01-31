@@ -44,17 +44,24 @@ helpers.map( (helper, index) => {
                             </tr>
                         </table>
 
-                        <input type="time" id="start_time" size="3" class="text-center" <%if(raid.start_time !== null){%>value="<%=raid.start_time%>"<% } %>>
-                        <label for="start_time">Heure de départ du raid <small>(Exemple: 09:30)</small></label>
-                        <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="saveStartTime();">Enregistrer</button>
-                        <br/>
+                        <div class="col-md-6">
+                            <input type="time" id="start_time" size="3" class="text-center" <%if(raid.start_time !== null){%>value="<%=raid.start_time%>"<% } %>>
+                            <label for="start_time">Heure de départ du raid <small>(Exemple: 09:30)</small></label>
+                            <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="saveStartTime();">Enregistrer</button>
+                            <br/>
 
 
-                        <% if (pois.length > 0 ) { %>
+                            <% if (pois.length > 0 ) { %>
                             <input id="allow_register" name="allow_register" type="checkbox" class="form-control-custom"
                             <%if(parseInt(raid.allow_register) === 1){%> checked <%}%> >
                             <label for="allow_register">Autoriser les inscriptions des bénévoles ?</label>
-                        <% } %>
+                            <% } %>
+                        </div>
+                        <div class="col-md-6">
+                            <input id="hashtag" type="text" value="<%=raid.hashtag%>">
+                            <label for="hashtag">Hashtag du raid pour les réseaux sociaux.</label>
+                            <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="saveHashtag()">Enregistrer</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -141,7 +148,10 @@ helpers.map( (helper, index) => {
                                 </tr>
                                 <% organizers.map(organizer => { %>
                                 <tr>
-                                    <td class="pt-3-half" contenteditable="false" width="60%"><%=organizer.first_name%> <%=organizer.last_name%> <%= organizer.index%></td>
+                                    <td class="pt-3-half align-baseline" contenteditable="false" width="60%">
+                                        <img src="data:image/png;base64,<%= organizer.picture %>" alt="person" class="img-fluid rounded-circle img_thumbnail"/>
+                                        <%=organizer.first_name%> <%=organizer.last_name%> <%= organizer.index%>
+                                    </td>
                                     <td width="20%"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" data-toggle="modal" data-target="#mailModal" data-mail="<%=organizer.email%>" data-type="Organizers">Contacter</button></td>
                                     <td width="20%"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0" data-toggle="modal" data-target="#removeModal" data-type="Organizers" data-username="<%=organizer.first_name%> <%=organizer.last_name%>" data-usermail="<%=organizer.email%>">Supprimer</button></td>
                                 </tr>

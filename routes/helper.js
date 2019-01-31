@@ -4,10 +4,11 @@ const sender = require('./sender');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const moment = require('moment');
+const date = require('date-and-time');
 
 const helpers = models.helper;
 
-exports.inviteHelper = function (req, res) {
+exports.inviteHelper = function(req, res) {
     const user = connected_user(req.sessionID);
     if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.raid_id);})){
         return res.redirect('/dashboard');
@@ -307,6 +308,7 @@ exports.displayHome = function (req, res) {
             });
         }
     });
+
 };
 
 exports.performCheckin = function (req, res) {

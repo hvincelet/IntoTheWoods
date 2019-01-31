@@ -2,8 +2,9 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 let nodemailer = require('nodemailer');
 let ejs = require('ejs-html');
 let fs = require('fs');
-const config = require(__dirname + '/../config/config.js')['mail'];
-const server = require(__dirname + '/../config/config.js')[global.env];
+const config_path = require(__dirname + '/../config/config.js')[env].credentials;
+const config = require("../" + config_path).mail;
+const server = require("../" + config_path)[env];
 
 exports.sendMailToOrganizer = function(email, password_hash){
 

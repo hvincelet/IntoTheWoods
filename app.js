@@ -8,14 +8,15 @@ const express_lib = require('express');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
-const config = require('./config/config')[global.env];
+const config_path = require('./config/config')[global.env].credentials;
+const config = require(config_path)[env];
 
 // IntoTheWoods app
 const intothewoods = express();
 
 intothewoods.use(favicon(__dirname + '/views/img/favicon.png'));
-intothewoods.use(bodyParser.json());
-intothewoods.use(bodyParser.urlencoded({extended: true}));
+intothewoods.use(bodyParser.json({limit: '5mb'}));
+intothewoods.use(bodyParser.urlencoded({limit: '5mb', extended: true}));
 intothewoods.use("/views", express.static(__dirname + '/views'));
 intothewoods.set('view engine', 'ejs');
 intothewoods.use(session({
@@ -50,14 +51,14 @@ global.connected_user = function (uuid) {
         return connected_users[0];
     }
     return connected_users.find(function (user) {
-        return user.uuid == uuid;
+        return user.uuid === uuid;
     });
 };
 
 let checkAuth = function (req, res, next) {
     if (!config.no_login) {
         const user = connected_users.find(function (user) {
-            return user.uuid == req.sessionID;
+            return user.uuid === req.sessionID;
         });
         if (!user) {
             return res.redirect('/login');
@@ -107,10 +108,14 @@ intothewoods.route('/resetpassword')
 intothewoods.route('/newpassword')
     .post(misc.register_new_password);
 
-//routes dedicated to the raids' pages
 intothewoods.route('/dashboard')
     .get(checkAuth, organizer.dashboard);
 
+intothewoods.route('/profile')
+    .get(checkAuth, organizer.profile)
+    .post(checkAuth, organizer.saveProfile);
+
+//routes dedicated to the raids' pages
 intothewoods.route('/createraid/start')
     .get(checkAuth, raid.init);
 
@@ -144,6 +149,9 @@ intothewoods.route('/editraid/:id/allowregister')
 intothewoods.route('/editraid/:id/starttime')
     .post(checkAuth, raid.starttime);
 
+intothewoods.route('/editraid/:id/hashtag')
+    .post(checkAuth, raid.saveHashtag);
+
 intothewoods.route('/editraid/:id/sendMessage')
     .post(checkAuth, organizer.sendMail);
 
@@ -159,14 +167,14 @@ intothewoods.route('/editraid/:id/removeHelper')
 intothewoods.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
 
-//intothewoods.route('/editraid/setStartTime')
-//    .post(checkAuth, raid.setStartTime);
-
 intothewoods.route('/editraid/:id/generateQRCode')
     .post(checkAuth, raid.generateQRCode);
 
 intothewoods.route('/editraid/:id/allowqrcodereader')
-        .post(checkAuth, raid.allowqrcodereader);
+    .post(checkAuth, raid.allowqrcodereader);
+
+intothewoods.route('/editraid/setRegisterDates')
+    .post(checkAuth, raid.setRegisterDates);
 
 //routes dedicated to the helpers
 intothewoods.route('/team/:raid_id/invitehelpers')
@@ -191,30 +199,18 @@ intothewoods.route('/helper/qrcodereader')
 intothewoods.route('/helper/registerrunner')
     .post(helper.registerRunner);
 
-// Routes dedicated to participant
+//Routes dedicated to the participants
 intothewoods.route('/participant/register')
     .get(participant.displayRegister)
     .post(participant.register);
+
+intothewoods.route('/participant/:id/home')
+    .get(participant.displayHome);
 
 //Routes dedicated to the Live
 intothewoods.route('/live/:id')
     .get(live.displayLive)
     .post(live.getData);
-
-// Routes dedicated to participant
-intothewoods.route('/participant/register')
-    .get(participant.displayRegister)
-    .post(participant.register);
-
-
-// routes dedicated to the team' pages
-//intothewoods.route('/manageteam') // manage helper and organizer of raid
-//    .get(organizer.manageTeam);
-//intothewoods.route('/manageteam/helper') // manage helper of raid
-//    .get(organizer.manageHelper)
-//    .post(organizer.assignHelper);
-//intothewoods.route('/manageteam/organizer') // manage organizer of raid
-//    .get(organizer.manageOrganizer);
 
 //bad url route
 intothewoods.use(function (req, resp, next) {
