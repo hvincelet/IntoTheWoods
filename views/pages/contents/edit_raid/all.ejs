@@ -36,10 +36,10 @@
                             <tbody>
                                 <% raids.forEach(function (raid) { %>
                                     <tr>
-                                        <td class="pt-3-half"><%= raid.raid.name %></td>
-                                        <td class="pt-3-half"><%= raid.raid.edition %></td>
-                                        <td class="pt-3-half" id="dateRaid_<%= raid.raid.id %>"><script>convertDate("<%= raid.raid.date %>", "<%= raid.raid.id %>");</script></td>
-                                        <td class="pt-3-half"><%= raid.raid.place %></td>
+                                        <td class="pt-3-half"><%= raid.name %></td>
+                                        <td class="pt-3-half"><%= raid.edition %></td>
+                                        <td class="pt-3-half" id="dateRaid_<%= raid.id %>"><script>convertDate("<%= raid.date %>", "<%= raid.id %>");</script></td>
+                                        <td class="pt-3-half"><%= raid.place %></td>
                                         <td class="pt-3-half"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0" onclick="window.location='/editraid/<%= raid.id %>'">Éditer ce Raid</button></td>
                                     </tr>
                                 <% }); %>

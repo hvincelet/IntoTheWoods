@@ -95,6 +95,7 @@ helpers.map( (helper, index) => {
                         <button style="margin-left: 1em;" type="button" class="btn btn-info btn-rounded btn-sm" onclick="updatePOI()">Sauvegarder les points d'intérêts</button>
                     </div>
                     <div class="card-body">
+                        <div id="noty-holder"></div>
                         <div class="table-editable">
                             <table id="poi_table" class="table table-bordered table-responsive-md table-striped text-center">
                                 <tr>
@@ -276,10 +277,6 @@ helpers.map( (helper, index) => {
 
         <% pois.map(poi => { %>
         $("#allow_qrcodereader<%=poi.id%>:checkbox").change(function () {
-            let $MESSAGE_MODAL = $('#messageModal');
-            let $MESSAGE_MODAL_TITLE = $('#messageDialog');
-            let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
-            let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
             let status = this.checked?"accessible":"non accessible";
             $.ajax({
                 type: 'POST',
@@ -291,27 +288,34 @@ helpers.map( (helper, index) => {
                 success: function (response) {
                     msg = JSON.parse(response).msg;
                     if(msg === "ok"){
-                        $MESSAGE_MODAL_TITLE.html("Lecteur de QR Code ");
-                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
-                        $MESSAGE_MODAL_CONTENT.html("Le lecteur de QR Code est désormais " + status + ".");
+                        createNoty("Le lecteur de QR Code est désormais " + status + ".", "success");
                     }else{
-                        $MESSAGE_MODAL_TITLE.html("Impossible d'effectuer cette action");
-                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
-                        $MESSAGE_MODAL_CONTENT.html("Une erreur est survenue... Impossible de sauvegarder le statut.<br/>Raffraichissez la page et rééssayez.");
+                        createNoty("Une erreur est survenue... Impossible de sauvegarder le statut. Raffraichissez la page et rééssayez.", "error");
                     }
-                    $MESSAGE_MODAL.modal('show');
                 },
                 error: function (response) {
-                    let msg = JSON.parse(response).msg;
-                    $MESSAGE_MODAL_TITLE.html("Impossible d'effectuer cette action");
-                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
-                    $MESSAGE_MODAL_CONTENT.html("Une erreur est survenue... Impossible de sauvegarder le statut.<br/>Raffraichissez la page et rééssayez.");
-                    $MESSAGE_MODAL.modal('show');
+                    createNoty("Une erreur est survenue... Impossible de sauvegarder le statut. Raffraichissez la page et rééssayez.", "error");
                 }
             });
         });
         <% }); %>
+        function createNoty(message, type) {
+          var html = '<div class="alert alert-' + type + ' alert-dismissable page-alert" data-auto-dismiss role="alert">';
+          html += '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>';
+          html += message;
+          html += '</div>';
+          $(html).hide().prependTo('#noty-holder').slideDown();
+        };
+        function dismissNoty(){
+          $('.alert[data-auto-dismiss]').each(function (index, element) {
+              var $element = $(element);
+              var timeout  = $element.data('auto-dismiss') || 5000;
+              setTimeout(function () {
+                  $element.alert('close');
+              }, timeout);
+          });
+        }
+        setInterval(dismissNoty(),5000);
     });
     <%- scripts %>
 </script>
-<!--<script type="text/javascript" src="/views/pages/contents/edit_raid/details.js"></script>-->

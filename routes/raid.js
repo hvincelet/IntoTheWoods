@@ -8,7 +8,7 @@ const fs = require('fs');
 const raids = models.raid;
 
 const pdf = require('html-pdf');
-var options = { format: 'A4', orientation: 'landscape' };
+var options = { format: 'A5', orientation: 'landscape' };
 const QRCode = require('qrcode');
 const http = require('http');
 
@@ -322,11 +322,13 @@ exports.getGeocodedResults = function (req, res) {
 
 exports.displayAllRaids = function (req, res) {
     const user = connected_user(req.sessionID);
+    const raids = user.raid_list;
     if (user.raid_list.length !== 0) {
         res.render(pages_path + "template.ejs", {
             pageTitle: "Gestion des Raids",
             page: "edit_raid/all",
-            user: user
+            user: user,
+            raids: raids
         });
     } else {
         res.redirect('/dashboard');
@@ -636,20 +638,20 @@ exports.generateQRCode = function(req, res){
         where: {
           id_raid: raid
         },
-        attributes: ['id_participant']
+        attributes: ['id_participant','last_name','first_name']
       }).then(function(participant_found){
         if(participant_found !== null){
           let cpt = 0;
           let html = '';
           participant_found.forEach(function(participant){
-            QRCode.toDataURL(participant.id_participant.toString(), { errorCorrectionLevel: 'L', width:350 }, function (err, url) {
+            QRCode.toDataURL(participant.id_participant.toString(), { errorCorrectionLevel: 'L', width:300 }, function (err, url) {
               if (err) return console.log(err);
               //console.log(url)
               html = html+"<html>"+
                          "<body>"+
+                         "<p style='font-size: 8pt;'>"+participant.first_name+" "+participant.last_name+"</p>"+
                          "<center>"+
-                           "<div style='height: 10px;'></div>"+
-                           "<p style='font-size: 40pt;'><strong>"+participant.id_participant+"</strong><br>"+
+                           "<p style='font-size: 16pt;'><strong>"+participant.id_participant+"</strong><br>"+
                            "<img src='"+url+"'></img><br>"+
                            "<strong>"+raid_found.name.toUpperCase()+" "+raid_found.edition+"</strong></p>"+
                          "</center>"+

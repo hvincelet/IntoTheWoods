@@ -399,7 +399,7 @@ exports.registerRunner = function(req, res){
                     models.stage.create({
                         id_participant: participant.id,
                         id_course: id_final,
-                        time: new Date(participant.time).getUTCHours()+":"+new Date(participant.time).getUTCMinutes()+":"+new Date(participant.time).getUTCSeconds(),
+                        time: new Date(participant.time).getUTCHours()+1+":"+new Date(participant.time).getUTCMinutes()+":"+new Date(participant.time).getUTCSeconds(),
                         timeEntered: new Date()
                     }).then(function(){
                       return res.send(participant);
