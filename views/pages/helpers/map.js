@@ -79,11 +79,14 @@ function recenterMap() {
 
 function performQRCodeReader(){
   // allow use of qrcodereader if the helper is close to the point of interest, for ex : 15m
+  document.getElementById('qrcodereader_button').addEventListener('change', function() {
+       geolocation.setTracking(true);
+  });
   if (distance <= 15){
       window.location.replace('../qrcodereader');
   } else {
-      window.location.replace('../'+helper.login+"/home");
       alert("Vous devez vous trouvez à proximité de votre point d'intérêt pour effectuer cette action");
+      window.location.replace('../'+helper.login+"/home");
   }
 }
 
@@ -174,7 +177,6 @@ geolocation.on('change:position', function () {
 
     $('#distance_label').text(formatDistance(distanceBetweenPoints(ol.proj.fromLonLat(position), ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat]))));
     distance = distanceBetweenPoints(ol.proj.fromLonLat(position), ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat]));
-    document.getElementById("infor_distance").innerHTML = distance+" m";
     if (distance > 15 && check_in){
         check_in = false;
         updateCheckinButton(check_in);

@@ -305,18 +305,6 @@ helpers.map( (helper, index) => {
           html += '</div>';
           $(html).hide().prependTo('#noty-holder').slideDown();
         };
-        /*
-        function dismissNoty(){
-          $('.alert[data-auto-dismiss]').each(function (index, element) {
-              var $element = $(element);
-              var timeout  = $element.data('auto-dismiss') || 5000;
-              setTimeout(function () {
-                  $element.alert('close');
-              }, timeout);
-          });
-        }
-        setInterval(dismissNoty(),5000);
-        */
     });
     <%- scripts %>
 </script>
