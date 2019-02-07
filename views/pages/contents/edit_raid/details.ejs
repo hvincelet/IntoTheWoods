@@ -112,7 +112,7 @@ helpers.map( (helper, index) => {
                                     <td width="40%" class="poi_description" contenteditable="true"><%= poi.description %></td>
                                     <td width="10%" contenteditable="false">
                                       <input id="allow_qrcodereader<%=poi.id%>" type="checkbox" value="<%=poi.id%>"
-                                      <%if(parseInt(poi.allow_qrcodereader) === 1){%> checked <%}%> >
+                                      <%if(parseInt(poi.allow_qrcodereader) == 1){%> checked <%}%> >
                                     </td>
                                 </tr>
                                 <% }); %>
@@ -287,10 +287,9 @@ helpers.map( (helper, index) => {
                 },
                 success: function (response) {
                     msg = JSON.parse(response).msg;
-                    if(msg === "ok"){
-                        createNoty("Le lecteur de QR Code est désormais " + status + ".", "success");
-                    }else{
-                        createNoty("Une erreur est survenue... Impossible de sauvegarder le statut. Raffraichissez la page et rééssayez.", "error");
+                    if(msg !== "ok"){
+                        createNoty(<%=poi.id%>+": une erreur est survenue... Impossible de sauvegarder le statut. Raffraichissez la page et rééssayez.", "error");
+                        $("#allow_qrcodereader<%=poi.id%>:checkbox").prop('checked',false);
                     }
                 },
                 error: function (response) {
@@ -306,6 +305,7 @@ helpers.map( (helper, index) => {
           html += '</div>';
           $(html).hide().prependTo('#noty-holder').slideDown();
         };
+        /*
         function dismissNoty(){
           $('.alert[data-auto-dismiss]').each(function (index, element) {
               var $element = $(element);
@@ -316,6 +316,7 @@ helpers.map( (helper, index) => {
           });
         }
         setInterval(dismissNoty(),5000);
+        */
     });
     <%- scripts %>
 </script>
