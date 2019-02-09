@@ -79,7 +79,7 @@ exports.displayRegister = function (req, res) {
         helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
         models.raid.findByPk(raid_id).then(function(raid_found){
-            if(raid_found.allow_register !== 1 || raid_found.startRegister > Date.now() || raid_found.endRegister < Date.now()){
+            if(raid_found.allow_register !== 1 || raid_found.startHelperRegister > Date.now() || raid_found.endHelperRegister < Date.now()){
                 return res.redirect('/helper/register');
             }else{
                 helper_post_model.findAll({
@@ -143,10 +143,10 @@ exports.displayRegister = function (req, res) {
                     [Op.gte]: today.toISOString().split('T')[0]
                 },
                 allow_register: 1,
-                startRegister: {
+                startHelperRegister: {
                     [Op.lt]: today
                 },
-                endRegister: {
+                endHelperRegister: {
                     [Op.gt]: today
                 }
             }, order: ['name']

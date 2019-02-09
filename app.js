@@ -170,7 +170,10 @@ intothewoods.route('/team/:raid_id/inviteorganizers')
 intothewoods.route('/editraid/setStartTime')
     .post(checkAuth, raid.setStartTime);
 
-intothewoods.route('/editraid/setRegisterDates')
+intothewoods.route('/editraid/setHelperRegisterDates')
+    .post(/*checkAuth, */raid.setRegisterDates);
+
+intothewoods.route('/editraid/setParticipantRegisterDates')
     .post(/*checkAuth, */raid.setRegisterDates);
 
 

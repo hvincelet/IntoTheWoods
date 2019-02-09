@@ -36,6 +36,10 @@ module.exports = function(sequelize, DataTypes) {
       type: "DOUBLE",
       allowNull: true
     },
+    startTime: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     hashtag: {
       type: DataTypes.STRING(30),
       allowNull: true
@@ -45,17 +49,21 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       defaultValue: '0'
     },
-    startRegister: {
+    startHelperRegister: {
       type: DataTypes.DATE,
       allowNull: true
     },
-    endRegister: {
+    endHelperRegister: {
       type: DataTypes.DATE,
       allowNull: true
     },
-    startTime: {
-      type: DataTypes.DATEONLY,
-      allowNull: false
+    startParticipantRegister: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    endParticipantRegister: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     tableName: 'raid'

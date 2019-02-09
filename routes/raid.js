@@ -669,7 +669,7 @@ exports.saveHashtag = function(req, res){
     }
 };
 
-exports.setRegisterDates = function(req, res){
+exports.setHelperRegisterDates = function(req, res){
     let idRaid = req.body.idRaid;
     let startRegister = new Date(req.body.startRegister);
     let endRegister = new Date(req.body.endRegister);
@@ -682,11 +682,40 @@ exports.setRegisterDates = function(req, res){
         }
     }).then(function (raid_found) {
         if (raid_found !== null) {
-            let time = new Date();
             models.raid.update(
                 {
-                    startRegister: startRegister,
-                    endRegister: endRegister
+                    startHelperRegister: startRegister,
+                    endHelperRegister: endRegister
+                },
+                {where: {
+                        id: idRaid
+                    }
+                });
+        }
+        else{
+            console.log("erreur");
+            //TODO : renvoyer un message d'erreur
+        }
+    });
+};
+
+exports.setParticipantRegisterDates = function(req, res){
+    let idRaid = req.body.idRaid;
+    let startRegister = new Date(req.body.startRegister);
+    let endRegister = new Date(req.body.endRegister);
+
+    console.log(idRaid+" "+startRegister+" "+endRegister)
+
+    models.raid.findOne({
+        where: {
+            id: idRaid
+        }
+    }).then(function (raid_found) {
+        if (raid_found !== null) {
+            models.raid.update(
+                {
+                    startParticipantRegister: startRegister,
+                    endParticipantRegister: endRegister
                 },
                 {where: {
                         id: idRaid

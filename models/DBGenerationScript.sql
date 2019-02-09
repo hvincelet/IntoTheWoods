@@ -39,8 +39,10 @@ CREATE TABLE IF NOT EXISTS `intoTheWoodsDB`.`raid` (
   `startTime` TIMESTAMP NULL,
   `hashtag` VARCHAR(30) NULL,
   `allow_register` TINYINT(1) NOT NULL DEFAULT 0,
-  `startRegister` DATETIME NULL,
-  `endRegister` DATETIME NULL,
+  `startHelperRegister` DATETIME NULL,
+  `endHelperRegister` DATETIME NULL,
+  `startParticipantRegister` DATETIME NULL,
+  `endParticipantRegister` DATETIME NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
