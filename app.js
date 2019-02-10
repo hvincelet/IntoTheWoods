@@ -171,10 +171,10 @@ intothewoods.route('/editraid/setStartTime')
     .post(checkAuth, raid.setStartTime);
 
 intothewoods.route('/editraid/setHelperRegisterDates')
-    .post(/*checkAuth, */raid.setRegisterDates);
+    .post(/*checkAuth, */raid.setHelperRegisterDates);
 
 intothewoods.route('/editraid/setParticipantRegisterDates')
-    .post(/*checkAuth, */raid.setRegisterDates);
+    .post(/*checkAuth, */raid.setParticipantRegisterDates);
 
 
 //routes dedicated to the helpers

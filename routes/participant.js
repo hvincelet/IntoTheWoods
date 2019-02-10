@@ -1,5 +1,7 @@
 const pages_path = "../views/pages/";
 const models = require('../models');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 // Register new participant default page
 exports.displayRegister = function(req, res){
@@ -7,8 +9,19 @@ exports.displayRegister = function(req, res){
 
     let raid_model = models.raid;
 
+    let today = new Date();
+
     raid_model.findAll({
-        attributes: ['id','name','date','edition']
+        attributes: ['id','name','date','edition'],
+        where: {
+            allow_register: 1,
+            startHelperRegister: {
+                [Op.lt]: today
+            },
+            endHelperRegister: {
+                [Op.gt]: today
+            }
+        }
     }).then(function(raids_found){
         if(raids_found !== null){
             const raidsCounter = raids_found.map(function(raid, index, raid_array){
