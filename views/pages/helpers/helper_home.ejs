@@ -66,6 +66,30 @@
                         <div class="card-header d-flex align-items-center">
                             <h2>Itinéraire jusqu'à votre poste</h2>
                         </div>
+
+
+                        <!-- Message Received modal -->
+                        <div class="modal fade" id="messageReceivedModal" tabindex="-1" role="dialog" aria-labelledby="messageDialog" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="messageReceivedDialog">Title</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-lg-9 align-middle my-auto" id="messageReceivedContentDialog"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--<button onclick="showModal()">Show modal</button>-->
+
+
                         <div class="card-body" style="padding-right: 0px; padding-left: 0px; padding-top: 0px;">
                             <div id="map" class="full-map">
                                 <div id="panel-left">
@@ -91,7 +115,9 @@
                             <div style="padding: 1rem 1.25rem;">
                                 <div align="right">
                                     <h2 id="countdownTime" style="color: #4caf50"></h2>
-                                    <small class="form-text">Début prévu le <%=raid.date%> à <%=raid.start_time.split(':')[0]%>h<%=raid.start_time.split(':')[1]%></small>
+                                    <% if( raid.start_time !== null) { %>
+                                        <small class="form-text">Début prévu le <%=raid.date%> à <%=raid.start_time.split(':')[0]%>h<%=raid.start_time.split(':')[1]%></small>
+                                    <% } %>
                                 </div>
                                 <h3 class="">Poste</h3>
                                 <label><%= helper_post.title %></label>
@@ -109,6 +135,9 @@
                                 const helper_post = <%- JSON.stringify(helper_post) %>;
                                 const point_of_interest = <%- JSON.stringify(point_of_interest) %>;
                             </script>
+
+                            <script src="/socket.io/socket.io.js"></script> // temporary
+
                             <script src="https://ignf.github.io/geoportal-access-lib/latest/dist/GpServices.js"></script>
                             <script src="/views/vendors/moment-with-locales.js"></script>
                             <script src="/views/pages/helpers/map.js"></script>

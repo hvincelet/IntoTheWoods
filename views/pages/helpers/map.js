@@ -239,4 +239,21 @@ function loadPathToPost(currentPosition) {
         console.log(e);
     }
 }
+//function showModal(){
+    const socket = io();
+    socket.on('receiving', function(msg){
+        msg = JSON.parse(msg);
+
+        let $MESSAGE_RECEIVED_MODAL = $('#messageReceivedModal');
+        let $MESSAGE_RECEIVED_MODAL_TITLE = $('#messageReceivedDialog');
+        let $MESSAGE_RECEIVED_MODAL_CONTENT = $('#messageReceivedContentDialog');
+
+        $MESSAGE_RECEIVED_MODAL_TITLE.html("Message de : ");
+        $MESSAGE_RECEIVED_MODAL_CONTENT.html(msg.message);
+        $MESSAGE_RECEIVED_MODAL.modal('show');
+    });
+
+//}
+
+
 
