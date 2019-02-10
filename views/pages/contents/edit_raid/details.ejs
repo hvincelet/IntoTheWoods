@@ -59,6 +59,7 @@ helpers.map( (helper, index) => {
                         </div>
                         <div class="col-md-6">
                             <input id="hashtag" type="text" value="<%=raid.hashtag%>">
+                            <a href="#" data-toggle="popover" title="Information Hashtag" data-content="Saisir un hashtag unique pour les réseaux sociaux."><i class="fas fa-info-circle"></i></a>
                             <label for="hashtag">Hashtag du raid pour les réseaux sociaux.</label>
                             <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="saveHashtag()">Enregistrer</button>
                         </div>
@@ -305,6 +306,7 @@ helpers.map( (helper, index) => {
           html += '</div>';
           $(html).hide().prependTo('#noty-holder').slideDown();
         };
+        $('[data-toggle="popover"]').popover();
     });
     <%- scripts %>
 </script>
