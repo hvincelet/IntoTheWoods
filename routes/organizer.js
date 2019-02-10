@@ -410,3 +410,84 @@ exports.saveProfile = function (req, res) {
         res.send(JSON.stringify({msg: "ok"}));
     });
 };
+
+exports.displayMessenger = function (req, res){
+  const raid = req.params.raid_id;
+  const organizer_array = [];
+  const helper_array = [];
+  models.team.findAll({
+    where: {
+      id_raid: raid
+    },
+    attributes: ['id_organizer']
+  }).then(function(organizer_found){
+    if(organizer_found !== null){
+      cpt=0;
+      organizer_found.forEach(function(current_organizer){
+        models.organizer.findOne({
+          where:{
+            email: current_organizer.id_organizer
+          },
+          attributes: ['email','last_name','first_name']
+        }).then(function(current_organizer_found){
+          if(current_organizer_found !== null){
+            organizer_array.push(current_organizer_found);
+          }
+        });
+        cpt=cpt+1;
+        if(cpt==organizer_found.length){
+          models.point_of_interest.findAll({
+            where:{
+              id_raid: raid
+            },
+            attributes: ['id']
+          }).then(function(point_of_interest_found){
+            if(point_of_interest_found !== null){
+              cpt2=0;
+              point_of_interest_found.forEach(function(poi){
+                models.helper_post.findOne({
+                  where:{
+                    id_point_of_interest: poi.id
+                  },
+                  attributes: ['id','allow_qrcodereader']
+                }).then(function(helper_post_found){
+                  if(helper_post_found !== null){
+                    models.assignment.findOne({
+                      where:{
+                        id_helper_post: helper_post_found.id
+                      },
+                      attributes: ['id_helper']
+                    }).then(function(assignment_found){
+                      if(assignment_found !== null){
+                        models.helper.findOne({
+                          where:{
+                            login: assignment_found.id_helper
+                          },
+                          attributes: ['login','last_name','first_name']
+                        }).then(function(helper_found){
+                          if(helper_found !== null){
+                            helper_found.allow_qrcodereader = helper_post_found.allow_qrcodereader;
+                            helper_array.push(helper_found);
+                            if(cpt2==point_of_interest_found.length){
+                              res.render(pages_path + "/live/organizer_live.ejs", {
+                                  pageTitle: "Messagerie",
+                                  page: "live/organizer_live",
+                                  organizer: organizer_array,
+                                  helper: helper_array
+                              });
+                            }
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+                cpt2=cpt2+1;
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+}

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="fr">
+<body>
+  <% organizer.map(org => { %>
+    <p><%= org.email %>,<%= org.last_name %>,<%= org.first_name %></p>
+  <% }); %>
+  <% helper.map(hel => { %>
+    <p><%= hel.login %>,<%= hel.last_name %>,<%= hel.first_name %>,<%= hel.allow_qrcodereader %></p>
+  <% }); %>
+  <script>
+      const organizer = <%- JSON.stringify(organizer) %>;
+      const helper = <%- JSON.stringify(helper) %>;
+  </script>
+</body>
+</html>

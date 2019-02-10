@@ -199,6 +199,10 @@ intothewoods.route('/helper/qrcodereader')
 intothewoods.route('/helper/registerrunner')
     .post(helper.registerRunner);
 
+//Routes dedicated to messenger
+intothewoods.route('/team/:raid_id/messenger')
+    .get(organizer.displayMessenger);
+
 //Routes dedicated to the participants
 intothewoods.route('/participant/register')
     .get(participant.displayRegister)
