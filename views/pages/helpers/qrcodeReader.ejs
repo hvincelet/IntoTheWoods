@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<% include ../partials/head %>
+<body>
+<div class="page page-full">
+  <% if(typeof errorMessage !== "undefined") { %>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 20px;">
+          <%= errorMessage %>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+  <% }else{ %>
+    <style>
+      #loadingMessage {
+        text-align: center;
+        padding: 5px;
+        background-color: #eee;
+      }
+      #canvas {
+            width: 95%;
+      }
+      #output {
+        padding: 5px;
+        background: #eee;
+      }
+    </style>
+    <div class="container-fluid" style="padding: 0;">
+      <center>
+      <h2>Participant - QRCode Reader</h2>
+      <div id="loadingMessage">Unable to access video stream (please make sure you have a webcam enabled)</div>
+      <canvas id="canvas" hidden></canvas>
+      <div id="output" hidden>
+        <div id="outputMessage">No QR code detected.</div>
+        <div hidden><div id="outputData"></div></div>
+        <div hidden><button id="reload" onclick="window.location.replace('../helper/qrcodereader')"><i class="fas fa-sync-alt"></i></button></div>
+      </div>
+    </center>
+    </div>
+    <script src="/views/vendors/jsQR.js"></script>
+    <script>
+      var video = document.createElement("video");
+      var canvasElement = document.getElementById("canvas");
+      var canvas = canvasElement.getContext("2d");
+      var loadingMessage = document.getElementById("loadingMessage");
+      var outputContainer = document.getElementById("output");
+      var outputMessage = document.getElementById("outputMessage");
+      var outputData = document.getElementById("outputData");
+      var reloadButton = document.getElementById("reload");
+      var participantID = [];
+      var participantTime = [];
+
+      function drawLine(begin, end, color){
+        canvas.beginPath();
+        canvas.moveTo(begin.x, begin.y);
+        canvas.lineTo(end.x, end.y);
+        canvas.lineWidth = 4;
+        canvas.strokeStyle = color;
+        canvas.stroke();
+      }
+
+      // Use facingMode: environment to attemt to get the front camera on phones
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+        video.play();
+        requestAnimationFrame(tick);
+      });
+
+      function tick(){
+        loadingMessage.innerText = "Loading video..."
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          loadingMessage.hidden = true;
+          canvasElement.hidden = false;
+          outputContainer.hidden = false;
+          canvasElement.height = video.videoHeight;
+          canvasElement.width = video.videoWidth;
+          canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+          var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+          var code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+          });
+          if (code) {
+            drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+            drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+            drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+            drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+            outputMessage.hidden = true;
+            outputData.parentElement.hidden = false;
+
+            if(participantID.indexOf(code.data) === -1){
+
+              var local_time = new Date(Date.now());
+              participantID.push(code.data);
+              participantTime.push(local_time);
+
+              var d = new Date();
+              d.setTime(d.getTime()+(24*60*60*1000));
+              var expires = "expires="+ d.toUTCString();
+              document.cookie = code.data+"="+local_time+";"+expires+";path=/";
+              send_data();
+            }
+          }else{
+            outputMessage.hidden = true; //false
+            outputData.parentElement.hidden = false; //true
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+
+      // Send cookies data
+      function send_data(){
+        // Export cookie to JSON object
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+          var tab = ca[i].split('=');
+          var cookies_json = { 'id':tab[0], 'time':tab[1] };
+          // Post Ajax request
+          $.ajax({
+            type : "POST",
+            contentType : "application/json",
+            data : JSON.stringify(cookies_json),
+            url : "/helper/registerrunner",
+            dataType : 'json',
+            success : function(data) {
+              outputData.innerText = "Participant "+data.id+" checked at "+ new Date(data.time).toLocaleTimeString()+".";
+              document.cookie = tab[0]+"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            },
+            error : function(e) {
+              outputData.innerText = "Participant checked (use update button when network available).";
+              reloadButton.parentElement.hidden = false;
+            }
+          });
+        }
+      }
+      // Send data every 10
+      setInterval(send_data(),10000);
+    </script>
+  <% } %>
+</div>
+<div class="login-page">
+    <div class="copyrights text-center">
+        <p>RunTonic' &copy; 2013-2018<span style="margin: 0 1%;">-</span>Design by <a href="https://bootstrapious.com" class="external">Bootstrapious</a></p>
+        <!-- Please do not remove the backlink to us unless you support further theme's development at https://bootstrapious.com/donate. It is part of the license conditions. Thank you for understanding :)-->
+    </div>
+</div>
+<% include ../partials/footer %>
+</body>
+</html>
