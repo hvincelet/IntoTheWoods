@@ -64,7 +64,12 @@ function setCourseFeature() {
     });
 
     if (courseFeatureFound) {
-        if (source.getFeatureById("course_" + (idCurrentEditedCourse + 1)) !== null) {
+
+        let c = courseArrayToLoad.find(function (course) {
+            return (course.order_num === (idCurrentEditedCourse + 1));
+        });
+
+        if (source.getFeatureById("course_" + c.id) !== null) {
             removeCurrentEditedCourse();
         }
 
@@ -104,7 +109,13 @@ function updateSelectedCourse() {
     $('#course-info-label').text(courseArrayToStore[idCurrentEditedCourse].label);
     $('#course_info_tooltip').stop(true).fadeIn().delay(4000).fadeOut("slow");
 
-    if (source.getFeatureById("course_" + (idCurrentEditedCourse + 1)) !== null) {
+
+    let c = courseArrayToLoad.find(function (course) {
+        return (course.order_num === (idCurrentEditedCourse + 1));
+    });
+    console.log(c);
+
+    if (source.getFeatureById("course_" + c.id) !== null) {
         $('#button-eraser').show();
     } else {
         $('#button-eraser').hide();
@@ -112,10 +123,13 @@ function updateSelectedCourse() {
 }
 
 function removeCurrentEditedCourse() {
-    console.log("removed overlay id : " + (idCurrentEditedCourse + 1));
-    feature = source.getFeatureById("course_" + (idCurrentEditedCourse + 1));
+    let c = courseArrayToLoad.find(function (course) {
+        return (course.order_num === (idCurrentEditedCourse + 1));
+    });
+    console.log("removed overlay id : " + c.id);
+    feature = source.getFeatureById("course_" + c.id);
     source.removeFeature(feature);
-    map.removeOverlay(map.getOverlayById(idCurrentEditedCourse + 1));
+    map.removeOverlay(map.getOverlayById(c.id));
 }
 
 //TODO vérifier qu'il n'y existe pas déjà un tracé pour le parcours à créer
