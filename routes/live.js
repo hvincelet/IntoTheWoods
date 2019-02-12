@@ -122,3 +122,12 @@ exports.getData = function(req, res){
         res.send(stages_found);
 	});
 };
+
+exports.chat_discussion = function (req, res) {
+    let conversation = {name: req.params.id_dest};
+
+    res.render(pages_path + "chat/discussion.ejs", {
+        pageTitle: "Chat with " + conversation.name,
+        conversation: conversation
+    });
+};
