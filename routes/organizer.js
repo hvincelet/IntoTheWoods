@@ -138,6 +138,12 @@ exports.register = function (req, res) {
                 active: false,
                 picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
             }).then(function () {
+                internal_raids_tchat.push({
+                    user_id: req.body.email,
+                    user_type: "organizer",
+                    socket_id: '',
+                    pending_messages: []
+                });
                 sender.sendMailToOrganizer(req.body.email, hash);
                 res.send(JSON.stringify({msg: "ok"}));
             });

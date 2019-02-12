@@ -11,6 +11,7 @@ const session = require('express-session');
 const config_path = require('./config/config')[global.env].credentials;
 const config = require(config_path)[env];
 
+
 // IntoTheWoods app
 const intothewoods = express();
 
@@ -216,7 +217,10 @@ intothewoods.use(function (req, resp, next) {
 });
 
 // NOT MODIFY AFTER THIS LINE !
-if(env === "production"){
+
+let httpsServer;
+
+if (env === "production") {
     const credentials = {
         key: fs.readFileSync('/etc/letsencrypt/live/runtonic.ovh/privkey.pem', 'utf8'),
         cert: fs.readFileSync('/etc/letsencrypt/live/runtonic.ovh/cert.pem', 'utf8'),
@@ -230,19 +234,130 @@ if(env === "production"){
     app.use(vhost(config.server_host, intothewoods)); // Serves top level runtonic via Main server app
 
     const httpServer = express_lib();
-    const httpsServer = https.createServer(credentials, app);
+    httpsServer = https.createServer(credentials, app);
 
-    httpServer.get('*', function(req, res){
+    httpServer.get('*', function (req, res) {
         res.redirect('https://' + req.headers.host + req.url);
     });
 
+    //httpServer.listen(config.server_port_http);
+    //console.log('HTTP Server running on ' + config.server_host + ':' + config.server_port_http);
+
+    //httpsServer.listen(config.server_port_https, () => {
+    //    console.log('HTTPS Server running on ' + config.server_host + ':' + config.server_port_https);
+    //});
+} else {
+    httpsServer = https.createServer(intothewoods);
+    //intothewoods.listen(config.server_port_http);
+    //console.log('HTTP Server running on ' + config.server_host + ':' + config.server_port_http);
+}
+
+const http = require('http').Server(httpsServer);
+
+const io = require('socket.io')(http);
+
+global.internal_raids_tchat = [];
+
+global.internal_raids_tchat.push({
+    user_id: 'aaaaaa',
+    user_type: 'helper',
+    socket_id: "",
+    pending_messages: [JSON.stringify({
+        message: 'un message de test',
+        src: 'julien'
+    })]
+});
+
+function message_time() {
+    function addZero(i) {
+        if (i < 10) {
+            i = "0" + i;
+        }
+        return i;
+    }
+
+    let now = new Date();
+    let hour = addZero(now.getHours());
+    let minute = addZero(now.getMinutes());
+    let second = addZero(now.getSeconds());
+    return "[" + hour + ":" + minute + ":" + second + "]";
+}
+
+/*
+[{
+    user_id: "...", // email for organizer or login for helper
+    user_type: "", // "organizer" or "helper" - not used for now
+    socket_id: "...",
+    pending_messages: ["..."]
+}]
+*/
+
+
+io.on('connection', function (socket) {
+    console.log(socket);
+    console.log("connected");
+    socket.on('username', function (msg) {
+        console.log(msg);
+        const user = internal_raids_tchat.find(user => {
+            return user.user_id === msg;
+        });
+        if (user) {
+            user.socket_id = socket.id;
+            user.pending_messages.map(message => {
+                socket.emit('receiving', message);
+            });
+            user.pending_messages = [];
+        } else {
+            // Unknown user
+        }
+    });
+    socket.on('sending', function (msg) {
+        const src = internal_raids_tchat.find(user => {
+            return user.socket_id === socket.id;
+        });
+        if (src) {
+            const message = JSON.parse(msg);
+            message.dest.map(dest_user => {
+                const dest = internal_raids_tchat.find(user => {
+                    return user.user_id === dest_user;
+                });
+                if (dest) {
+                    const dest_message = JSON.stringify({
+                        src: src.user_id,
+                        timestamp: message_time(),
+                        message: message.message
+                    });
+                    dest.pending_messages.push(dest_message);
+                    io.to(dest.socket_id).emit('receiving', dest_message, function (data) {
+                        dest.pending_messages.pop();
+                    });
+                } else {
+                    // Unknown dest
+                }
+            });
+        } else {
+            // Unknown sender
+        }
+    });
+    socket.on('disconnect', function () {
+        let user = internal_raids_tchat.find(user => {
+            return user.socket_id === socket.id;
+        });
+        user.socket_id = '';
+    });
+});
+
+
+if (env === "production") {
     httpServer.listen(config.server_port_http);
-    console.log('HTTP Server running on '+config.server_host+':'+config.server_port_http);
+    console.log('HTTP Server running on ' + config.server_host + ':' + config.server_port_http);
 
     httpsServer.listen(config.server_port_https, () => {
-        console.log('HTTPS Server running on '+config.server_host+':'+config.server_port_https);
+        console.log('HTTPS Server running on ' + config.server_host + ':' + config.server_port_https);
     });
-}else{
+} else {
     intothewoods.listen(config.server_port_http);
-    console.log('HTTP Server running on '+config.server_host+':'+config.server_port_http);
+    //http.listen(config.server_port_http);
+
+    console.log('HTTP Server running on ' + config.server_host + ':' + config.server_port_http);
 }

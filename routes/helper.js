@@ -227,6 +227,12 @@ exports.register = function (req, res) {
                 last_name: registerUserLn,
                 first_name: registerUserFn
             }).then(function () {
+                internal_raids_tchat.push({
+                    user_id: id_helper,
+                    user_type: "helper",
+                    socket_id: '',
+                    pending_messages: []
+                });
 
                 let create_assignment_actions = helperPostsWished.map(wish => {
                     return new Promise(resolve => {
