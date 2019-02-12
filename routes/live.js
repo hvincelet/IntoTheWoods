@@ -52,7 +52,7 @@ exports.displayLive = function(req, res){
     /*****************/
 
     models.raid.findByPk(idRaid).then(function(raid_found){
-        if(raid_found === null) return res.redirect("/");
+        if(raid_found === null) return res.redirect("/live");
         let text = "";
         if(raid_found.dataValues.hashtag !== null && raid_found.dataValues.hashtag !== ""){
             let client = new Twitter({
@@ -61,7 +61,8 @@ exports.displayLive = function(req, res){
                 access_token_key: credentials.twitter.TWITTER_ACCESS_TOKEN_KEY,
                 access_token_secret: credentials.twitter.TWITTER_ACCESS_TOKEN_SECRET
             });
-            client.get('search/tweets', {q: "#" + raid_found.dataValues.hashtag}, function(error, tweets, response) {
+            const hashtag = (raid_found.dataValues.hashtag[0] === '#') ? raid_found.dataValues.hashtag : '#' + raid_found.dataValues.hashtag;
+            client.get('search/tweets', {q: hashtag}, function(error, tweets, response) {
                 let tweetsHtml = [];
                 const getAllTweets = tweets.statuses.map(function(status){
                     return new Promise(function(resolve){

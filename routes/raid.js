@@ -646,6 +646,81 @@ exports.setStartTime = function(req, res){
     });
 };
 
+exports.generateQRCode = function(req, res){
+    // Generate QR Code PDFs for all participant
+    const raid = req.params.id;
+    models.raid.findOne({
+        where: {
+            id: raid
+        },
+        attributes: ['id','name','edition']
+    }).then(function(raid_found){
+        if(raid_found !== null){
+            models.participant.findAll({
+                where: {
+                    id_raid: raid
+                },
+                attributes: ['id_participant','last_name','first_name']
+            }).then(function(participant_found){
+                if(participant_found !== null){
+                    let cpt = 0;
+                    let html = '';
+                    participant_found.forEach(function(participant){
+                        QRCode.toDataURL(participant.id_participant.toString(), { errorCorrectionLevel: 'L', width:300 }, function (err, url) {
+                            if (err) return console.log(err);
+                            //console.log(url)
+                            html = html+"<html>"+
+                                "<body>"+
+                                "<p style='font-size: 8pt;'>"+participant.first_name+" "+participant.last_name+"</p>"+
+                                "<center>"+
+                                "<p style='font-size: 16pt;'><strong>"+participant.id_participant+"</strong><br>"+
+                                "<img src='"+url+"'></img><br>"+
+                                "<strong>"+raid_found.name.toUpperCase()+" "+raid_found.edition+"</strong></p>"+
+                                "</center>"+
+                                "</body>"+
+                                "</html>";
+                            cpt=cpt+1;
+                            if(cpt==participant_found.length){
+                                pdf.create(html, options).toBuffer(function(err, buffer) {
+                                    if (err) return res.send(JSON.stringify({msg: "not-generate"}));
+                                    buffer = buffer.toString('base64');
+                                    return res.send({msg: "ok",buffer: buffer});
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    });
+};
+
+exports.allowqrcodereader = function (req, res) {
+    let user = connected_user(req.sessionID);
+    const raid = user.raid_list.find(function (raid) {
+        return raid.id === parseInt(req.params.id);
+    });
+    if (!raid) {
+        return res.redirect('/dashboard');
+    }else {
+        models.helper_post.findOne({
+            where: {
+                id: parseInt(req.body.id)
+            }
+        }).then(function (helper_post_found) {
+            if(helper_post_found === null){
+                return res.send(JSON.stringify({msg: "not-found"}));
+            }else{
+                helper_post_found.update({
+                    allow_qrcodereader: parseInt(req.body.status)
+                }).then(function () {
+                    return res.send(JSON.stringify({msg: "ok"}));
+                });
+            }
+        });
+    }
+};
+
 exports.saveHashtag = function(req, res){
     let user = connected_user(req.sessionID);
     const raid = user.raid_list.find(function (raid) {

@@ -77,6 +77,19 @@ function recenterMap() {
         view.setCenter(ol.proj.fromLonLat(position));
 }
 
+function performQRCodeReader(){
+    // allow use of qrcodereader if the helper is close to the point of interest, for ex : 15m
+    document.getElementById('qrcodereader_button').addEventListener('change', function() {
+        geolocation.setTracking(true);
+    });
+    if (distance <= 15){
+        window.location.replace('../qrcodereader');
+    } else {
+        alert("Vous devez vous trouvez à proximité de votre point d'intérêt pour effectuer cette action");
+        window.location.replace('../'+helper.login+"/home");
+    }
+}
+
 /***************************************************************
  ***************************************************************
  ***                           UI                            ***
@@ -239,4 +252,18 @@ function loadPathToPost(currentPosition) {
         console.log(e);
     }
 }
+//function showModal(){
+const socket = io();
+socket.on('receiving', function(msg){
+    msg = JSON.parse(msg);
 
+    let $MESSAGE_RECEIVED_MODAL = $('#messageReceivedModal');
+    let $MESSAGE_RECEIVED_MODAL_TITLE = $('#messageReceivedDialog');
+    let $MESSAGE_RECEIVED_MODAL_CONTENT = $('#messageReceivedContentDialog');
+
+    $MESSAGE_RECEIVED_MODAL_TITLE.html("Message de : ");
+    $MESSAGE_RECEIVED_MODAL_CONTENT.html(msg.message);
+    $MESSAGE_RECEIVED_MODAL.modal('show');
+});
+
+//}

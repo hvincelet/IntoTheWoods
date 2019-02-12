@@ -79,6 +79,7 @@ exports.displayRegister = function (req, res) {
         helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
         models.raid.findByPk(raid_id).then(function(raid_found){
+            if(!raid_found) return res.redirect('/helper/register');
             if(raid_found.allow_register !== 1){
                 return res.redirect('/helper/register');
             }else{
@@ -226,7 +227,12 @@ exports.register = function (req, res) {
                 last_name: registerUserLn,
                 first_name: registerUserFn
             }).then(function () {
-
+                internal_raids_tchat.push({
+                    user_id: id_helper,
+                    user_type: "helper",
+                    socket_id: '',
+                    pending_messages: []
+                });
                 let create_assignment_actions = helperPostsWished.map(wish => {
                     return new Promise(resolve => {
                         assignments.create({
@@ -351,102 +357,65 @@ exports.remove = function (req, res) {
         }
     });
 };
-exports.participantPassage = function(req, res){
-    let idParticipant = req.body.idParticipant;
-    let idRaid = req.body.idRaid;
 
-    let dateLastStage = 0;
-
-    let orderRun;
-
-    models.stage.findAll({
-        where: {
-            id_participant: idParticipant
-        }
-    }).then(function (stages_found) {
-        if (stages_found !== null && stages_found.length >= 1) {
-            orderRun = stages_found.length + 1;
-
-            dateLastStage = new Date(stages_found[stages_found.length-1].timeEntered+"UTC");
-
-            let dateTime = new Date();
-
-            let time = new Date(dateTime - dateLastStage);
-
-            insertStage(orderRun, time, idParticipant, idRaid);
-        }
-        else{
-            orderRun = 1;
-            models.raid.findOne({
-                attributes: ['start_time', 'date'],
-                where: {
-                    id: idRaid
-                }
-            }).then(function (raid_found) {
-                if (raid_found !== null) {
-                    let dateRaid = raid_found.date.split("-")
-                    let timeRaid = raid_found.start_time.split(":")
-
-                    dateLastStage = new Date(dateRaid[0], dateRaid[1]-1, dateRaid[2], timeRaid[0], timeRaid[1], timeRaid[2]);
-
-                    let dateTime = new Date();
-                    let time = new Date(dateTime - dateLastStage);
-
-                    insertStage(orderRun, time, idParticipant, idRaid);
-                }
-                else{
-                    console.log("erreur");
-                }
-            });
-        }
-
-        /*models.course.findOne({
-            attributes: ['id'],
-            where: {
-                id_raid: idRaid,
-                order_num: orderRun
-            }
-        }).then(function (course_found) {
-            if(course_found !== null){
-                console.log(stages_found)
-                let time = Date.parse("January 01, 1970 "+stages_found[stages_found.length-1].time);
-
-                time = Date.parse(date)-(Date.parse(date)-time);
-
-                models.stage.create({
-                    id_participant: idParticipant,
-                    id_course: course_found.id,
-                    time: time
-                });
-            }
-            else{
-                console.log("erreur");
-                //TODO : renvoyer un message d'erreur
-            }
-        });*/
-    });
-};
-
-insertStage = function(orderRun, time, idParticipant, idRaid){
-
-    models.course.findOne({
-        attributes: ['id'],
-        where: {
-            id_raid: idRaid,
-            order_num: orderRun
-        }
-    }).then(function (course_found) {
-        if(course_found !== null){
-            models.stage.create({
-                id_participant: idParticipant,
-                id_course: course_found.id,
-                time: time.getUTCHours()+":"+time.getUTCMinutes()+":"+time.getUTCSeconds(),
-                timeEntered: new Date()
-            });
-        }
-        else{
-            console.log("erreur");
-            //TODO : renvoyer un message d'erreur
-        }
+exports.qrcodeReader = function(req, res){
+    res.render(pages_path + "qrcodeReader.ejs", {
+        pageTitle: "Lecteur de QRCode pour participant",
     });
 }
+
+exports.registerRunner = function(req, res){
+    var participant = {};
+    participant.id = req.body.id;
+    participant.time = req.body.time;
+    models.participant.findOne({
+        attributes : ['id_raid'],
+        where: {
+            id_participant: participant.id
+        }
+    }).then(function(participant_found){
+        if(participant_found !== null){
+            models.course.findAll({
+                attributes: ['id'],
+                where:{
+                    id_raid: participant_found.id_raid
+                },
+                order: [
+                    ['order_num','ASC']
+                ]
+            }).then(function(course_found){
+                if(course_found !== null){
+                    let cpt = 0;
+                    let id_final = 0;
+                    course_found.forEach(function(course){
+                        models.stage.findOne({
+                            where:{
+                                id_participant: participant.id,
+                                id_course: course.id
+                            }
+                        }).then(function(stage_found){
+                            if(stage_found === null){
+                                if(id_final == 0){
+                                    id_final = course.id
+                                }
+                            }
+                            cpt=cpt+1;
+                            if(cpt==course_found.length){
+                                if(id_final != 0){
+                                    models.stage.create({
+                                        id_participant: participant.id,
+                                        id_course: id_final,
+                                        time: new Date(participant.time).getUTCHours()+1+":"+new Date(participant.time).getUTCMinutes()+":"+new Date(participant.time).getUTCSeconds(),
+                                        timeEntered: new Date()
+                                    }).then(function(){
+                                        return res.send(participant);
+                                    });
+                                }
+                            }
+                        })
+                    });
+                }
+            });
+        }
+    });
+};

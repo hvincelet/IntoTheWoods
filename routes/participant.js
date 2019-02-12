@@ -3,10 +3,8 @@ const models = require('../models');
 
 // Register new participant default page
 exports.displayRegister = function(req, res){
-    var  get_raids_clean = [];
-
+    let get_raids_clean = [];
     let raid_model = models.raid;
-
     raid_model.findAll({
         attributes: ['id','name','date','edition']
     }).then(function(raids_found){
@@ -61,8 +59,4 @@ exports.register = function(req, res){
         //sender.sendMailToOrganizer(req.body.email, hash);
         //res.send(JSON.stringify({msg: "ok"}));
     });
-};
-
-exports.displayHome = function(req, res){
-    //TODO
 };

@@ -92,7 +92,7 @@
 
         for (var i=0 ; i<data.length ; i++) {
             li = document.createElement("li");
-            cn = document.createTextNode(data[i]["participant.first_name"] + " " + data[i]["participant.first_name"] + " vient de finir la course " + data[i]["course.label"] + " avec le temps suivant : " + data[i]["time"]);
+            cn = document.createTextNode(data[i]["participant.first_name"] + " " + data[i]["participant.last_name"] + " vient de finir l'étape " + data[i]["course.label"] + " avec le temps suivant : " + data[i]["time"]);
 
             li.appendChild(cn);
             ul.appendChild(li);

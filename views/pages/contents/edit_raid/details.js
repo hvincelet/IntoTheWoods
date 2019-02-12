@@ -416,6 +416,47 @@ function saveStartTime() {
     });
 }
 
+function generateBib(){
+
+    let $MESSAGE_MODAL = $('#messageModal');
+    let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+    let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+    let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+
+    $.ajax({
+        type: 'POST',
+        url: '/editraid/<%= raid.id %>/generateQRCode',
+        success: function (response) {
+            msg = response.msg;
+            buffer = response.buffer;
+            if(msg === "ok"){
+                var link = document.createElement('a');
+                link.href = "data:application/pdf;base64," + buffer;
+                link.download = "<%=raid.id%>_<%=raid.name%>_<%=raid.edition%>_dossards_participants.pdf";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                $MESSAGE_MODAL_TITLE.html("Dossards des participants générés !");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Les dossards des participants ont bien été générés.");
+                $MESSAGE_MODAL.modal('show');
+            }else{
+                $MESSAGE_MODAL_TITLE.html("Dossards des participants non générés !");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Impossible de générer les dossards des participants...<br/>Merci de réessayer dans quelques instants.");
+                $MESSAGE_MODAL.modal('show');
+            }
+        },
+        error: function (response) {
+            let msg = JSON.parse(response).msg;
+            $MESSAGE_MODAL_TITLE.html("Dossards des participants non générés !");
+            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+            $MESSAGE_MODAL_CONTENT.html("Impossible de générer les dossards des participants...<br/>Merci de réessayer dans quelques instants.");
+            $MESSAGE_MODAL.modal('show');
+        }
+    });
+}
+
 function saveHashtag(){
     let hashtag = $('#hashtag').val();
 
