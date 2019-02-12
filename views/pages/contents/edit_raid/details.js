@@ -449,3 +449,81 @@ function saveHashtag(){
         }
     });
 }
+
+
+function saveRegisterHelpersDates() {
+    let startRegister = $('#startHelperRegister').val();
+    let endRegister = $('#endHelperRegister').val();
+
+    let $MESSAGE_MODAL = $('#messageModal');
+    let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+    let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+    let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+    $.ajax({
+        type: 'POST',
+        url: '/editraid/<%= raid.id %>/setHelperRegisterDates',
+        data: {
+            startRegister: startRegister,
+            endRegister: endRegister
+        },
+        success: function (response) {
+            msg = JSON.parse(response).msg;
+            if(msg === "ok"){
+                $MESSAGE_MODAL_TITLE.html("Heure de départ sauvegardée !");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("L'heure de départ ("+time+") a bien été sauvegardée.");
+                $MESSAGE_MODAL.modal('show');
+            }else{
+                $MESSAGE_MODAL_TITLE.html("Heure de départ non sauvegardée !");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Impossible de sauvegarder l'heure de départ...<br/>Merci de réessayer dans quelques instants.");
+                $MESSAGE_MODAL.modal('show');
+            }
+        },
+        error: function (response) {
+            $MESSAGE_MODAL_TITLE.html("Heure de départ non sauvegardée !");
+            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+            $MESSAGE_MODAL_CONTENT.html("Impossible de sauvegarder l'heure de départ...<br/>Merci de réessayer dans quelques instants.");
+            $MESSAGE_MODAL.modal('show');
+        }
+    });
+}
+
+
+function saveRegisterParticipantsDates() {
+    let startRegister = $('#startParticipantRegister').val();
+    let endRegister = $('#endParticipantRegister').val();
+
+    let $MESSAGE_MODAL = $('#messageModal');
+    let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+    let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+    let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+    $.ajax({
+        type: 'POST',
+        url: '/editraid/<%= raid.id %>/setParticipantRegisterDates',
+        data: {
+            startRegister: startRegister,
+            endRegister: endRegister
+        },
+        success: function (response) {
+            msg = JSON.parse(response).msg;
+            if(msg === "ok"){
+                $MESSAGE_MODAL_TITLE.html("Heure de départ sauvegardée !");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("L'heure de départ ("+time+") a bien été sauvegardée.");
+                $MESSAGE_MODAL.modal('show');
+            }else{
+                $MESSAGE_MODAL_TITLE.html("Heure de départ non sauvegardée !");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Impossible de sauvegarder l'heure de départ...<br/>Merci de réessayer dans quelques instants.");
+                $MESSAGE_MODAL.modal('show');
+            }
+        },
+        error: function (response) {
+            $MESSAGE_MODAL_TITLE.html("Heure de départ non sauvegardée !");
+            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+            $MESSAGE_MODAL_CONTENT.html("Impossible de sauvegarder l'heure de départ...<br/>Merci de réessayer dans quelques instants.");
+            $MESSAGE_MODAL.modal('show');
+        }
+    });
+}

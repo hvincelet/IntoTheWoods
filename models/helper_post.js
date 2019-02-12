@@ -10,7 +10,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     id_point_of_interest: {
       type: DataTypes.INTEGER(10).UNSIGNED,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: 'point_of_interest',
         key: 'id'

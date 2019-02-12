@@ -670,7 +670,10 @@ exports.saveHashtag = function(req, res){
 };
 
 exports.setHelperRegisterDates = function(req, res){
-    let idRaid = req.body.idRaid;
+    let idRaid = user.raid_list.find(function (raid) {
+        return raid.id === parseInt(req.params.id);
+    });
+
     let startRegister = new Date(req.body.startRegister);
     let endRegister = new Date(req.body.endRegister);
 
@@ -700,7 +703,10 @@ exports.setHelperRegisterDates = function(req, res){
 };
 
 exports.setParticipantRegisterDates = function(req, res){
-    let idRaid = req.body.idRaid;
+    let idRaid = user.raid_list.find(function (raid) {
+        return raid.id === parseInt(req.params.id);
+    });
+    
     let startRegister = new Date(req.body.startRegister);
     let endRegister = new Date(req.body.endRegister);
 
