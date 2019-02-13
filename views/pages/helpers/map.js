@@ -38,7 +38,7 @@ updateCheckinButton(check_in);
 
 function performCheckin() {
     // allow check-in if the helper is close to the point of interest, for ex : 15m
-    if (distance <= 15 || check_in){
+    if (distance <= 15 || check_in) {
         check_in = !check_in;
         let data = {
             helper_login: helper.login,
@@ -164,7 +164,7 @@ geolocation.on('change:position', function () {
 
     $('#distance_label').text(formatDistance(distanceBetweenPoints(ol.proj.fromLonLat(position), ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat]))));
     distance = distanceBetweenPoints(ol.proj.fromLonLat(position), ol.proj.fromLonLat([point_of_interest.lng, point_of_interest.lat]));
-    if (distance > 15 && check_in){
+    if (distance > 15 && check_in) {
         check_in = false;
         updateCheckinButton(check_in);
     }
@@ -239,22 +239,23 @@ function loadPathToPost(currentPosition) {
         console.log(e);
     }
 }
-//function showModal(){
-    const socket = io();
-    socket.on('receiving', function(msg){
-        msg = JSON.parse(msg);
-        console.log(msg);
 
-        let $MESSAGE_RECEIVED_MODAL = $('#messageReceivedModal');
-        let $MESSAGE_RECEIVED_MODAL_TITLE = $('#messageReceivedDialog');
-        let $MESSAGE_RECEIVED_MODAL_CONTENT = $('#messageReceivedContentDialog');
+/***************************************************************
+ ***************************************************************
+ ***                        Chat socket                      ***
+ ***************************************************************
+ ***************************************************************/
 
-        $MESSAGE_RECEIVED_MODAL_TITLE.html("Message de : " + msg.src);
-        $MESSAGE_RECEIVED_MODAL_CONTENT.html(msg.message);
-        $MESSAGE_RECEIVED_MODAL.modal('show');
-    });
+const socket = io();
+socket.on('receiving', function (msg) {
+    msg = JSON.parse(msg);
+    console.log(msg);
 
-//}
+    let $MESSAGE_RECEIVED_MODAL = $('#messageReceivedModal');
+    let $MESSAGE_RECEIVED_MODAL_TITLE = $('#messageReceivedDialog');
+    let $MESSAGE_RECEIVED_MODAL_CONTENT = $('#messageReceivedContentDialog');
 
-
-
+    $MESSAGE_RECEIVED_MODAL_TITLE.html("Message de : " + msg.name);
+    $MESSAGE_RECEIVED_MODAL_CONTENT.html(msg.message);
+    $MESSAGE_RECEIVED_MODAL.modal('show');
+});

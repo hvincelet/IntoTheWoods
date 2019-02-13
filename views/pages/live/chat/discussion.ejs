@@ -265,6 +265,30 @@
     }
 
     updateScroll();
+
+    const socket = io();
+
+    socket.on('receiving', function (msg) {
+        msg = JSON.parse(msg);
+        let date = new Date(msg.timestamp*1000);
+        $("#incoming_msg").append('<div class="incoming_msg">' +
+            '<div class="received_msg">' +
+            '<div class="received_withd_msg">' +
+            '<p>' + msg.message + '</p>' +
+            '<span class="time_date">' + msg.name + ' | ' + date.getHours() + ':' + date.getMinutes() + ' | </span>' +
+            '</div>' +
+            '</div>' +
+            '</div>');
+    });
+
+    let message = {
+        dest: ["", ""],
+        message: ""
+    }
+
+    socket.emit('sending', message);
+
+
 </script>
 <% include ../../partials/footer %>
 </body>
