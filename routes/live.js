@@ -93,9 +93,30 @@ exports.displayLive = function(req, res){
 };
 
 exports.displayAllLive = function(req, res){
-
-    res.render(pages_path + "raid_selection.ejs", {
-        pageTitle: "Sélection d'un Live!"
+    let today = new Date();
+    const Op = require('sequelize').Op;
+    models.raid.findAll({
+        where:{
+            date: {
+                [Op.gte]: today.toISOString().split('T')[0]
+            }
+        }
+    }).then(function(raids_found){
+        let raids_live = [];
+        raids_found.map(raid => {
+            raids_live.push({
+                id: raid.dataValues.id,
+                name: raid.dataValues.name,
+                edition: raid.dataValues.edition,
+                date: raid.dataValues.date,
+                start_time: raid.dataValues.start_time,
+                place: raid.dataValues.place
+            });
+        });
+        res.render(pages_path + "raid_selection.ejs", {
+            pageTitle: "Sélection d'un Live!",
+            raids_live: raids_live
+        });
     });
 };
 
