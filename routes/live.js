@@ -1,8 +1,48 @@
-const pages_path = __dirname+"../views/pages/live/";
+const pages_path = __dirname+"/../views/pages/live/";
 const models = require('../models');
 const Twitter = require('twitter');
 const config = require('../config/config')[global.env];
 const credentials = require('../' + config.credentials);
+
+function renderAfterGettingParticipantDatas(twitter_html, res, idRaid){
+
+    let coursesModel = models.course;
+    let sportsModel = models.sport;
+
+    coursesModel.belongsTo(sportsModel, {foreignKey: 'id_sport'});
+
+    coursesModel.findAll({
+        attributes: ['id', 'order_num', 'label'],
+        where: {
+            id_raid: idRaid
+        },
+        include: [{
+            model: sportsModel,
+            attributes: ['name'],
+        }]
+    }).then(function(coursesFound){
+        models.participant.findAll({
+            where: {
+                id_raid: idRaid
+            }
+        }).then(function(participantsFound){
+            if(coursesFound !== null) {
+                res.render(pages_path + "public.ejs", {
+                    pageTitle: "Live !",
+                    courses: coursesFound,
+                    participants : participantsFound,
+                    text: twitter_html
+                });
+            }
+            else{
+                res.render(pages_path + "public.ejs", {
+                    pageTitle: "Live !",
+                    text: twitter_html
+                });
+            }
+        });
+    });
+}
 
 exports.displayLive = function(req, res){
 	const idRaid = req.params.id;
@@ -42,17 +82,11 @@ exports.displayLive = function(req, res){
                     tweetsHtml.forEach((tweetHtml) => {
                         text += tweetHtml.html + '<br>';
                     });
-                    res.render(pages_path + "public.ejs", {
-                        pageTitle: "Live !",
-                        text: text
-                    });
+                    renderAfterGettingParticipantDatas(text, res, idRaid);
                 });
             });
         }else{
-            res.render(pages_path + "public.ejs", {
-                pageTitle: "Live !",
-                text: text
-            });
+            renderAfterGettingParticipantDatas(text, res, idRaid);
         }
     });
 };
@@ -87,4 +121,13 @@ exports.getData = function(req, res){
 	}).then(function(stages_found){
         res.send(stages_found);
 	});
+};
+
+exports.chat_discussion = function (req, res) {
+    let conversation = {name: req.params.id_dest};
+
+    res.render(pages_path + "chat/discussion.ejs", {
+        pageTitle: "Chat with " + conversation.name,
+        conversation: conversation
+    });
 };

@@ -202,6 +202,9 @@ intothewoods.route('/participant/:id/home')
 
 
 //Routes dedicated to the Live
+intothewoods.route('/live/:id_raid/chat/:id_dest')
+    .get(live.chat_discussion);
+
 intothewoods.route('/live/:id')
     .get(live.displayLive)
     .post(live.getData);
