@@ -200,6 +200,12 @@ intothewoods.route('/helper/check_in')
 intothewoods.route('/helper/qrcodereader')
     .get(helper.qrcodeReader);
 
+intothewoods.route('/helper/registerrunner')
+    .post(helper.registerRunner);
+
+intothewoods.route('/team/:raid_id/messenger')
+    .get(organizer.displayMessenger);
+
 //Routes dedicated to the participants
 intothewoods.route('/participant/register')
     .get(participant.displayRegister)
@@ -269,11 +275,12 @@ function message_time() {
 [{
     user_id: "...", // email for organizer or login for helper
     user_type: "", // "organizer" or "helper" - not used for now
+    name: "",
     socket_id: "...",
     pending_messages: ["..."]
 }]
 */
-io.on('connect', function(socket){
+io.on('connection', function(socket){
     socket.on('username', function(msg){
         const user = internal_raids_tchat.find(user => {return user.user_id === msg;});
         if(user){
@@ -293,6 +300,7 @@ io.on('connect', function(socket){
                 if(dest){
                     const dest_message = JSON.stringify({
                         src: src.user_id,
+                        name: src.name,
                         timestamp: message_time(),
                         message: message.message
                     });

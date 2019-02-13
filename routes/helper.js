@@ -229,7 +229,8 @@ exports.register = function (req, res) {
             }).then(function () {
                 internal_raids_tchat.push({
                     user_id: id_helper,
-                    user_type: "helper",
+                    user_type: 'helper',
+                    name: registerUserFn + ' ' + registerUserLn,
                     socket_id: '',
                     pending_messages: []
                 });
