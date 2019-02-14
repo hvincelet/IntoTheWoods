@@ -1,4 +1,4 @@
-const pages_path = __dirname+"/../views/pages/live/";
+const pages_path = __dirname+"/../views/pages/contents/live/";
 const models = require('../models');
 const Twitter = require('twitter');
 const config = require('../config/config')[global.env];
