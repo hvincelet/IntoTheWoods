@@ -101,8 +101,6 @@ function updatePointOfInterestId(serverId) {
         pointOfInterestFound.is_new = false;
 
         let helperPostFound = helperPostArrayToStore.find(function (helperPost) {
-            console.log(helperPost.id_point_of_interest);
-            console.log(pointOfInterestServerId.clientId);
             return helperPost.id_point_of_interest === parseInt(pointOfInterestServerId.clientId);
         });
         if (helperPostFound !== undefined) {

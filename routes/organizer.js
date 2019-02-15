@@ -4,6 +4,7 @@ const models = require('../models');
 const crypto = require('crypto');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
+const fs = require('fs');
 
 exports.dashboard = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -69,6 +70,10 @@ exports.idVerification = function (req, res) {
                 raids_found.map(tuple => {
                     let date = tuple.dataValues.raid.dataValues.date.split('-');
                     let local_date = date[2]+'/'+date[1]+'/'+date[0];
+                    let in_future = false;
+                    if(new Date(date) >= new Date()){
+                        in_future = true;
+                    }
                     user.raid_list.push({
                         id: tuple.dataValues.raid.dataValues.id,
                         name: tuple.dataValues.raid.dataValues.name,
@@ -78,7 +83,9 @@ exports.idVerification = function (req, res) {
                         lat: tuple.dataValues.raid.dataValues.lat,
                         lng: tuple.dataValues.raid.dataValues.lng,
                         start_time: tuple.dataValues.raid.start_time,
-                        allow_register: tuple.dataValues.raid.allow_register
+                        allow_register: tuple.dataValues.raid.allow_register,
+                        hashtag: tuple.dataValues.raid.dataValues.hashtag,
+                        in_future: in_future
                     });
                 });
                 connected_users.push(user);
@@ -131,6 +138,13 @@ exports.register = function (req, res) {
                 active: false,
                 picture: jdenticon.toPng(req.body.firstname.concat(req.body.lastname), 80).toString('base64')
             }).then(function () {
+                internal_raids_tchat.push({
+                    user_id: req.body.email,
+                    user_type: 'organizer',
+                    name: req.body.firstname + ' ' + req.body.lastname,
+                    socket_id: '',
+                    pending_messages: []
+                });
                 sender.sendMailToOrganizer(req.body.email, hash);
                 res.send(JSON.stringify({msg: "ok"}));
             });
@@ -148,7 +162,7 @@ exports.validate = function (req, res) {
         if (organizer_found === null) {
             console.log("Validating invalid user");
         } else {
-            organizer_found.updateAttributes({
+            organizer_found.update({
                 active: '1'
             });
         }
@@ -157,11 +171,11 @@ exports.validate = function (req, res) {
             successMessage: "Votre adresse mail a bien été confirmée."
         });
     })
-}
+};
 
 exports.shareRaidToOthersOrganizers = function(req, res) {
     const user = connected_user(req.sessionID);
-    if(!user.raid_list.find(function(raid){return raid.id == req.params.raid_id})){
+    if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.raid_id)})){
         return res.redirect('/dashboard');
     }
 
@@ -357,6 +371,110 @@ exports.remove = function (req, res) {
             });
         }else{
             res.send(JSON.stringify({msg: "only_one_organizer"}));
+        }
+    });
+};
+
+exports.profile = function (req, res) {
+    const user = connected_user(req.sessionID);
+    res.render(pages_path + "template.ejs", {
+        pageTitle: "Gestion du profil",
+        page: "profile",
+        user: user
+    });
+};
+
+exports.saveProfile = function (req, res) {
+    const user = connected_user(req.sessionID);
+
+    let photo = req.body.photo.split(',')[1];
+
+    models.organizer.update({
+        picture: photo
+    },{where: {email: user.login}}).then(function () {
+        user.picture = photo;
+
+        res.send(JSON.stringify({msg: "ok"}));
+    });
+};
+
+exports.displayMessenger = function (req, res){
+    const raid = req.params.raid_id;
+    const organizer_array = [];
+    const helper_array = [];
+    models.team.findAll({
+        where: {
+            id_raid: raid
+        },
+        attributes: ['id_organizer']
+    }).then(function(organizer_found){
+        if(organizer_found !== null){
+            cpt=0;
+            organizer_found.forEach(function(current_organizer){
+                models.organizer.findOne({
+                    where:{
+                        email: current_organizer.id_organizer
+                    },
+                    attributes: ['email','last_name','first_name']
+                }).then(function(current_organizer_found){
+                    if(current_organizer_found !== null){
+                        organizer_array.push(current_organizer_found);
+                    }
+                });
+                cpt=cpt+1;
+                if(cpt==organizer_found.length){
+                    models.point_of_interest.findAll({
+                        where:{
+                            id_raid: raid
+                        },
+                        attributes: ['id']
+                    }).then(function(point_of_interest_found){
+                        if(point_of_interest_found !== null){
+                            cpt2=0;
+                            point_of_interest_found.forEach(function(poi){
+                                models.helper_post.findOne({
+                                    where:{
+                                        id_point_of_interest: poi.id
+                                    },
+                                    attributes: ['id','allow_qrcodereader']
+                                }).then(function(helper_post_found){
+                                    if(helper_post_found !== null){
+                                        models.assignment.findOne({
+                                            where:{
+                                                id_helper_post: helper_post_found.id
+                                            },
+                                            attributes: ['id_helper']
+                                        }).then(function(assignment_found){
+                                            if(assignment_found !== null){
+                                                models.helper.findOne({
+                                                    where:{
+                                                        login: assignment_found.id_helper
+                                                    },
+                                                    attributes: ['login','last_name','first_name']
+                                                }).then(function(helper_found){
+                                                    if(helper_found !== null){
+                                                        helper_found.allow_qrcodereader = helper_post_found.allow_qrcodereader;
+                                                        helper_array.push(helper_found);
+                                                        if(cpt2==point_of_interest_found.length){
+                                                            res.render(pages_path + "/live/organizer_live.ejs", {
+                                                                pageTitle: "Messagerie",
+                                                                page: "live/organizer_live",
+                                                                organizer: organizer_array,
+                                                                helper: helper_array
+                                                            });
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                                cpt2=cpt2+1;
+                            });
+                        }
+                    });
+                }
+            });
         }
     });
 };

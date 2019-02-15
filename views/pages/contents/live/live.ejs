@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<body>
+	Page de Live
+	<% if(typeof courses !== "undefined") { %>
+        <% courses.forEach(function(item){ %>
+          <h3> <%-item.order_num%>è course, <%-item.label%> : <%-item.sport.name%></h3>
+          <div id='output_<%-item.order_num%>'>
+		      <ul id='<%-item.id%>_<%-item.label%>'>
+		      	<% if(item.order_num == 1) { %>
+		      		<% participants.forEach(function(participant){ %>
+		      			<li id='<%-participant.id_participant%>_<%-participant.first_name%>_<%-participant.last_name%>'>Participant <%-participant.first_name%> <%-participant.last_name%> fait la première course</li>
+		      		<% }); %>
+		      	<% } %>
+		      </ul>
+		  </div>
+        <% }); %>
+    <% } %>
+
+	<div class="raids_container">
+
+	</div>
+	<script type="text/javascript">
+		function getXMLHttpRequest() {
+			var xhr = null;
+			
+			if (window.XMLHttpRequest || window.ActiveXObject) {
+				if (window.ActiveXObject) {
+					try {
+						xhr = new ActiveXObject("Msxml2.XMLHTTP");
+					} catch(e) {
+						xhr = new ActiveXObject("Microsoft.XMLHTTP");
+					}
+				} else {
+					xhr = new XMLHttpRequest(); 
+				}
+			} else {
+				alert("Votre navigateur ne supporte pas l'objet XMLHTTPRequest...");
+				return null;
+			}
+			
+			return xhr;
+		}
+
+		function request() {
+			var xhr = getXMLHttpRequest();
+
+			xhr.open("POST", "http://localhost:8080/live/1", true);
+			
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState==4 && xhr.status==200){
+					var response=JSON.parse(xhr.responseText);
+					readData(response);
+				}
+			};
+			
+			xhr.send();
+		}
+
+		function readData(data) {
+			var ul, li, cn;
+			
+			for (var i=0 ; i<data.length ; i++) {
+				participant = document.getElementById(data[i]["participant.id_participant"]+"_"+data[i]["participant.first_name"]+"_"+data[i]["participant.last_name"]);
+
+				if(participant != null){
+					course = participant.parentNode;
+					course.removeChild(participant);
+					courseOrder = course.parentNode.id.split("_")[1];
+
+					course = document.getElementById("output_"+(data[i]["course.order_num"]+1));
+
+					if(course != null){
+						ul = course.firstElementChild;
+					}
+					else{
+						ul = document.getElementById("output_"+(data[i]["course.order_num"])).firstElementChild;
+					}
+
+					li = document.createElement("li");
+					li.setAttribute("id", data[i]["participant.id_participant"]+"_"+data[i]["participant.first_name"]+"_"+data[i]["participant.last_name"]);
+					cn = document.createTextNode(data[i]["participant.first_name"] + " " + data[i]["participant.last_name"] + " vient de finir la course " + data[i]["course.label"] + " avec le temps suivant : " + data[i]["time"]);
+					
+					li.appendChild(cn);
+					ul.appendChild(li);
+				}
+			}
+		}
+		request();
+		setInterval(function(){request();}, 3000);
+	</script>
+</body>

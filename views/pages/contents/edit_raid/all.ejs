@@ -1,3 +1,10 @@
+<script type="text/javascript">
+    function convertDate(dateString, idRaid) {
+        var date = new Date(dateString);
+        document.getElementById("dateRaid_"+idRaid).innerHTML = date.getDate().toLocaleString(undefined, {minimumIntegerDigits: 2})+"/"+date.getMonth()+1+"/"+date.getFullYear();
+    }
+</script>
+
 <div class="breadcrumb-holder">
     <div class="container-fluid">
         <ul class="breadcrumb">
@@ -15,25 +22,29 @@
                         <h4>Sélectionnez votre Raid</h4>
                     </div>
                     <div class="card-body">
-                        <table id="table"
-                               class="table table-bordered table-responsive-md table-striped text-center">
-                            <tr>
-                                <th class="text-center">Nom</th>
-                                <th class="text-center">Édition</th>
-                                <th class="text-center">Date</th>
-                                <th class="text-center">Lieu</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-
-                            <% user.raid_list.forEach(function (raid) { %>
+                        <table id="table" class="table table-bordered table-responsive-md table-striped text-center">
+                            <thead>
                                 <tr>
-                                    <td class="pt-3-half"><%= raid.name %></td>
-                                    <td class="pt-3-half"><%= raid.edition %></td>
-                                    <td class="pt-3-half"><%= raid.date %></td>
-                                    <td class="pt-3-half"><%= raid.place %></td>
-                                    <td class="pt-3-half"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0" onclick="window.location='/editraid/<%= raid.id %>'">Éditer ce Raid</button></td>
+                                    <th class="text-center">Nom</th>
+                                    <th class="text-center">Édition</th>
+                                    <th class="text-center">Date</th>
+                                    <th class="text-center">Lieu</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
-                            <% }); %>
+                            </thead>
+
+                            <tbody>
+                                <% raids.forEach(function (raid) { %>
+                                    <tr>
+                                        <td class="pt-3-half"><%= raid.name %></td>
+                                        <td class="pt-3-half"><%= raid.edition %></td>
+                                        <td class="pt-3-half"><%= raid.date.toLocaleString() %></td>
+                                        <!--<td class="pt-3-half" id="dateRaid_<%= raid.id %>"><script>convertDate("<%= raid.date %>", "<%= raid.id %>");</script></td>-->
+                                        <td class="pt-3-half"><%= raid.place %></td>
+                                        <td class="pt-3-half"><button type="button" class="btn btn-primary btn-rounded btn-sm my-0" onclick="window.location='/editraid/<%= raid.id %>'">Éditer ce Raid</button></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -41,3 +52,43 @@
         </div>
     </div>
 </section>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-3.3.1/dt-1.10.18/b-1.5.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.css"/>
+ 
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.3.1/dt-1.10.18/b-1.5.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#table').DataTable({
+            "columns": [
+                null,
+                null,
+                null,
+                null,
+                { "searchable": false }
+            ],
+            language: {
+                processing:     "Traitement en cours...",
+                search:         "Rechercher&nbsp;:",
+                lengthMenu:     "Afficher _MENU_ &eacute;l&eacute;ments",
+                info:           "Affichage de l'&eacute;lement _START_ &agrave; _END_ sur _TOTAL_ &eacute;l&eacute;ments",
+                infoEmpty:      "Affichage de l'&eacute;lement 0 &agrave; 0 sur 0 &eacute;l&eacute;ments",
+                infoFiltered:   "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
+                infoPostFix:    "",
+                loadingRecords: "Chargement en cours...",
+                zeroRecords:    "Aucun &eacute;l&eacute;ment &agrave; afficher",
+                emptyTable:     "Aucune donnée disponible dans le tableau",
+                paginate: {
+                    first:      "Premier",
+                    previous:   "Pr&eacute;c&eacute;dent",
+                    next:       "Suivant",
+                    last:       "Dernier"
+                },
+                aria: {
+                    sortAscending:  ": activer pour trier la colonne par ordre croissant",
+                    sortDescending: ": activer pour trier la colonne par ordre décroissant"
+                }
+            }
+        });
+    });
+</script>

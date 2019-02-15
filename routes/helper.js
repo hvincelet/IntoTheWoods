@@ -3,10 +3,12 @@ const models = require('../models');
 const sender = require('./sender');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
+const moment = require('moment');
 const date = require('date-and-time');
+
 const helpers = models.helper;
 
-exports.inviteHelper = function (req, res) {
+exports.inviteHelper = function(req, res) {
     const user = connected_user(req.sessionID);
     if(!user.raid_list.find(function(raid){return raid.id === parseInt(req.params.raid_id);})){
         return res.redirect('/dashboard');
@@ -52,7 +54,7 @@ exports.inviteHelper = function (req, res) {
                     });
                 }
                 if (index === helper_emails.length - 1) {
-                    res.send(JSON.stringify({status: helper_invite_status}));
+                    return res.send(JSON.stringify({status: helper_invite_status}));
                 }
             });
         } else {
@@ -63,7 +65,7 @@ exports.inviteHelper = function (req, res) {
         }
     });
 
-    res.send(JSON.stringify({status: helper_invite_status}));
+    return res.send(JSON.stringify({status: helper_invite_status}));
 };
 
 exports.displayRegister = function (req, res) {
@@ -77,6 +79,7 @@ exports.displayRegister = function (req, res) {
         helper_post_model.belongsTo(point_of_interest_model, {foreignKey: 'id_point_of_interest'});
 
         models.raid.findByPk(raid_id).then(function(raid_found){
+            if(!raid_found) return res.redirect('/helper/register');
             if(raid_found.allow_register !== 1){
                 return res.redirect('/helper/register');
             }else{
@@ -224,7 +227,13 @@ exports.register = function (req, res) {
                 last_name: registerUserLn,
                 first_name: registerUserFn
             }).then(function () {
-
+                internal_raids_tchat.push({
+                    user_id: id_helper,
+                    user_type: 'helper',
+                    name: registerUserFn + ' ' + registerUserLn,
+                    socket_id: '',
+                    pending_messages: []
+                });
                 let create_assignment_actions = helperPostsWished.map(wish => {
                     return new Promise(resolve => {
                         assignments.create({
@@ -306,6 +315,7 @@ exports.displayHome = function (req, res) {
             });
         }
     });
+
 };
 
 exports.performCheckin = function (req, res) {
@@ -344,6 +354,68 @@ exports.remove = function (req, res) {
                 models.helper.destroy({ where: {login: helper_id} }).then(function () {
                     res.send(JSON.stringify({msg: "ok"}));
                 });
+            });
+        }
+    });
+};
+
+exports.qrcodeReader = function(req, res){
+    res.render(pages_path + "qrcodeReader.ejs", {
+        pageTitle: "Lecteur de QRCode pour participant",
+    });
+}
+
+exports.registerRunner = function(req, res){
+    var participant = {};
+    participant.id = req.body.id;
+    participant.time = req.body.time;
+    models.participant.findOne({
+        attributes : ['id_raid'],
+        where: {
+            id_participant: participant.id
+        }
+    }).then(function(participant_found){
+        if(participant_found !== null){
+            models.course.findAll({
+                attributes: ['id'],
+                where:{
+                    id_raid: participant_found.id_raid
+                },
+                order: [
+                    ['order_num','ASC']
+                ]
+            }).then(function(course_found){
+                if(course_found !== null){
+                    let cpt = 0;
+                    let id_final = 0;
+                    course_found.forEach(function(course){
+                        models.stage.findOne({
+                            where:{
+                                id_participant: participant.id,
+                                id_course: course.id
+                            }
+                        }).then(function(stage_found){
+                            if(stage_found === null){
+                                if(id_final == 0){
+                                    id_final = course.id
+                                }
+                            }
+                            cpt=cpt+1;
+                            if(cpt==course_found.length){
+                                if(id_final != 0){
+                                    models.stage.create({
+                                        id_participant: participant.id,
+                                        id_course: id_final,
+                                        time: new Date(participant.time).getUTCHours()+1+":"+new Date(participant.time).getUTCMinutes()+":"+new Date(participant.time).getUTCSeconds(),
+                                        timeEntered: new Date()
+                                    }).then(function(){
+                                        return res.send(participant);
+                                    });
+                                }
+                            }
+                        })
+                    });
+                }
             });
         }
     });

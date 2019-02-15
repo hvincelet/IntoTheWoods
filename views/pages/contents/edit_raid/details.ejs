@@ -44,17 +44,41 @@ helpers.map( (helper, index) => {
                             </tr>
                         </table>
 
-                        <input type="time" id="start_time" size="3" class="text-center" <%if(raid.start_time !== null){%>value="<%=raid.start_time%>"<% } %>>
-                        <label for="start_time">Heure de départ du raid <small>(Exemple: 09:30)</small></label>
-                        <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="saveStartTime();">Enregistrer</button>
-                        <br/>
+                        <div class="col-md-6">
+                            <input type="time" id="start_time" size="3" class="text-center" <%if(raid.start_time !== null){%>value="<%=raid.start_time%>"<% } %>>
+                            <label for="start_time">Heure de départ du raid <small>(Exemple: 09:30)</small></label>
+                            <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="saveStartTime();">Enregistrer</button>
+                            <br/>
 
 
-                        <% if (pois.length > 0 ) { %>
+                            <% if (pois.length > 0 ) { %>
                             <input id="allow_register" name="allow_register" type="checkbox" class="form-control-custom"
                             <%if(parseInt(raid.allow_register) === 1){%> checked <%}%> >
                             <label for="allow_register">Autoriser les inscriptions des bénévoles ?</label>
-                        <% } %>
+                            <% } %>
+                        </div>
+                        <div class="col-md-6">
+                            <input id="hashtag" type="text" value="<%=raid.hashtag%>">
+                            <a href="#" data-toggle="popover" title="Information Hashtag" data-content="Saisir un hashtag unique pour les réseaux sociaux."><i class="fas fa-info-circle"></i></a>
+                            <label for="hashtag">Hashtag du raid pour les réseaux sociaux.</label>
+                            <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="saveHashtag()">Enregistrer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="forms">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <h4> Gestion des dossards</h4>
+                    </div>
+                    <div class="card-body">
+                        <button type="button" class="btn btn-info btn-rounded btn-sm my-0" onclick="generateBib();">Générer les dossards de tous les participants du raid</button>
                     </div>
                 </div>
             </div>
@@ -78,6 +102,7 @@ helpers.map( (helper, index) => {
                                     <th class="text-center">Nom</th>
                                     <th class="text-center">Nombre de bénévole</th>
                                     <th class="text-center">Description</th>
+                                    <th class="text-center">Lecteur de QRCode</th>
                                 </tr>
                                 <% pois.map(poi => { %>
                                 <tr>
@@ -85,6 +110,10 @@ helpers.map( (helper, index) => {
                                     <td class="pt-3-half poi_name" contenteditable="true" width="40%"><%=poi.name%></td>
                                     <td width="20%" contenteditable="false"><input class="poi_number_helper" type="number" min="1" value="<%= poi.nb_helper %>"/></td>
                                     <td width="40%" class="poi_description" contenteditable="true"><%= poi.description %></td>
+                                    <td width="10%" contenteditable="false">
+                                        <input id="allow_qrcodereader<%=poi.id%>" type="checkbox" value="<%=poi.id%>"
+                                        <%if(parseInt(poi.allow_qrcodereader) == 1){%> checked <%}%> >
+                                    </td>
                                 </tr>
                                 <% }); %>
                             </table>
@@ -120,7 +149,10 @@ helpers.map( (helper, index) => {
                                 </tr>
                                 <% organizers.map(organizer => { %>
                                 <tr>
-                                    <td class="pt-3-half" contenteditable="false" width="60%"><%=organizer.first_name%> <%=organizer.last_name%> <%= organizer.index%></td>
+                                    <td class="pt-3-half align-baseline" contenteditable="false" width="60%">
+                                        <img src="data:image/png;base64,<%= organizer.picture %>" alt="person" class="img-fluid rounded-circle img_thumbnail"/>
+                                        <%=organizer.first_name%> <%=organizer.last_name%> <%= organizer.index%>
+                                    </td>
                                     <td width="20%"><button type="button" class="btn btn-info btn-rounded btn-sm my-0" data-toggle="modal" data-target="#mailModal" data-mail="<%=organizer.email%>" data-type="Organizers">Contacter</button></td>
                                     <td width="20%"><button type="button" class="btn btn-danger btn-rounded btn-sm my-0" data-toggle="modal" data-target="#removeModal" data-type="Organizers" data-username="<%=organizer.first_name%> <%=organizer.last_name%>" data-usermail="<%=organizer.email%>">Supprimer</button></td>
                                 </tr>
@@ -220,7 +252,6 @@ helpers.map( (helper, index) => {
                 }
             });
         });
-
         <% helpers.forEach(function (helper) { %>
         $('input[type=radio][name="<%=helpers_id[helper.email]%>"]').change(function () {
             let val = this.value;
@@ -242,6 +273,37 @@ helpers.map( (helper, index) => {
             });
         });
         <% }); %>
+        <% pois.map(poi => { %>
+        $("#allow_qrcodereader<%=poi.id%>:checkbox").change(function () {
+            let status = this.checked?"accessible":"non accessible";
+            $.ajax({
+                type: 'POST',
+                url: '/editraid/<%=raid.id%>/allowqrcodereader',
+                data: {
+                    status: this.checked?1:0,
+                    id: this.value
+                },
+                success: function (response) {
+                    msg = JSON.parse(response).msg;
+                    if(msg !== "ok"){
+                        createNoty(<%=poi.id%>+": une erreur est survenue... Impossible de sauvegarder le statut. Raffraichissez la page et rééssayez.", "error");
+                        $("#allow_qrcodereader<%=poi.id%>:checkbox").prop('checked',false);
+                    }
+                },
+                error: function (response) {
+                    createNoty("Une erreur est survenue... Impossible de sauvegarder le statut. Raffraichissez la page et rééssayez.", "error");
+                }
+            });
+        });
+        <% }); %>
+        function createNoty(message, type) {
+            var html = '<div class="alert alert-' + type + ' alert-dismissable page-alert" data-auto-dismiss role="alert">';
+            html += '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>';
+            html += message;
+            html += '</div>';
+            $(html).hide().prependTo('#noty-holder').slideDown();
+        };
+        $('[data-toggle="popover"]').popover();
     });
     <%- scripts %>
 </script>

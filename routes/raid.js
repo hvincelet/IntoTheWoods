@@ -6,6 +6,7 @@ const geocoder = new Nominatim();
 const ejs = require('ejs');
 const fs = require('fs');
 const raids = models.raid;
+const Op = require('Sequelize').Op
 
 exports.init = function (req, res) {
     const user = connected_user(req.sessionID);
@@ -205,7 +206,8 @@ exports.saveSportsRanking = function (req, res) {
                     edition: unique_raid_found.dataValues.edition,
                     place: unique_raid_found.dataValues.place,
                     lat: unique_raid_found.dataValues.lat,
-                    lng: unique_raid_found.dataValues.lng
+                    lng: unique_raid_found.dataValues.lng,
+                    hashtag: unique_raid_found.dataValues.hashtag
                 });
             }
 
@@ -316,11 +318,13 @@ exports.getGeocodedResults = function (req, res) {
 
 exports.displayAllRaids = function (req, res) {
     const user = connected_user(req.sessionID);
+    const raids = user.raid_list;
     if (user.raid_list.length !== 0) {
         res.render(pages_path + "template.ejs", {
             pageTitle: "Gestion des Raids",
             page: "edit_raid/all",
-            user: user
+            user: user,
+            raids: raids
         });
     } else {
         res.redirect('/dashboard');
@@ -359,7 +363,7 @@ exports.displayRaid = function (req, res) {
         team_model.findAll({
             include: [{
                 model: organizer_model,
-                attributes: ['email', 'last_name', 'first_name']
+                attributes: ['email', 'last_name', 'first_name', 'picture']
             }],
             attributes: ['id_organizer'],
             where: {
@@ -372,7 +376,8 @@ exports.displayRaid = function (req, res) {
                 organizers_linked_with_the_current_raid.push({
                     email: organizer.dataValues.organizer.dataValues.email,
                     first_name: organizer.dataValues.organizer.dataValues.first_name,
-                    last_name: organizer.dataValues.organizer.dataValues.last_name
+                    last_name: organizer.dataValues.organizer.dataValues.last_name,
+                    picture: organizer.organizer.picture
                 });
             });
 
@@ -613,4 +618,159 @@ exports.starttime = function (req, res) {
             }
         });
     }
+};
+
+exports.setStartTime = function(req, res){
+    let idRaid = req.body.idRaid;
+
+    models.raid.findOne({
+        where: {
+            id: idRaid
+        }
+    }).then(function (raid_found) {
+        if (raid_found !== null) {
+            let time = new Date();
+            models.raid.update(
+                {
+                    start_time: time.toLocaleTimeString()
+                },
+                {where: {
+                    id: idRaid
+                }
+            });
+        }
+        else{
+            console.log("erreur");
+            //TODO : renvoyer un message d'erreur
+        }
+    });
+};
+
+exports.generateQRCode = function(req, res){
+    // Generate QR Code PDFs for all participant
+    const raid = req.params.id;
+    models.raid.findOne({
+        where: {
+            id: raid
+        },
+        attributes: ['id','name','edition']
+    }).then(function(raid_found){
+        if(raid_found !== null){
+            models.participant.findAll({
+                where: {
+                    id_raid: raid
+                },
+                attributes: ['id_participant','last_name','first_name']
+            }).then(function(participant_found){
+                if(participant_found !== null){
+                    let cpt = 0;
+                    let html = '';
+                    participant_found.forEach(function(participant){
+                        QRCode.toDataURL(participant.id_participant.toString(), { errorCorrectionLevel: 'L', width:300 }, function (err, url) {
+                            if (err) return console.log(err);
+                            //console.log(url)
+                            html = html+"<html>"+
+                                "<body>"+
+                                "<p style='font-size: 8pt;'>"+participant.first_name+" "+participant.last_name+"</p>"+
+                                "<center>"+
+                                "<p style='font-size: 16pt;'><strong>"+participant.id_participant+"</strong><br>"+
+                                "<img src='"+url+"'></img><br>"+
+                                "<strong>"+raid_found.name.toUpperCase()+" "+raid_found.edition+"</strong></p>"+
+                                "</center>"+
+                                "</body>"+
+                                "</html>";
+                            cpt=cpt+1;
+                            if(cpt==participant_found.length){
+                                pdf.create(html, options).toBuffer(function(err, buffer) {
+                                    if (err) return res.send(JSON.stringify({msg: "not-generate"}));
+                                    buffer = buffer.toString('base64');
+                                    return res.send({msg: "ok",buffer: buffer});
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    });
+};
+
+exports.allowqrcodereader = function (req, res) {
+    let user = connected_user(req.sessionID);
+    const raid = user.raid_list.find(function (raid) {
+        return raid.id === parseInt(req.params.id);
+    });
+    if (!raid) {
+        return res.redirect('/dashboard');
+    }else {
+        models.helper_post.findOne({
+            where: {
+                id: parseInt(req.body.id)
+            }
+        }).then(function (helper_post_found) {
+            if(helper_post_found === null){
+                return res.send(JSON.stringify({msg: "not-found"}));
+            }else{
+                helper_post_found.update({
+                    allow_qrcodereader: parseInt(req.body.status)
+                }).then(function () {
+                    return res.send(JSON.stringify({msg: "ok"}));
+                });
+            }
+        });
+    }
+};
+
+exports.saveHashtag = function(req, res){
+    let user = connected_user(req.sessionID);
+    const raid = user.raid_list.find(function (raid) {
+        return raid.id === parseInt(req.params.id);
+    });
+    if (!raid) {
+        res.send(JSON.stringify({msg: "raid not found"}));
+        return res.redirect('/dashboard');
+    }else {
+        models.raid.findByPk(raid.id).then(function (raid_found) {
+            if (raid_found !== null) {
+                raid_found.update({
+                    hashtag: req.body.hashtag
+                }).then(function(){
+                    return res.send(JSON.stringify({msg: "ok"}));
+                });
+            } else {
+                return res.send(JSON.stringify({msg: "raid not found"}));
+            }
+        });
+    }
+};
+
+exports.setRegisterDates = function(req, res){
+    let idRaid = req.body.idRaid;
+    let startRegister = new Date(req.body.startRegister);
+    let endRegister = new Date(req.body.endRegister);
+
+    console.log(idRaid+" "+startRegister+" "+endRegister)
+
+    models.raid.findOne({
+        where: {
+            id: idRaid
+        }
+    }).then(function (raid_found) {
+        if (raid_found !== null) {
+            let time = new Date();
+            models.raid.update(
+                {
+                    startRegister: startRegister,
+                    endRegister: endRegister
+                },
+                {where: {
+                        id: idRaid
+                    }
+                });
+        }
+        else{
+            console.log("erreur");
+            //TODO : renvoyer un message d'erreur
+        }
+    });
 };

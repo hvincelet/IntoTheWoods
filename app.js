@@ -8,14 +8,15 @@ const express_lib = require('express');
 const bodyParser = require('body-parser');
 const uuid = require('uuid/v4');
 const session = require('express-session');
-const config = require('./config/config')[global.env];
+const config_path = require('./config/config')[global.env].credentials;
+const config = require(config_path)[env];
 
 // IntoTheWoods app
 const intothewoods = express();
 
 intothewoods.use(favicon(__dirname + '/views/img/favicon.png'));
-intothewoods.use(bodyParser.json());
-intothewoods.use(bodyParser.urlencoded({extended: true}));
+intothewoods.use(bodyParser.json({limit: '5mb'}));
+intothewoods.use(bodyParser.urlencoded({limit: '5mb', extended: true}));
 intothewoods.use("/views", express.static(__dirname + '/views'));
 intothewoods.set('view engine', 'ejs');
 intothewoods.use(session({
@@ -50,14 +51,14 @@ global.connected_user = function (uuid) {
         return connected_users[0];
     }
     return connected_users.find(function (user) {
-        return user.uuid == uuid;
+        return user.uuid === uuid;
     });
 };
 
 let checkAuth = function (req, res, next) {
     if (!config.no_login) {
         const user = connected_users.find(function (user) {
-            return user.uuid == req.sessionID;
+            return user.uuid === req.sessionID;
         });
         if (!user) {
             return res.redirect('/login');
@@ -72,6 +73,7 @@ const map = require('./routes/map');
 const misc = require('./routes/misc');
 const helper = require('./routes/helper');
 const participant = require('./routes/participant');
+const live = require('./routes/live');
 
 /**********************************/
 /*             Routes             */
@@ -106,10 +108,14 @@ intothewoods.route('/resetpassword')
 intothewoods.route('/newpassword')
     .post(misc.register_new_password);
 
-//routes dedicated to the raids' pages
 intothewoods.route('/dashboard')
     .get(checkAuth, organizer.dashboard);
 
+intothewoods.route('/profile')
+    .get(checkAuth, organizer.profile)
+    .post(checkAuth, organizer.saveProfile);
+
+//routes dedicated to the raids' pages
 intothewoods.route('/createraid/start')
     .get(checkAuth, raid.init);
 
@@ -143,6 +149,9 @@ intothewoods.route('/editraid/:id/allowregister')
 intothewoods.route('/editraid/:id/starttime')
     .post(checkAuth, raid.starttime);
 
+intothewoods.route('/editraid/:id/hashtag')
+    .post(checkAuth, raid.saveHashtag);
+
 intothewoods.route('/editraid/:id/sendMessage')
     .post(checkAuth, organizer.sendMail);
 
@@ -157,6 +166,19 @@ intothewoods.route('/editraid/:id/removeHelper')
 
 intothewoods.route('/team/:raid_id/inviteorganizers')
     .post(checkAuth, organizer.shareRaidToOthersOrganizers);
+
+intothewoods.route('/editraid/setStartTime')
+    .post(checkAuth, raid.setStartTime);
+
+intothewoods.route('/editraid/:id/generateQRCode')
+    .post(checkAuth, raid.generateQRCode);
+
+intothewoods.route('/editraid/:id/allowqrcodereader')
+    .post(checkAuth, raid.allowqrcodereader);
+
+intothewoods.route('/editraid/setRegisterDates')
+    .post(/*checkAuth, */raid.setRegisterDates);
+
 
 //routes dedicated to the helpers
 intothewoods.route('/team/:raid_id/invitehelpers')
@@ -175,11 +197,28 @@ intothewoods.route('/helper/:id/home')
 intothewoods.route('/helper/check_in')
     .post(helper.performCheckin);
 
-// Routes dedicated to participant
+intothewoods.route('/helper/qrcodereader')
+    .get(helper.qrcodeReader);
+
+intothewoods.route('/helper/registerrunner')
+    .post(helper.registerRunner);
+
+intothewoods.route('/team/:raid_id/messenger')
+    .get(organizer.displayMessenger);
+
+//Routes dedicated to the participants
 intothewoods.route('/participant/register')
     .get(participant.displayRegister)
     .post(participant.register);
 
+
+//Routes dedicated to the Live
+intothewoods.route('/live/:id')
+    .get(live.displayLive)
+    .post(live.getData);
+
+intothewoods.route('/live')
+    .get(live.displayAllLive);
 
 //bad url route
 intothewoods.use(function (req, resp, next) {
@@ -189,6 +228,7 @@ intothewoods.use(function (req, resp, next) {
 });
 
 // NOT MODIFY AFTER THIS LINE !
+let httpsServer;
 if(env === "production"){
     const credentials = {
         key: fs.readFileSync('/etc/letsencrypt/live/runtonic.ovh/privkey.pem', 'utf8'),
@@ -203,7 +243,7 @@ if(env === "production"){
     app.use(vhost(config.server_host, intothewoods)); // Serves top level runtonic via Main server app
 
     const httpServer = express_lib();
-    const httpsServer = https.createServer(credentials, app);
+    httpsServer = https.createServer(credentials, app);
 
     httpServer.get('*', function(req, res){
         res.redirect('https://' + req.headers.host + req.url);
@@ -216,6 +256,68 @@ if(env === "production"){
         console.log('HTTPS Server running on '+config.server_host+':'+config.server_port_https);
     });
 }else{
+    httpsServer = https.createServer(intothewoods);
     intothewoods.listen(config.server_port_http);
     console.log('HTTP Server running on '+config.server_host+':'+config.server_port_http);
 }
+
+const io = require('socket.io')(httpsServer);
+global.internal_raids_tchat = [];
+function message_time() {
+    function addZero(i){ if(i<10){i="0"+i;} return i; }
+    let now = new Date();
+    let hour = addZero(now.getHours());
+    let minute = addZero(now.getMinutes());
+    let second = addZero(now.getSeconds());
+    return "["+hour+":"+minute+":"+second+"]";
+}
+/*
+[{
+    user_id: "...", // email for organizer or login for helper
+    user_type: "", // "organizer" or "helper" - not used for now
+    name: "",
+    socket_id: "...",
+    pending_messages: ["..."]
+}]
+*/
+io.on('connection', function(socket){
+    socket.on('username', function(msg){
+        const user = internal_raids_tchat.find(user => {return user.user_id === msg;});
+        if(user){
+            user.socket_id = socket.id;
+            user.pending_messages.map(message => {socket.emit('receiving', message);});
+            user.pending_messages = [];
+        }else{
+            // Unknown user
+        }
+    });
+    socket.on('sending', function(msg){
+        const src = internal_raids_tchat.find(user => {return user.socket_id === socket.id;});
+        if(src){
+            const message = JSON.parse(msg);
+            message.dest.map(dest_user => {
+                const dest = internal_raids_tchat.find(user => {return user.user_id === dest_user;});
+                if(dest){
+                    const dest_message = JSON.stringify({
+                        src: src.user_id,
+                        name: src.name,
+                        timestamp: message_time(),
+                        message: message.message
+                    });
+                    dest.pending_messages.push(dest_message);
+                    io.to(dest.socket_id).emit('receiving', dest_message, function(data){
+                        dest.pending_messages.pop();
+                    });
+                }else{
+                    // Unknown dest
+                }
+            });
+        }else{
+            // Unknown sender
+        }
+    });
+    socket.on('disconnect', function(){
+        let user = internal_raids_tchat.find(user => {return user.socket_id === socket.id;});
+        user.socket_id = '';
+    });
+});

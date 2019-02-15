@@ -1,0 +1,143 @@
+<div class="breadcrumb-holder">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/dashboard">Accueil</a></li>
+            <li class="breadcrumb-item active">Profile</li>
+        </ul>
+    </div>
+</div>
+<section class="forms">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <h4>Gestion du profil</h4>
+                    </div>
+                    <div class="card-body">
+                        <table class="profile">
+                            <tr>
+                                <th>Nom :</th>
+                                <td><%=user.last_name%></td>
+                                <td class="profile"></td>
+                            </tr>
+                            <tr>
+                                <th>Prénom :</th>
+                                <td><%=user.first_name%></td>
+                                <td class="profile"></td>
+                            </tr>
+                            <tr>
+                                <th>Photo :</th>
+                                <td><img src="data:image/png;base64,<%= user.picture %>" alt="person" class="img-fluid" /></td>
+                                <td class="profile">
+                                    <div class="input-group mb-3">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="file" name="photo">
+                                            <label class="custom-file-label" for="file" aria-describedby="update-picture" id="filename">Choisir un fichier</label>
+                                        </div>
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-info btn-rounded" id="update-picture">Mettre à jour la photo</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Message modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageDialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageDialog">Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-3 text-center align-middle my-auto" id="messageIconDialog"></div>
+                    <div class="col-lg-9 align-middle my-auto" id="messageContentDialog"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $('#update-picture').on('click', function () {
+
+        let $MESSAGE_MODAL = $('#messageModal');
+        let $MESSAGE_MODAL_TITLE = $('#messageDialog');
+        let $MESSAGE_MODAL_ICON = $('#messageIconDialog');
+        let $MESSAGE_MODAL_CONTENT = $('#messageContentDialog');
+
+        let file = $('#file')[0].files[0];
+        if(file !== undefined){
+            if (file.type.match('image.*')) {
+                if(file.size <= 3e6){  // Fichier inférieur à 3 Mo
+                    function getBase64(file) {
+                        return new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.readAsDataURL(file);
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = error => reject(error);
+                        });
+                    }
+
+                    getBase64(file).then(
+                        function (data) {
+                            $.ajax({
+                                url: '/profile',
+                                type: 'POST',
+                                data: {photo: data},
+                                success: function (response) {
+                                    msg = JSON.parse(response).msg;
+                                    if(msg === "ok"){
+                                        $MESSAGE_MODAL_TITLE.html("Photo de profil mise à jour !");
+                                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-check-circle\" style='color:greenyellow;font-size: 48px;'></i>");
+                                        $MESSAGE_MODAL_CONTENT.html("Votre photo de profil a bien été mise à jour, rechargez la page pour voir les modifications.");
+                                        $MESSAGE_MODAL.modal('show');
+                                    }else{
+                                        $MESSAGE_MODAL_TITLE.html("Photo de profil non mise à jour...");
+                                        $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                                        $MESSAGE_MODAL_CONTENT.html("Impossible de mettre à jour votre photo de profil...<br/>Merci de réessayer dans quelques instants.");
+                                        $MESSAGE_MODAL.modal('show');
+                                    }
+                                },
+                                error: function (response) {
+                                    let msg = JSON.parse(response).msg;
+                                    $MESSAGE_MODAL_TITLE.html("Photo de profil non mise à jour...");
+                                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                                    $MESSAGE_MODAL_CONTENT.html("Impossible de mettre à jour votre photo de profil...<br/>Merci de réessayer dans quelques instants.");
+                                    $MESSAGE_MODAL.modal('show');
+                                }
+                            });
+                        }
+                    );
+                }else{
+                    $MESSAGE_MODAL_TITLE.html("Photo de profil non mise à jour...");
+                    $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                    $MESSAGE_MODAL_CONTENT.html("Impossible de mettre à jour votre photo de profil...<br/>Merci de sélectionner un fichier d'une taille maximale de 3 Mo...");
+                    $MESSAGE_MODAL.modal('show');
+                }
+            }else{
+                $MESSAGE_MODAL_TITLE.html("Photo de profil non mise à jour...");
+                $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+                $MESSAGE_MODAL_CONTENT.html("Impossible de mettre à jour votre photo de profil...<br/>Merci de sélectionner un fichier image...");
+                $MESSAGE_MODAL.modal('show');
+            }
+        }else{
+            $MESSAGE_MODAL_TITLE.html("Photo de profil non mise à jour...");
+            $MESSAGE_MODAL_ICON.html("<i class=\"far fa-times-circle\" style='color:red;font-size: 48px;'></i>");
+            $MESSAGE_MODAL_CONTENT.html("Impossible de mettre à jour votre photo de profil...<br/>Merci de sélectionner un fichier...");
+            $MESSAGE_MODAL.modal('show');
+        }
+    });
+    $('#file').on('change', function () {
+        $('#filename').text($('#file')[0].files[0].name);
+    });
+</script>

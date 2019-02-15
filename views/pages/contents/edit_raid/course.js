@@ -22,7 +22,7 @@ function loadCourses(courseArray) {
                 })
             );
 
-            createMeasureTooltip();
+            createMeasureTooltip(course.id);
             measureTooltip.setPosition(course.track_point_array[course.track_point_array.length - 1]);
             measureTooltipElement.innerHTML += course.distance + " de " + course.sport_label;
             measureTooltipElement.className = 'tooltip tooltip-static';
@@ -64,6 +64,15 @@ function setCourseFeature() {
     });
 
     if (courseFeatureFound) {
+
+        let c = courseArrayToLoad.find(function (course) {
+            return (course.order_num === (idCurrentEditedCourse + 1));
+        });
+
+        if (source.getFeatureById("course_" + c.id) !== null) {
+            removeCurrentEditedCourse();
+        }
+
         console.log("Newly created course");
         courseFeatureFound.setId("course_" + courseArrayToStore[idCurrentEditedCourse].id);
         courseFeatureFound.setStyle(
@@ -75,7 +84,7 @@ function setCourseFeature() {
             })
         );
 
-        let courseFound = courseArrayToStore.find(function(course){
+        let courseFound = courseArrayToStore.find(function (course) {
             return course.id === courseArrayToStore[idCurrentEditedCourse].id;
         });
         courseFound['distance'] = distance;
@@ -99,10 +108,30 @@ function updateSelectedCourse() {
     $('#course-info-num').text(courseArrayToStore[idCurrentEditedCourse].order_num + "° épreuve");
     $('#course-info-label').text(courseArrayToStore[idCurrentEditedCourse].label);
     $('#course_info_tooltip').stop(true).fadeIn().delay(4000).fadeOut("slow");
+
+
+    let c = courseArrayToLoad.find(function (course) {
+        return (course.order_num === (idCurrentEditedCourse + 1));
+    });
+    console.log(c);
+
+    if (source.getFeatureById("course_" + c.id) !== null) {
+        $('#button-eraser').show();
+    } else {
+        $('#button-eraser').hide();
+    }
+}
+
+function removeCurrentEditedCourse() {
+    let c = courseArrayToLoad.find(function (course) {
+        return (course.order_num === (idCurrentEditedCourse + 1));
+    });
+    console.log("removed overlay id : " + c.id);
+    feature = source.getFeatureById("course_" + c.id);
+    source.removeFeature(feature);
+    map.removeOverlay(map.getOverlayById(c.id));
 }
 
 //TODO vérifier qu'il n'y existe pas déjà un tracé pour le parcours à créer
 //TODO exprimer les coordonnées des track_point en lonlat
-//TODO pb asynchrone entre INSERT et SELECT des parcours arpès la création du raid
 //TODO UPDATE et/ou INSERT des track_point ??????
-
